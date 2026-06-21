@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CAAF Precision - Practices Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error-dim": "#4e0309",
+            "primary-dim": "#004bb9",
+            "inverse-surface": "#0c0f10",
+            "primary": "#0056d2",
+            "on-secondary-fixed-variant": "#5b5b5f",
+            "on-tertiary": "#fcf7ff",
+            "secondary": "#5f5f62",
+            "on-error": "#fff7f6",
+            "surface-container-lowest": "#ffffff",
+            "error-container": "#fe8983",
+            "surface-container-low": "#f1f4f6",
+            "tertiary-dim": "#55506b",
+            "on-primary-fixed": "#003991",
+            "surface-container-highest": "#dbe4e7",
+            "on-primary": "#f8f7ff",
+            "on-primary-fixed-variant": "#0053cc",
+            "on-tertiary-container": "#524c68",
+            "tertiary-container": "#e3dbfd",
+            "on-background": "#2b3437",
+            "surface-container-high": "#e3e9ec",
+            "outline-variant": "#abb3b7",
+            "secondary-container": "#e4e2e6",
+            "background": "#f8f9fa",
+            "secondary-fixed": "#e4e2e6",
+            "secondary-dim": "#535356",
+            "surface-variant": "#dbe4e7",
+            "surface-tint": "#0056d2",
+            "on-secondary": "#faf8fc",
+            "on-surface-variant": "#586064",
+            "primary-container": "#dae2ff",
+            "on-tertiary-fixed-variant": "#5b5672",
+            "primary-fixed-dim": "#c6d3ff",
+            "outline": "#737c7f",
+            "secondary-fixed-dim": "#d5d4d8",
+            "on-surface": "#2b3437",
+            "on-error-container": "#752121",
+            "on-primary-container": "#004ab7",
+            "surface-dim": "#d1dce0",
+            "error": "#9f403d",
+            "surface-container": "#eaeff1",
+            "inverse-on-surface": "#9b9d9e",
+            "on-tertiary-fixed": "#3f3a54",
+            "tertiary-fixed": "#e3dbfd",
+            "on-secondary-container": "#515155",
+            "tertiary-fixed-dim": "#d5cdee",
+            "primary-fixed": "#dae2ff",
+            "inverse-primary": "#5b8cff",
+            "tertiary": "#615b77",
+            "on-secondary-fixed": "#3f3f43",
+            "surface-bright": "#f8f9fa",
+            "surface": "#f8f9fa"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline": ["Manrope"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(24px);
+    }
+    .custom-shadow {
+      box-shadow: 0px 20px 40px rgba(12, 15, 16, 0.06);
+    }
+    .gradient-btn {
+      background: linear-gradient(135deg, #0056d2 0%, #004bb9 100%);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 flex flex-col bg-slate-100 dark:bg-slate-900 tonal-layering">
+<div class="flex flex-col h-full py-6 space-y-2">
+<div class="px-6 mb-8 flex items-center space-x-3">
+<div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+</div>
+<div>
+<h1 class="text-lg font-black text-blue-700 dark:text-blue-300 font-manrope">Precision Curator</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Tax Management</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-4">
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Active Tab: Practices -->
+<a class="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 rounded-lg mx-2 shadow-sm font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+<span>Practices</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span>Wizard</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span>Documents</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</a>
+</nav>
+<div class="px-6 mt-auto space-y-4">
+<button class="w-full py-3 px-4 gradient-btn text-white font-manrope font-bold text-sm rounded-xl flex items-center justify-center space-x-2 custom-shadow">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+<span>New Practice</span>
+</button>
+<div class="pt-4 border-t border-outline-variant/10 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help">help</span>
+<span>Help Center</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-2 text-error hover:bg-error-container/10 rounded-lg transition-all font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Log Out</span>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-40 shadow-sm shadow-blue-900/5">
+<div class="flex items-center space-x-8">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">search</span>
+</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-sm font-medium w-64 focus:ring-2 focus:ring-primary/20 transition-all text-on-surface placeholder:text-on-surface-variant" placeholder="Search practices..." type="text"/>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 text-on-surface-variant hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/20 mx-2"></div>
+<div class="flex items-center space-x-3">
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface leading-tight">Marco Rossi</p>
+<p class="text-[10px] text-on-surface-variant font-medium">Senior Consultant</p>
+</div>
+<img alt="User profile avatar" class="h-9 w-9 rounded-xl object-cover ring-2 ring-primary/10" data-alt="professional male portrait with business attire in a modern minimalist office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVieAvodCXLldGE3IEencA4DpxjjRQOay68l3d5DyG9aYl2xdB7EavzFfaYHt7eSwW-3p2gKHPBFUC6FY8ms0xEKrKe7e_THkXOPDQlRXIpUmmQ3M6cE4AT8_aPFqDrQigiUp2eNFBmyHQFadXiLbuv0-VPqXqaC7lhusi49yFdW822EiNeST93_FRqMyk7QTpljDUYVHAYwYBRP-svMMwaCi6BAISWC981onuWWnGmsHh1X31f_Pm8gAZFXgMJ2gbrtuhXsPIkY5d"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-24 px-10 pb-12 min-h-screen">
+<!-- Page Header Section -->
+<section class="mb-10 flex items-end justify-between">
+<div>
+<nav class="flex space-x-2 text-on-surface-variant mb-2">
+<span class="text-xs font-semibold">Workspace</span>
+<span class="text-xs font-semibold">/</span>
+<span class="text-xs font-semibold text-primary">Practices Management</span>
+</nav>
+<h2 class="text-4xl font-extrabold tracking-tight text-on-surface font-headline">Practices Management</h2>
+<p class="text-on-surface-variant mt-2 max-w-lg">Manage and track tax declarations across all active clients. Review submission statuses and handle administrative workflow.</p>
+</div>
+<div class="flex space-x-3">
+<button class="flex items-center space-x-2 px-5 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant font-semibold rounded-xl transition-all text-sm">
+<span class="material-symbols-outlined text-lg">file_download</span>
+<span>Export CSV</span>
+</button>
+<button class="flex items-center space-x-2 px-6 py-2.5 gradient-btn text-white font-bold rounded-xl custom-shadow transition-all text-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>New Practice</span>
+</button>
+</div>
+</section>
+<!-- Bento Filter Grid -->
+<div class="grid grid-cols-12 gap-6 mb-8">
+<div class="col-span-8 bg-surface-container-low rounded-3xl p-6 flex items-center justify-between">
+<div class="flex space-x-8">
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant font-black mb-3">Status Filter</label>
+<div class="flex space-x-2">
+<button class="px-4 py-1.5 bg-primary-container text-on-primary-container text-xs font-bold rounded-full">All Statuses</button>
+<button class="px-4 py-1.5 bg-surface-container-highest text-on-surface-variant text-xs font-bold rounded-full hover:bg-primary/5 transition-colors">Approved</button>
+<button class="px-4 py-1.5 bg-surface-container-highest text-on-surface-variant text-xs font-bold rounded-full hover:bg-primary/5 transition-colors">Submitted</button>
+<button class="px-4 py-1.5 bg-surface-container-highest text-on-surface-variant text-xs font-bold rounded-full hover:bg-primary/5 transition-colors">Draft</button>
+</div>
+</div>
+<div class="w-[1px] bg-outline-variant/30"></div>
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant font-black mb-3">Practice Type</label>
+<select class="bg-transparent border-none focus:ring-0 text-sm font-bold text-on-surface p-0 cursor-pointer">
+<option>All Types</option>
+<option>730 Regular</option>
+<option>ISEE Certification</option>
+<option>IMU Declaration</option>
+<option>UNICO Form</option>
+</select>
+</div>
+</div>
+<div class="flex items-center bg-surface-container-lowest px-4 py-2 rounded-2xl shadow-sm">
+<span class="material-symbols-outlined text-primary text-xl mr-3">calendar_month</span>
+<div class="text-left">
+<p class="text-[10px] text-on-surface-variant font-bold leading-none mb-1">FISCAL YEAR</p>
+<p class="text-xs font-black text-on-surface">2023 / 2024</p>
+</div>
+</div>
+</div>
+<div class="col-span-4 bg-tertiary-container rounded-3xl p-6 flex flex-col justify-between overflow-hidden relative">
+<div class="z-10">
+<h4 class="text-tertiary-dim font-black text-lg">System Insights</h4>
+<p class="text-on-tertiary-container/80 text-xs font-medium mt-1">12 practices require immediate attention.</p>
+</div>
+<button class="z-10 mt-4 text-xs font-black text-tertiary-dim flex items-center hover:underline">
+          View critical issues <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
+</button>
+<span class="material-symbols-outlined absolute -right-6 -bottom-6 text-9xl text-white/40 pointer-events-none" style="font-variation-settings: 'wght' 700;">priority_high</span>
+</div>
+</div>
+<!-- Data Table Canvas -->
+<div class="bg-surface-container-low rounded-3xl overflow-hidden custom-shadow">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Practice ID</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Client Name</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Type</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant text-center">Status</th>
+<th class="px-6 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant">Last Updated</th>
+<th class="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="bg-surface-container-lowest">
+<!-- Row 1 -->
+<tr class="group hover:bg-surface-container transition-colors border-b border-surface-container-low">
+<td class="px-8 py-6">
+<span class="text-sm font-bold font-body text-primary">#P-24890</span>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center font-bold text-xs text-primary">EB</div>
+<span class="text-sm font-bold text-on-surface">Elena Bianchi</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+<span class="text-sm font-semibold text-on-surface">730 Precompilato</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-primary-container text-on-primary-container text-[10px] font-black uppercase tracking-wider rounded-full">Approved</span>
+</div>
+</td>
+<td class="px-6 py-6 text-sm font-medium text-on-surface-variant">24 Oct, 2023</td>
+<td class="px-8 py-6">
+<div class="flex items-center justify-end space-x-1">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="View">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit_square</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-lg transition-all" title="Delete">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-surface-container transition-colors border-b border-surface-container-low">
+<td class="px-8 py-6">
+<span class="text-sm font-bold font-body text-primary">#P-24891</span>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center font-bold text-xs text-secondary">AM</div>
+<span class="text-sm font-bold text-on-surface">Alessandro Moretti</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-purple-500"></span>
+<span class="text-sm font-semibold text-on-surface">ISEE Università</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-black uppercase tracking-wider rounded-full">Submitted</span>
+</div>
+</td>
+<td class="px-6 py-6 text-sm font-medium text-on-surface-variant">Today, 09:45 AM</td>
+<td class="px-8 py-6">
+<div class="flex items-center justify-end space-x-1">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="View">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit_square</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-lg transition-all" title="Delete">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-surface-container transition-colors border-b border-surface-container-low">
+<td class="px-8 py-6">
+<span class="text-sm font-bold font-body text-primary">#P-24895</span>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center font-bold text-xs text-tertiary">LV</div>
+<span class="text-sm font-bold text-on-surface">Laura Verdi</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+<span class="text-sm font-semibold text-on-surface">730 Congiunto</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-black uppercase tracking-wider rounded-full">Draft</span>
+</div>
+</td>
+<td class="px-6 py-6 text-sm font-medium text-on-surface-variant">22 Oct, 2023</td>
+<td class="px-8 py-6">
+<div class="flex items-center justify-end space-x-1">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="View">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit_square</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-lg transition-all" title="Delete">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-surface-container transition-colors border-b border-surface-container-low">
+<td class="px-8 py-6">
+<span class="text-sm font-bold font-body text-primary">#P-24902</span>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center font-bold text-xs text-primary">GR</div>
+<span class="text-sm font-bold text-on-surface">Giovanni Rossi</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="text-sm font-semibold text-on-surface">IMU Declaration</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-black uppercase tracking-wider rounded-full">Rejected</span>
+</div>
+</td>
+<td class="px-6 py-6 text-sm font-medium text-on-surface-variant">Yesterday</td>
+<td class="px-8 py-6">
+<div class="flex items-center justify-end space-x-1">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="View">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/30 rounded-lg transition-all" title="Edit">
+<span class="material-symbols-outlined text-xl">edit_square</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/20 rounded-lg transition-all" title="Delete">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-8 py-5 flex items-center justify-between bg-surface-container-low">
+<p class="text-xs font-semibold text-on-surface-variant">Showing <span class="text-on-surface">4</span> of <span class="text-on-surface">1,248</span> practices</p>
+<div class="flex space-x-2">
+<button class="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant disabled:opacity-40">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<div class="flex space-x-1">
+<button class="w-9 h-9 rounded-lg bg-primary text-white text-xs font-bold">1</button>
+<button class="w-9 h-9 rounded-lg bg-transparent text-on-surface-variant hover:bg-surface-container-highest text-xs font-bold transition-all">2</button>
+<button class="w-9 h-9 rounded-lg bg-transparent text-on-surface-variant hover:bg-surface-container-highest text-xs font-bold transition-all">3</button>
+<span class="w-9 h-9 flex items-center justify-center text-on-surface-variant">...</span>
+</div>
+<button class="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Stats Cards (Bottom) -->
+<div class="mt-8 grid grid-cols-4 gap-6">
+<div class="p-6 bg-surface-container-lowest rounded-3xl shadow-sm flex items-center space-x-4 border border-outline-variant/5">
+<div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest leading-none mb-1">Approved</p>
+<p class="text-2xl font-black text-on-surface leading-none">842</p>
+</div>
+</div>
+<div class="p-6 bg-surface-container-lowest rounded-3xl shadow-sm flex items-center space-x-4 border border-outline-variant/5">
+<div class="w-12 h-12 rounded-2xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest leading-none mb-1">Submitted</p>
+<p class="text-2xl font-black text-on-surface leading-none">314</p>
+</div>
+</div>
+<div class="p-6 bg-surface-container-lowest rounded-3xl shadow-sm flex items-center space-x-4 border border-outline-variant/5">
+<div class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">drafts</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest leading-none mb-1">Drafts</p>
+<p class="text-2xl font-black text-on-surface leading-none">92</p>
+</div>
+</div>
+<div class="p-6 bg-surface-container-lowest rounded-3xl shadow-sm flex items-center space-x-4 border border-outline-variant/5">
+<div class="w-12 h-12 rounded-2xl bg-error/10 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">report</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest leading-none mb-1">Warnings</p>
+<p class="text-2xl font-black text-on-surface leading-none">12</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button Contextual Logic -->
+<button class="fixed bottom-8 right-8 w-14 h-14 gradient-btn text-white rounded-2xl custom-shadow flex items-center justify-center group transition-all hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform">add</span>
+</button>
+</body></html>

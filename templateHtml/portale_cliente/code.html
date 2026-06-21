@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#3f3a54",
+                    "on-secondary-container": "#515155",
+                    "tertiary-container": "#e3dbfd",
+                    "on-tertiary-fixed-variant": "#5b5672",
+                    "on-secondary-fixed": "#3f3f43",
+                    "on-error": "#fff7f6",
+                    "surface-dim": "#d1dce0",
+                    "background": "#f8f9fa",
+                    "error": "#9f403d",
+                    "on-tertiary-container": "#524c68",
+                    "secondary-fixed-dim": "#d5d4d8",
+                    "primary-dim": "#004bb9",
+                    "surface-container": "#eaeff1",
+                    "on-primary": "#f8f7ff",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container-highest": "#dbe4e7",
+                    "surface-container-low": "#f1f4f6",
+                    "tertiary": "#615b77",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#e3e9ec",
+                    "surface-variant": "#dbe4e7",
+                    "surface-tint": "#0056d2",
+                    "on-primary-fixed-variant": "#0053cc",
+                    "inverse-surface": "#0c0f10",
+                    "inverse-on-surface": "#9b9d9e",
+                    "primary": "#0056d2",
+                    "primary-container": "#dae2ff",
+                    "on-secondary-fixed-variant": "#5b5b5f",
+                    "error-container": "#fe8983",
+                    "on-secondary": "#faf8fc",
+                    "primary-fixed-dim": "#c6d3ff",
+                    "outline": "#737c7f",
+                    "secondary-dim": "#535356",
+                    "on-primary-container": "#004ab7",
+                    "tertiary-dim": "#55506b",
+                    "error-dim": "#4e0309",
+                    "surface": "#f8f9fa",
+                    "on-surface": "#2b3437",
+                    "on-background": "#2b3437",
+                    "on-surface-variant": "#586064",
+                    "outline-variant": "#abb3b7",
+                    "on-primary-fixed": "#003991",
+                    "secondary-container": "#e4e2e6",
+                    "primary-fixed": "#dae2ff",
+                    "on-tertiary": "#fcf7ff",
+                    "secondary-fixed": "#e4e2e6",
+                    "secondary": "#5f5f62",
+                    "tertiary-fixed-dim": "#d5cdee",
+                    "tertiary-fixed": "#e3dbfd",
+                    "on-error-container": "#752121",
+                    "inverse-primary": "#5b8cff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #0056d2 0%, #004bb9 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-2 border-r-0 z-40">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-gradient flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<h1 class="text-lg font-extrabold text-slate-900 dark:text-white leading-none">Client Portal</h1>
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest mt-1">CAAF Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<!-- Overiew (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-inter text-sm font-medium hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<!-- My Applications (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 rounded-lg shadow-sm font-bold font-inter text-sm scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+<span>My Applications</span>
+</a>
+<!-- Document Vault (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-inter text-sm font-medium hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+<span>Document Vault</span>
+</a>
+<!-- Appointments (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-inter text-sm font-medium hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span>Appointments</span>
+</a>
+<!-- Support (Inactive) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-inter text-sm font-medium hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span>Support</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3">
+<img alt="User Profile" class="w-8 h-8 rounded-full border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtxWW08lsW74MW_8EH9x-lldTyc4hZ3NifMuG2oUGLF26h7Dgxq7nnALy0bn11R3hsZnv9yjoO82CnACp5cH3fxFlKxpGSSVEqptAunD88-ghNsWCDebubOLlksCPd0_-H-PC5apaRvHwwcEySGiDP-8U74ptt6_HEyz49ZlT0rxZsblRwTP1nSsNlm_NgIO3NQf5zj7Pu5iuaupsi1zU7EzPw1Yo8oO4C4l3PKbkJofcqH3Y060GOnn0s_mNBZrvfX1MsoTxjCEmP"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Marco Rossi</p>
+<p class="text-[10px] text-on-surface-variant truncate">Client ID: #88219</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen p-8">
+<!-- Header -->
+<header class="mb-10 flex justify-between items-end">
+<div>
+<p class="text-label-sm font-semibold text-primary uppercase tracking-[0.2em] mb-2">Workspace</p>
+<h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight">My Applications</h2>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container-high px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+                    Archived
+                </button>
+<button class="bg-primary-gradient px-6 py-2.5 rounded-xl text-on-primary text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="add" style="font-variation-settings: 'FILL' 1;">add</span>
+                    New Request
+                </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- My Applications Status List (8 cols) -->
+<section class="col-span-8 flex flex-col gap-4">
+<div class="bg-surface-container-low rounded-2xl p-1">
+<!-- Application Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 mb-1 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-3xl" data-icon="description">description</span>
+</div>
+<div>
+<h3 class="text-lg font-bold">Modello 730/2024</h3>
+<p class="text-sm text-on-surface-variant">Income Tax Declaration • Submitted March 12</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="bg-primary-container text-on-primary-container px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">Processing</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Application Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 mb-1 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-2xl bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-3xl" data-icon="warning">warning</span>
+</div>
+<div>
+<h3 class="text-lg font-bold">ISEE 2024</h3>
+<p class="text-sm text-on-surface-variant">Equivalent Economic Situation Indicator</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="bg-error-container text-on-error-container px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">Action Required</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Application Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-3xl" data-icon="verified">verified</span>
+</div>
+<div>
+<h3 class="text-lg font-bold">IMU Payment Proxy</h3>
+<p class="text-sm text-on-surface-variant">Real Estate Tax • Completed Feb 10</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">Completed</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Document Vault Quick Access -->
+<div class="bg-surface-container-low rounded-3xl p-8 relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-2xl font-headline font-bold text-on-surface">Document Vault</h3>
+<p class="text-on-surface-variant mt-1">Review missing files and pending uploads.</p>
+</div>
+<span class="material-symbols-outlined text-4xl text-primary/20" data-icon="folder_open">folder_open</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<span class="bg-error-container/10 text-error text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Missing</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="upload_file">upload_file</span>
+</div>
+<h4 class="font-bold text-sm">Land Registry Certificate</h4>
+<p class="text-xs text-on-surface-variant mt-1">Required for ISEE 2024</p>
+<button class="mt-4 w-full py-2 rounded-lg border border-primary text-primary text-xs font-bold hover:bg-primary/5 transition-colors">Upload Now</button>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-4">
+<span class="bg-error-container/10 text-error text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Missing</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="upload_file">upload_file</span>
+</div>
+<h4 class="font-bold text-sm">Bank Statement (Dec 2023)</h4>
+<p class="text-xs text-on-surface-variant mt-1">Required for 730 Declaration</p>
+<button class="mt-4 w-full py-2 rounded-lg border border-primary text-primary text-xs font-bold hover:bg-primary/5 transition-colors">Upload Now</button>
+</div>
+</div>
+</div>
+<!-- Decorative background graphic -->
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- Sidebar Info (4 cols) -->
+<aside class="col-span-4 flex flex-col gap-6">
+<!-- Notification Center -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm border border-outline-variant/5">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-headline font-bold">Notifications</h3>
+<span class="text-xs font-bold text-primary cursor-pointer">Mark all read</span>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Notification 1 -->
+<div class="flex gap-4 group">
+<div class="relative">
+<div class="w-2 h-2 bg-primary rounded-full absolute -left-1 top-1"></div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-xl text-on-surface-variant" data-icon="mark_email_unread">mark_email_unread</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold group-hover:text-primary transition-colors">730 Update: Review Ready</p>
+<p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">Your preliminary 730 draft is available for digital signature.</p>
+<p class="text-[10px] text-outline mt-2 font-medium">2 hours ago</p>
+</div>
+</div>
+<!-- Notification 2 -->
+<div class="flex gap-4 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-xl text-on-surface-variant" data-icon="task_alt">task_alt</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold group-hover:text-primary transition-colors">Appointment Confirmed</p>
+<p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">Meeting with Consultant Bianchi set for March 25, 10:30 AM.</p>
+<p class="text-[10px] text-outline mt-2 font-medium">Yesterday</p>
+</div>
+</div>
+<!-- Notification 3 -->
+<div class="flex gap-4 group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-xl text-on-surface-variant" data-icon="info">info</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold group-hover:text-primary transition-colors">ISEE Calculation Started</p>
+<p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">We have received your basic data. Processing will take 3-5 days.</p>
+<p class="text-[10px] text-outline mt-2 font-medium">March 15</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 rounded-xl bg-surface-container text-on-surface-variant text-sm font-bold hover:bg-surface-container-high transition-colors">
+                        View All Notifications
+                    </button>
+</div>
+<!-- Specialist Card -->
+<div class="bg-primary-gradient rounded-3xl p-6 text-on-primary relative overflow-hidden">
+<h3 class="text-lg font-headline font-bold mb-4 relative z-10">Dedicated Consultant</h3>
+<div class="flex items-center gap-4 mb-6 relative z-10">
+<img alt="Consultant Profile" class="w-14 h-14 rounded-2xl object-cover border-2 border-white/20" data-alt="professional portrait of a confident female financial consultant in a modern office environment with warm natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtB-XKMSEwKbd7thOgr6rnW6a2gQfXY-0W1rL_Yf1GQQLhzxxoUWWV_c_n5oyHemVjBCORxaIDpIcewqRVZBWdq65dYpWFyBqpprOxdCCUEYpe72Q9BXXZUVPzmiZJ0zJp6COvymjdTr0dUcK3NZtMGXsQeR3SLDlK9ltWuaPNbXvpQVFbEWxHkCfIV-0O6d_5MYxmx3Dq48lk5nVIchuAZ7IvSWcTOCFFCdmgMk9P7FoXecJ-O7WudmSG7GjBQ21cb_VDSEWVQ1AK"/>
+<div>
+<p class="font-bold">Dott.ssa Elena Bianchi</p>
+<p class="text-xs text-on-primary/70">Tax &amp; Fiscal Expert</p>
+</div>
+</div>
+<div class="flex gap-2 relative z-10">
+<button class="flex-1 glass-panel py-2.5 rounded-xl text-on-primary-container text-xs font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="chat">chat</span>
+                            Message
+                        </button>
+<button class="flex-1 glass-panel py-2.5 rounded-xl text-on-primary-container text-xs font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="call">call</span>
+                            Call
+                        </button>
+</div>
+<!-- Decorative background patterns -->
+<div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+<div class="absolute right-4 bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl" data-icon="support_agent">support_agent</span>
+</div>
+</div>
+<!-- Resource Links -->
+<div class="bg-surface-container-low rounded-3xl p-6">
+<h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Tax Resources</h3>
+<ul class="flex flex-col gap-3">
+<li>
+<a class="flex items-center justify-between text-sm font-medium hover:text-primary transition-colors" href="#">
+<span>2024 Tax Calendar</span>
+<span class="material-symbols-outlined text-lg" data-icon="open_in_new">open_in_new</span>
+</a>
+</li>
+<li>
+<a class="flex items-center justify-between text-sm font-medium hover:text-primary transition-colors" href="#">
+<span>Deductible Expenses Guide</span>
+<span class="material-symbols-outlined text-lg" data-icon="open_in_new">open_in_new</span>
+</a>
+</li>
+<li>
+<a class="flex items-center justify-between text-sm font-medium hover:text-primary transition-colors" href="#">
+<span>CAAF Privacy Policy</span>
+<span class="material-symbols-outlined text-lg" data-icon="open_in_new">open_in_new</span>
+</a>
+</li>
+</ul>
+</div>
+</aside>
+</div>
+</main>
+<!-- Success Message Overlay (Glassmorphism Example) -->
+<div class="fixed bottom-8 right-8 z-50 pointer-events-none">
+<div class="glass-panel border border-white/20 shadow-2xl rounded-2xl p-4 flex items-center gap-4 animate-in slide-in-from-right duration-500">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Data synced</p>
+<p class="text-xs text-on-surface-variant">Your documents were updated moments ago.</p>
+</div>
+<button class="ml-4 p-1 hover:bg-surface-container-high rounded-lg pointer-events-auto">
+<span class="material-symbols-outlined text-outline" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</body></html>

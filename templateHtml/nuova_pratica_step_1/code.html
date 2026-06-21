@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CAAF Precision - New Practice Wizard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "error-dim": "#4e0309",
+                "primary-dim": "#004bb9",
+                "inverse-surface": "#0c0f10",
+                "primary": "#0056d2",
+                "on-secondary-fixed-variant": "#5b5b5f",
+                "on-tertiary": "#fcf7ff",
+                "secondary": "#5f5f62",
+                "on-error": "#fff7f6",
+                "surface-container-lowest": "#ffffff",
+                "error-container": "#fe8983",
+                "surface-container-low": "#f1f4f6",
+                "tertiary-dim": "#55506b",
+                "on-primary-fixed": "#003991",
+                "surface-container-highest": "#dbe4e7",
+                "on-primary": "#f8f7ff",
+                "on-primary-fixed-variant": "#0053cc",
+                "on-tertiary-container": "#524c68",
+                "tertiary-container": "#e3dbfd",
+                "on-background": "#2b3437",
+                "surface-container-high": "#e3e9ec",
+                "outline-variant": "#abb3b7",
+                "secondary-container": "#e4e2e6",
+                "background": "#f8f9fa",
+                "secondary-fixed": "#e4e2e6",
+                "secondary-dim": "#535356",
+                "surface-variant": "#dbe4e7",
+                "surface-tint": "#0056d2",
+                "on-secondary": "#faf8fc",
+                "on-surface-variant": "#586064",
+                "primary-container": "#dae2ff",
+                "on-tertiary-fixed-variant": "#5b5672",
+                "primary-fixed-dim": "#c6d3ff",
+                "outline": "#737c7f",
+                "secondary-fixed-dim": "#d5d4d8",
+                "on-surface": "#2b3437",
+                "on-error-container": "#752121",
+                "on-primary-container": "#004ab7",
+                "surface-dim": "#d1dce0",
+                "error": "#9f403d",
+                "surface-container": "#eaeff1",
+                "inverse-on-surface": "#9b9d9e",
+                "on-tertiary-fixed": "#3f3a54",
+                "tertiary-fixed": "#e3dbfd",
+                "on-secondary-container": "#515155",
+                "tertiary-fixed-dim": "#d5cdee",
+                "primary-fixed": "#dae2ff",
+                "inverse-primary": "#5b8cff",
+                "tertiary": "#615b77",
+                "on-secondary-fixed": "#3f3f43",
+                "surface-bright": "#f8f9fa",
+                "surface": "#f8f9fa"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+        .step-active {
+            background: linear-gradient(135deg, #0056d2 0%, #004bb9 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 flex flex-col bg-slate-100 dark:bg-slate-900 tonal-layering">
+<div class="flex flex-col h-full py-6 space-y-2">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+</div>
+<div>
+<h1 class="text-lg font-black text-blue-700 dark:text-blue-300 font-manrope">Precision Curator</h1>
+<p class="text-xs text-on-surface-variant font-medium">Tax Management</p>
+</div>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                    Practices
+                </a>
+<a class="bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 rounded-lg mx-2 shadow-sm flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+                    Wizard
+                </a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+                    Documents
+                </a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                    Reports
+                </a>
+</nav>
+<div class="mt-auto px-4 pt-6">
+<button class="w-full py-3 px-4 rounded-xl bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    New Practice
+                </button>
+</div>
+<div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                    Help Center
+                </a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mx-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-all flex items-center gap-3 px-4 py-3 font-manrope font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                    Log Out
+                </a>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-8 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-40 shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-4">
+<span class="text-slate-400">/</span>
+<span class="font-manrope text-sm font-medium text-slate-600">Wizard</span>
+<span class="text-slate-400">/</span>
+<span class="font-manrope text-sm font-bold text-blue-700 dark:text-blue-400">New 730 Practice</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-lg">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover" data-alt="professional male accountant portrait in corporate office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHZBa5Wm6Edzpt9orithx82zGoYE8dPKfEoIuYOvh7LNCKesK0exsvbjmJ4yV6jCetntdo61T7Nuy_cOxVIlCKOnvKvF5uSruyltbndhcbbVHZZEz-OyS-TLq_Ep2FNmQ-I8nVZEo0b1cKIBkxNT-WqQFUHtPVXTTD-uKr3tkbQbYq4dFh8SoSQAVFik5OHtdsgsTt2tnGpq9YbU4apoQ3DXECxB9v6YH6vcfxhcLoOuIaljS0LwN9PZn-hFyvTdaVgYZtPchZO4aP"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-24 pb-12 px-12 min-h-screen bg-surface">
+<div class="max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12">
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface font-manrope mb-2">Create New 730 Practice</h2>
+<p class="text-on-surface-variant font-body">Follow the guided steps to complete the tax declaration for the fiscal year.</p>
+</div>
+<!-- Stepper Component (Pathfinder) -->
+<div class="mb-12">
+<div class="flex justify-between items-center mb-4 relative">
+<!-- Progress Bar Track -->
+<div class="absolute top-1/2 left-0 w-full h-1 bg-surface-container-highest -translate-y-1/2 z-0 rounded-full"></div>
+<!-- Active Progress Bar -->
+<div class="absolute top-1/2 left-0 w-1/4 h-1 bg-gradient-to-r from-primary to-primary-fixed -translate-y-1/2 z-0 rounded-full"></div>
+<!-- Step 1 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center text-white step-active shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<span class="text-sm font-bold text-on-surface font-manrope">Personal Data</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant border-4 border-surface">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant font-label">Income</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant border-4 border-surface">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant font-label">Deductions</span>
+</div>
+<!-- Step 4 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant border-4 border-surface">
+<span class="material-symbols-outlined" data-icon="summarize">summarize</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant font-label">Summary</span>
+</div>
+</div>
+</div>
+<!-- Form Workspace -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden p-10 border-0">
+<div class="mb-10">
+<h3 class="text-xl font-bold font-manrope text-primary border-l-4 border-primary pl-4">Step 1: Personal Data</h3>
+<p class="text-sm text-on-surface-variant mt-2 pl-5">Enter the legal identification and contact details for the taxpayer.</p>
+</div>
+<form class="space-y-8">
+<!-- Tax Code Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="tax_code">Tax Code (Codice Fiscale)</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="tax_code" placeholder="RSSMRA80A01H501W" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="full_name">Full Name</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="full_name" placeholder="Mario Rossi" type="text"/>
+</div>
+</div>
+<!-- Contact Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="birth_date">Date of Birth</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all" id="birth_date" type="date"/>
+</div>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="email">Email Address</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="email" placeholder="mario.rossi@example.com" type="email"/>
+</div>
+</div>
+<!-- Address Section -->
+<div class="p-6 rounded-xl bg-surface-container-low/50 space-y-6">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="home">home</span>
+<h4 class="text-sm font-bold font-manrope text-on-surface">Residential Address</h4>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="address">Street Address</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="address" placeholder="Via della Conciliazione, 12" type="text"/>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="city">City</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="city" placeholder="Rome" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="province">Province</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="province" placeholder="RM" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="postal_code">Postal Code</label>
+<input class="w-full bg-surface-container-high border-0 border-b-2 border-transparent focus:ring-0 focus:border-primary rounded-md py-3 px-4 text-on-surface font-body text-sm transition-all placeholder:text-outline-variant/50" id="postal_code" placeholder="00193" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider font-label" for="country">Country</label>
+<input class="w-full bg-surface-container border-0 border-b-2 border-transparent rounded-md py-3 px-4 text-on-surface-variant font-body text-sm cursor-not-allowed" id="country" readonly="" type="text" value="Italy"/>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-between pt-10 border-t border-surface-container-high">
+<button class="px-6 py-3 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-low transition-all font-manrope flex items-center gap-2" type="button">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+                            Cancel
+                        </button>
+<div class="flex items-center gap-4">
+<button class="px-6 py-3 rounded-full text-sm font-bold text-on-surface-variant hover:bg-surface-container-low transition-all font-manrope flex items-center gap-2" type="button">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+                                Save Draft
+                            </button>
+<button class="px-8 py-3 rounded-full bg-gradient-to-br from-primary to-primary-dim text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center gap-2" type="button">
+                                Next Step
+                                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</form>
+</div>
+<!-- Contextual Info (Bento Style Aside) -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-primary-container p-6 rounded-2xl flex gap-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary" data-icon="info">info</span>
+</div>
+<div>
+<h4 class="font-bold font-manrope text-on-primary-container text-sm">Need help?</h4>
+<p class="text-xs text-on-primary-container mt-1 opacity-80 leading-relaxed">The Tax Code is unique for every individual. If you don't have it, we can help you calculate it based on your birth details.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-2xl flex gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-secondary" data-icon="security">security</span>
+</div>
+<div>
+<h4 class="font-bold font-manrope text-on-surface text-sm">Privacy &amp; Security</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Your data is encrypted following the latest GDPR standards. Only authorized personnel can view this practice.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
