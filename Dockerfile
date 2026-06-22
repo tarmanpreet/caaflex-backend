@@ -91,7 +91,11 @@ RUN chown -R www-data:www-data /var/www/html \
 
 USER www-data:www-data
 
-EXPOSE 80
+EXPOSE 8080
+
+# ── Healthcheck ──────────────────────────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -fsS http://localhost:8080/ || exit 1
 
 # entrypoint.sh esegue: package:discover, config:cache, route:cache,
 # migrate --force, fix permessi — poi avvia supervisord
