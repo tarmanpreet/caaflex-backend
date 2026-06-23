@@ -2,7 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import UiStatCard from '@/Components/ui/UiStatCard.vue';
-import { formatDate, formatDateTime } from '@/utils/date';
+import { formatDate, formatDateTime } from '@/utils/date.js';
 
 const props = defineProps({
     stats: {

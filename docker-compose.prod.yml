@@ -15,6 +15,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    volumes:
+      - app_storage:/var/www/html/storage
+      - app_bootstrap_cache:/var/www/html/bootstrap/cache
     networks:
       - caf_network
 
@@ -30,7 +33,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,12 +44,15 @@ services:
     image: redis:alpine
     container_name: caf_redis
     restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
       - caf_network
 
 volumes:
+  app_storage:
+  app_bootstrap_cache:
   db_data:
   redis_data:
 

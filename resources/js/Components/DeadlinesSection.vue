@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
-import { formatDateTime } from '@/utils/date';
+import { formatDateTime } from '@/utils/date.js';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';

@@ -14,7 +14,23 @@ RUN composer install \
     && true
 
 ###############################################################################
-# Stage 2 — Application image (PHP-FPM + Nginx + Supervisor)
+# Stage 2 — Node.js frontend asset compilation
+###############################################################################
+FROM node:20-alpine AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY . .
+# vendor is needed at build time: resources/js/app.js imports Ziggy from
+# vendor/tightenco/ziggy, which Vite must resolve during `npm run build`.
+COPY --from=vendor /app/vendor ./vendor
+RUN npm run build
+
+###############################################################################
+# Stage 3 — Application image (PHP-FPM + Nginx + Supervisor)
 ###############################################################################
 FROM php:8.4-fpm-alpine
 
@@ -61,6 +77,10 @@ COPY . .
 
 # Use pre-built vendor if available (dev: override via volume mount)
 COPY --from=vendor /app/vendor ./vendor
+
+# Pre-built frontend assets (Vite manifest + hashed bundles).
+# /public/build is gitignored, so it MUST come from the assets build stage.
+COPY --from=assets /app/public/build ./public/build
 
 # ── Bootstrap cache — cleared at runtime by entrypoint.sh ───────────────────
 # (Needed here too for non-volume builds / production images)

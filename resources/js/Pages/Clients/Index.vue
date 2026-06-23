@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
-import { formatDate } from '@/utils/date';
+import { formatDate } from '@/utils/date.js';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';

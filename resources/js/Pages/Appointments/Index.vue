@@ -16,7 +16,7 @@ import IconButton from '@/Components/IconButton.vue';
 import Pagination from '@/Components/Pagination.vue';
 import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import UiStatusBadge from '@/Components/ui/UiStatusBadge.vue';
-import { formatDateTime } from '@/utils/date';
+import { formatDateTime } from '@/utils/date.js';
 import { BoltIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import {
     CalendarDaysIcon,

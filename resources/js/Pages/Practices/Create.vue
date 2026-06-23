@@ -10,7 +10,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Multiselect from '@vueform/multiselect';
 import ClientSelect from '@/Components/ClientSelect.vue';
-import { useStepForm } from '@/Composables/useStepForm';
+import { useStepForm } from '@/Composables/useStepForm.js';
 import { useToast } from 'vue-toastification';
 
 const props = defineProps({

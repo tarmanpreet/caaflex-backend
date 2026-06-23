@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { formatDate } from '@/utils/date';
+import { formatDate } from '@/utils/date.js';
 import { useForm, usePage, router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import InputLabel from '@/Components/InputLabel.vue';

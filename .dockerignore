@@ -3,7 +3,10 @@
 node_modules
 storage/framework/testing/disks
 storage/logs/*.log
+storage/*.key
 bootstrap/cache/*.php
+public/hot
+public/build
 .env
 .env.*
 !.env.example
