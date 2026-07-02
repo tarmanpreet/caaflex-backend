@@ -24,11 +24,14 @@ fi
 
 APP_KEY_TRIMMED=$(echo "${APP_KEY}" | tr -d '[:space:]')
 if [ -z "${APP_KEY_TRIMMED}" ]; then
-    if [ "${APP_ENV}" = "local" ]; then
+    if [ "${APP_ENV}" = "local" ] && [ -f /var/www/html/.env ]; then
         echo "==> [entrypoint] APP_KEY mancante, generazione automatica..."
         php /var/www/html/artisan key:generate --force --ansi
     else
-        echo "ERROR: APP_KEY non impostata. Impostare APP_KEY nelle variabili d'ambiente prima di avviare." >&2
+        echo "ERROR: APP_KEY non impostata." >&2
+        echo "       In produzione, impostare APP_KEY nelle variabili d'ambiente (docker-compose env_file o -e)." >&2
+        echo "       Genera una chiave con:  openssl rand -base64 32" >&2
+        echo "       Verifica anche che APP_ENV=production (non local)." >&2
         exit 1
     fi
 fi
