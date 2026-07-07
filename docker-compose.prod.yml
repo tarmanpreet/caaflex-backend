@@ -2,7 +2,7 @@ name: caf
 
 services:
   app:
-    image: ${APP_IMAGE:-ghcr.io/tarmanpreet/caaflex-backend:sha-521d7f2}
+    image: ${APP_IMAGE:-ghcr.io/tarmanpreet/caaflex-backend:latest}
     container_name: caf_app
     restart: always
     ports:
