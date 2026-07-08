@@ -560,7 +560,7 @@ const closeDeleteModal = () => {
                         <select
                             id="edit_deadline_user"
                             v-model="editForm.user_id"
-                            class="mt-1 block w-full rounded-lg border-gray-300    focus:border-indigo-500 focus:ring-indigo-500"
+                            class="app-input mt-1 block w-full rounded-lg"
                         >
                             <option :value="null">-- Non assegnato --</option>
                             <option v-for="user in users" :key="user.id" :value="user.id">

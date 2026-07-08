@@ -91,7 +91,7 @@ const deleteBranch = () => {
                         />
                         <select
                             v-model="statusFilter"
-                            class="border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm py-2 px-3"
+                            class="rounded-xl border-0 bg-surface-container-high text-sm text-on-surface py-2 px-3 focus:ring-2 focus:ring-primary/25"
                             @change="performSearch"
                         >
                             <option value="">Tutte</option>

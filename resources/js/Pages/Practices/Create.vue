@@ -170,7 +170,7 @@ const steps = [
                                     <select 
                                         id="type"
                                         v-model="form.type" 
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" 
+                                        class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
                                         required
                                     >
                                         <option value="" disabled>Seleziona tipo...</option>
@@ -184,7 +184,7 @@ const steps = [
                                     <select 
                                         id="procedure_id"
                                         v-model="form.procedure_id" 
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" 
+                                        class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
                                         :disabled="!form.type"
                                     >
                                         <option :value="null">Seleziona procedura...</option>
@@ -230,7 +230,7 @@ const steps = [
                                     <select 
                                         id="status"
                                         v-model="form.status" 
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" 
+                                        class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
                                         required
                                     >
                                         <option v-for="s in STATUSES" :key="s" :value="s">{{ formatStatus(s) }}</option>

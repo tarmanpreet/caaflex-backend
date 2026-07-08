@@ -57,7 +57,7 @@ const submitForm = () => {
                             <select
                                 id="procedure_type_id"
                                 v-model="form.procedure_type_id"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                                 required
                             >
                                 <option value="" disabled>Seleziona un tipo</option>

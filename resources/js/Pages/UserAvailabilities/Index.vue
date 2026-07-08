@@ -110,7 +110,7 @@ const deleteAvailability = () => {
                             <select
                                 id="day_of_week"
                                 v-model="form.day_of_week"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 shadow-sm"
+                                class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface py-2 px-3 focus:ring-2 focus:ring-primary/25"
                                 required
                             >
                                 <option value="" disabled>Seleziona giorno</option>

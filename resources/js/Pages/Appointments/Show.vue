@@ -150,7 +150,7 @@ const deleteAppointment = () => {
                             <select
                                 id="status"
                                 v-model="form.status"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                             >
                                 <option v-for="status in statuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
                             </select>
@@ -162,7 +162,7 @@ const deleteAppointment = () => {
                             <select
                                 id="assigned_user_id"
                                 v-model="form.assigned_user_id"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                             >
                                 <option :value="null">Nessuno</option>
                                 <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>

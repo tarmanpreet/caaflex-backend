@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --color-background: #f4f6f8;
     --color-surface: #f8f9fa;
     --color-surface-container-lowest: #ffffff;
@@ -32,9 +33,54 @@
     --color-on-error-container: #752121;
     --color-outline: #737c7f;
     --color-outline-variant: #abb3b7;
+
+    /* @vueform/multiselect — map its default-theme CSS vars onto our design
+       tokens. The default theme hardcodes #fff backgrounds and leaves the
+       selected-value label without an explicit color, so under color-scheme:
+       dark the inherited text renders white-on-white (the "blank select"
+       bug). These reference the --color-* tokens, which .dark redefines on
+       <html>, so the component adapts to light/dark automatically. */
+    --ms-bg: var(--color-surface-container-high);
+    --ms-bg-disabled: var(--color-surface-container);
+    --ms-border-color: var(--color-outline-variant);
+    --ms-border-color-active: var(--color-primary);
+    --ms-ring-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+    --ms-placeholder-color: var(--color-on-surface-variant);
+    --ms-caret-color: var(--color-on-surface-variant);
+    --ms-clear-color: var(--color-on-surface-variant);
+    --ms-clear-color-hover: var(--color-on-surface);
+    --ms-spinner-color: var(--color-primary);
+    --ms-dropdown-bg: var(--color-surface-container-lowest);
+    --ms-dropdown-border-color: var(--color-outline-variant);
+    --ms-option-color-pointed: var(--color-on-surface);
+    --ms-option-bg-pointed: var(--color-surface-container-low);
+    --ms-option-color-selected: var(--color-on-primary);
+    --ms-option-bg-selected: var(--color-primary);
+    --ms-option-color-selected-pointed: var(--color-on-primary);
+    --ms-option-bg-selected-pointed: var(--color-primary-dim);
+    --ms-option-color-disabled: var(--color-on-surface-variant);
+    --ms-option-bg-disabled: var(--color-surface-container-lowest);
+    --ms-option-color-selected-disabled: var(--color-on-surface-variant);
+    --ms-option-bg-selected-disabled: var(--color-surface-container);
+    --ms-group-label-color: var(--color-on-surface-variant);
+    --ms-group-label-bg: var(--color-surface-container-low);
+    --ms-group-label-color-pointed: var(--color-on-surface-variant);
+    --ms-group-label-bg-pointed: var(--color-surface-container);
+    --ms-group-label-color-selected: var(--color-on-primary);
+    --ms-group-label-bg-selected: var(--color-primary);
+    --ms-group-label-color-selected-pointed: var(--color-on-primary);
+    --ms-group-label-bg-selected-pointed: var(--color-primary-dim);
+    --ms-group-label-color-disabled: var(--color-on-surface-variant);
+    --ms-group-label-color-selected-disabled: var(--color-on-surface-variant);
+    --ms-empty-color: var(--color-on-surface-variant);
+    --ms-tag-bg: var(--color-primary);
+    --ms-tag-color: var(--color-on-primary);
+    --ms-tag-bg-disabled: var(--color-surface-container-high);
+    --ms-tag-color-disabled: var(--color-on-surface-variant);
   }
 
   .dark {
+    color-scheme: dark;
     --color-background: #020617;
     --color-surface: #111827;
     --color-surface-container-lowest: #030712;
