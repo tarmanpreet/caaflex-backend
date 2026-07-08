@@ -4,11 +4,22 @@ namespace App\Actions\Practice;
 
 use App\Models\Practice;
 use App\Models\User;
+use App\Traits\Sortable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 
 class IndexPracticeAction
 {
+    use Sortable;
+
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'id' => 'practices.id',
+        'type' => 'type',
+        'status' => 'status',
+        'reference_year' => 'reference_year',
+    ];
+
     public function execute(Request $request, User $user): LengthAwarePaginator
     {
         $query = Practice::query();
@@ -51,6 +62,9 @@ class IndexPracticeAction
         if ($request->filled('client_profile_id')) {
             $query->where('client_profile_id', (int) $request->client_profile_id);
         }
+
+        $sort = $this->sortParams($request, $this->sortableColumns, 'id', 'desc');
+        $this->applySorting($query, $sort, $this->sortableColumns);
 
         return $query->with('client', 'assignedUsers')->paginate(20)->withQueryString();
     }

@@ -26,13 +26,21 @@ const props = defineProps({
 
 const page = usePage();
 const search = ref(props.filters?.search ?? '');
+const sortKey = ref(props.filters?.sort ?? 'last_name');
+const sortDir = ref(props.filters?.direction ?? 'asc');
 
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('clients.create'));
 const canDelete = computed(() => page.props.auth.user?.permissions?.includes('clients.delete'));
 
 // Search
 const performSearch = () => {
-    router.get(route('clients.index'), { search: search.value }, { preserveState: true, replace: true });
+    router.get(route('clients.index'), { search: search.value, sort: sortKey.value, direction: sortDir.value }, { preserveState: true, replace: true });
+};
+
+const onSort = ({ key, dir }) => {
+    sortKey.value = key;
+    sortDir.value = dir;
+    router.get(route('clients.index'), { search: search.value, sort: key, direction: dir }, { preserveState: true, replace: true });
 };
 
 // Delete confirmation
@@ -94,7 +102,15 @@ const deleteClient = () => {
                 <!-- Table -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="overflow-x-auto">
-                        <SortableTable :columns="columns" :rows="clients.data" empty-message="No clients found.">
+                        <SortableTable
+                            :columns="columns"
+                            :rows="clients.data"
+                            :controlled="true"
+                            :sort-key="sortKey"
+                            :sort-dir="sortDir"
+                            empty-message="No clients found."
+                            @sort="onSort"
+                        >
                             <template #cell-first_name="{ row }">
                                 <Link :href="route('clients.show', row.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 font-medium">
                                     {{ row.first_name }} {{ row.last_name }}

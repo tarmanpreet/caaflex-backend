@@ -21,7 +21,17 @@ const slotColumns = [
 const props = defineProps({
     slots: Array,
     days: Object,
+    filters: Object,
 });
+
+const sortKey = ref(props.filters?.sort ?? 'day_of_week');
+const sortDir = ref(props.filters?.direction ?? 'asc');
+
+const onSort = ({ key, dir }) => {
+    sortKey.value = key;
+    sortDir.value = dir;
+    router.get(route('auto-confirm-slots.index'), { sort: key, direction: dir }, { preserveState: true, replace: true });
+};
 
 const form = useForm({
     day_of_week: '',
@@ -72,7 +82,15 @@ const deleteSlot = () => {
                 <div class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-outline-variant/10 p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Slot configurati</h3>
                     <div class="overflow-x-auto">
-                        <SortableTable :columns="slotColumns" :rows="slots ?? []" empty-message="Nessuno slot auto-conferma configurato.">
+                        <SortableTable
+                            :columns="slotColumns"
+                            :rows="slots ?? []"
+                            :controlled="true"
+                            :sort-key="sortKey"
+                            :sort-dir="sortDir"
+                            empty-message="Nessuno slot auto-conferma configurato."
+                            @sort="onSort"
+                        >
                             <template #cell-day_of_week="{ row }">
                                 <span class="font-medium text-gray-900 dark:text-gray-100">{{ days[row.day_of_week] }}</span>
                             </template>

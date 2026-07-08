@@ -13,6 +13,7 @@ use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
 use App\Models\User;
+use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,6 +21,15 @@ use Inertia\Inertia;
 class PracticeController extends Controller
 {
     use AuthorizesRequests;
+    use Sortable;
+
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'id' => 'practices.id',
+        'type' => 'type',
+        'status' => 'status',
+        'reference_year' => 'reference_year',
+    ];
 
     public function index(Request $request, IndexPracticeAction $action)
     {
@@ -30,10 +40,14 @@ class PracticeController extends Controller
         }
 
         $practices = $action->execute($request, $user);
+        $sort = $this->sortParams($request, $this->sortableColumns, 'id', 'desc');
 
         return Inertia::render('Practices/Index', [
             'practices' => $practices,
-            'filters' => ['search' => $request->search],
+            'filters' => array_merge(
+                $request->only(['search', 'status', 'type', 'branch_id', 'reference_year']),
+                ['sort' => $sort['sort'], 'direction' => $sort['direction']]
+            ),
         ]);
     }
 

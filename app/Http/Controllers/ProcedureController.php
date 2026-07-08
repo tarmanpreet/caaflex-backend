@@ -4,22 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProcedureRequest;
 use App\Http\Requests\UpdateProcedureRequest;
-use App\Models\Procedure;
 use App\Models\PracticeType;
+use App\Models\Procedure;
+use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProcedureController extends Controller
 {
     use AuthorizesRequests;
+    use Sortable;
 
-    public function index()
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'name' => 'name',
+        'procedure_type_id' => 'procedure_type_id',
+        'deadline_days' => 'deadline_days',
+    ];
+
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Procedure::class);
 
+        $query = Procedure::query();
+
+        if ($request->search) {
+            $search = '%'.$request->search.'%';
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', $search)
+                    ->orWhere('default_notes', 'like', $search);
+            });
+        }
+
+        $sort = $this->sortParams($request, $this->sortableColumns);
+        $this->applySorting($query, $sort, $this->sortableColumns);
+
         return Inertia::render('Procedures/Index', [
             'procedureTypes' => PracticeType::orderBy('name')->get(),
-            'procedures' => Procedure::orderBy('name')->get(),
+            'procedures' => $query->get(),
+            'filters' => array_merge(
+                $request->only(['search']),
+                ['sort' => $sort['sort'], 'direction' => $sort['direction']]
+            ),
         ]);
     }
 

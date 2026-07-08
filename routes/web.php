@@ -50,7 +50,7 @@ Route::middleware([
 
     Route::resource('procedures', ProcedureController::class)->except(['show']);
 
-    Route::resource('users', UserController::class)->only(['index', 'show', 'update']);
+    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'show', 'update']);
     Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
 
     Route::get('/users/{user}/availabilities', [UserAvailabilityController::class, 'index'])->name('users.availabilities.index');

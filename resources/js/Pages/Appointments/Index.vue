@@ -60,17 +60,37 @@ const props = defineProps({
 const page = usePage();
 const currentTab = ref(props.filters?.view === 'calendar' ? 'calendario' : 'lista');
 const statusFilter = ref(props.filters?.status ?? '');
+const searchFilter = ref(props.filters?.search ?? '');
+const sortKey = ref(props.filters?.sort ?? 'scheduled_at');
+const sortDir = ref(props.filters?.direction ?? 'desc');
 const fullCalendarRef = ref(null);
 const selectedMiniDate = ref(null);
 
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('appointments.create'));
 
 const applyFilter = () => {
-    router.get(route('appointments.index'), { status: statusFilter.value }, { preserveState: true, replace: true });
+    router.get(route('appointments.index'), {
+        status: statusFilter.value,
+        search: searchFilter.value,
+        sort: sortKey.value,
+        direction: sortDir.value,
+    }, { preserveState: true, replace: true });
+};
+
+const onSort = ({ key, dir }) => {
+    sortKey.value = key;
+    sortDir.value = dir;
+    router.get(route('appointments.index'), {
+        status: statusFilter.value,
+        search: searchFilter.value,
+        sort: key,
+        direction: dir,
+    }, { preserveState: true, replace: true });
 };
 
 const resetFilter = () => {
     statusFilter.value = '';
+    searchFilter.value = '';
     applyFilter();
 };
 
@@ -410,6 +430,16 @@ async function selectMiniDate(day) {
                             </div>
                             <div class="p-4 space-y-4">
                                 <div>
+                                    <label class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">Cerca</label>
+                                    <input
+                                        v-model="searchFilter"
+                                        type="text"
+                                        placeholder="Cliente o tipo pratica..."
+                                        @keyup.enter="applyFilter"
+                                        class="block w-full rounded-xl border-0 bg-surface-container-high px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25 transition-all"
+                                    />
+                                </div>
+                                <div>
                                     <label class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">Stato</label>
                                     <select 
                                         v-model="statusFilter" 
@@ -515,8 +545,12 @@ async function selectMiniDate(day) {
                                 <div class="p-6">
                                     <SortableTable 
                                         :columns="listColumns" 
-                                        :rows="appointments.data || []" 
+                                        :rows="appointments.data || []"
+                                        :controlled="true"
+                                        :sort-key="sortKey"
+                                        :sort-dir="sortDir"
                                         empty-message="Nessun appuntamento trovato."
+                                        @sort="onSort"
                                     >
                                         <template #cell-client="{ row }">
                                             <Link 

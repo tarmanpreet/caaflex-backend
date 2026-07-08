@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\User\CreateUserAction;
 use App\Actions\User\UpdateUserAction;
+use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Branch;
 use App\Models\PracticeType;
 use App\Models\User;
+use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +18,15 @@ use Spatie\Permission\Models\Role;
 class UserController extends Controller
 {
     use AuthorizesRequests;
+    use Sortable;
+
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'name' => 'name',
+        'email' => 'email',
+        'open_practices_count' => 'open_practices_count',
+        'is_active' => 'is_active',
+    ];
 
     public function index(Request $request)
     {
@@ -30,12 +42,40 @@ class UserController extends Controller
             $query->where(fn ($q) => $q->where('name', 'like', $search)->orWhere('email', 'like', $search));
         }
 
-        $users = $query->orderBy('name')->paginate(20)->withQueryString();
+        $sort = $this->sortParams($request, $this->sortableColumns);
+        $this->applySorting($query, $sort, $this->sortableColumns);
+
+        $users = $query->paginate(20)->withQueryString();
 
         return Inertia::render('Users/Index', [
             'users' => $users,
-            'filters' => ['search' => $request->search],
+            'filters' => [
+                'search' => $request->search,
+                'sort' => $sort['sort'],
+                'direction' => $sort['direction'],
+            ],
+            'canCreateUser' => $request->user()->can('create', User::class),
         ]);
+    }
+
+    public function create(Request $request)
+    {
+        $this->authorize('create', User::class);
+
+        $assignableRoles = $request->user()->assignableRoles();
+
+        return Inertia::render('Users/Create', [
+            'assignableRoles' => $assignableRoles,
+            'allPracticeTypes' => PracticeType::orderBy('name')->get(['id', 'name', 'color']),
+            'branches' => Branch::active()->select('id', 'name', 'city', 'province')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function store(StoreUserRequest $request, CreateUserAction $action)
+    {
+        $user = $action->execute($request->validated());
+
+        return redirect()->route('users.show', $user)->with('success', 'Utente creato.');
     }
 
     public function show(User $user, Request $request)

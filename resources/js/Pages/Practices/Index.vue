@@ -16,7 +16,7 @@ const props = defineProps({
 
 const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'client.first_name', label: 'Cliente' },
+    { key: 'client.first_name', label: 'Cliente', sortable: false },
     { key: 'type', label: 'Tipo' },
     { key: 'status', label: 'Stato' },
     { key: 'reference_year', label: 'Anno' },
@@ -25,10 +25,29 @@ const columns = [
 
 const page = usePage();
 const search = ref(props.filters?.search ?? '');
+const sortKey = ref(props.filters?.sort ?? 'id');
+const sortDir = ref(props.filters?.direction ?? 'desc');
+const statusFilter = ref(props.filters?.status ?? '');
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 
 const performSearch = () => {
-    router.get(route('practices.index'), { search: search.value }, { preserveState: true, replace: true });
+    router.get(route('practices.index'), {
+        search: search.value,
+        sort: sortKey.value,
+        direction: sortDir.value,
+        status: statusFilter.value,
+    }, { preserveState: true, replace: true });
+};
+
+const onSort = ({ key, dir }) => {
+    sortKey.value = key;
+    sortDir.value = dir;
+    router.get(route('practices.index'), {
+        search: search.value,
+        sort: key,
+        direction: dir,
+        status: statusFilter.value,
+    }, { preserveState: true, replace: true });
 };
 
 const formatStatus = (status) => status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
@@ -97,11 +116,32 @@ const statCards = computed(() => [
                                     @keyup.enter="performSearch"
                                 >
                             </div>
+                            <select
+                                v-model="statusFilter"
+                                class="h-11 rounded-2xl border-0 bg-surface-container-high px-4 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
+                                @change="performSearch"
+                            >
+                                <option value="">Tutti gli stati</option>
+                                <option value="nuova">Nuova</option>
+                                <option value="in_lavorazione">In lavorazione</option>
+                                <option value="in_attesa_documenti">In attesa documenti</option>
+                                <option value="completata">Completata</option>
+                                <option value="annullata">Annullata</option>
+                                <option value="sospesa">Sospesa</option>
+                            </select>
                             <button @click="performSearch" class="rounded-2xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest">Cerca</button>
                         </div>
                     </template>
 
-                    <SortableTable :columns="columns" :rows="practices.data" empty-message="Nessuna pratica trovata.">
+                    <SortableTable
+                        :columns="columns"
+                        :rows="practices.data"
+                        :controlled="true"
+                        :sort-key="sortKey"
+                        :sort-dir="sortDir"
+                        empty-message="Nessuna pratica trovata."
+                        @sort="onSort"
+                    >
                         <template #cell-id="{ row }">
                             <span class="font-semibold text-primary">#{{ row.id }}</span>
                         </template>

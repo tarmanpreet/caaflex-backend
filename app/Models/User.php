@@ -119,4 +119,25 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Branch::class, 'branch_user')->withPivot('assigned_at');
     }
+
+    /**
+     * Roles that this user is allowed to assign when creating a new user.
+     *
+     * - superadmin (has admins.create) can create admin or employee
+     * - admin (has users.create only) can create employee only
+     */
+    public function assignableRoles(): array
+    {
+        $roles = [];
+
+        if ($this->can('users.create')) {
+            $roles[] = 'employee';
+        }
+
+        if ($this->can('admins.create')) {
+            $roles[] = 'admin';
+        }
+
+        return $roles;
+    }
 }

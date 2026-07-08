@@ -13,6 +13,7 @@ use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\User;
+use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,6 +21,14 @@ use Inertia\Inertia;
 class AppointmentController extends Controller
 {
     use AuthorizesRequests;
+    use Sortable;
+
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'scheduled_at' => 'scheduled_at',
+        'duration_minutes' => 'duration_minutes',
+        'status' => 'status',
+    ];
 
     public function index(Request $request)
     {
@@ -50,6 +59,15 @@ class AppointmentController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->search) {
+            $search = '%'.$request->search.'%';
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('client', function ($cq) use ($search) {
+                    $cq->where('first_name', 'like', $search)->orWhere('last_name', 'like', $search);
+                })->orWhereHas('practiceType', fn ($pt) => $pt->where('name', 'like', $search));
+            });
+        }
+
         if ($request->from) {
             $query->where('scheduled_at', '>=', $request->from);
         }
@@ -57,6 +75,8 @@ class AppointmentController extends Controller
         if ($request->to) {
             $query->where('scheduled_at', '<=', $request->to);
         }
+
+        $sort = $this->sortParams($request, $this->sortableColumns, 'scheduled_at', 'desc');
 
         if ($request->view === 'calendar') {
             $from = $request->from ?? now()->startOfMonth()->format('Y-m-d');
@@ -76,7 +96,10 @@ class AppointmentController extends Controller
             return Inertia::render('Appointments/Index', [
                 'appointments' => null,
                 'calendarEvents' => $calendarEvents,
-                'filters' => $request->only(['status', 'from', 'to', 'view', 'branch_id']),
+                'filters' => array_merge(
+                    $request->only(['status', 'from', 'to', 'view', 'branch_id', 'search']),
+                    ['sort' => $sort['sort'], 'direction' => $sort['direction']]
+                ),
                 'statuses' => Appointment::STATUSES,
                 'clients' => $clients,
                 'practiceTypes' => $practiceTypes,
@@ -86,7 +109,9 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $appointments = $query->orderBy('scheduled_at', 'desc')->paginate(20)->withQueryString();
+        $this->applySorting($query, $sort, $this->sortableColumns);
+
+        $appointments = $query->paginate(20)->withQueryString();
         $clients = ClientProfile::select('id', 'first_name', 'last_name')->orderBy('last_name')->get();
         $practiceTypes = PracticeType::orderBy('name')->get();
         $users = User::whereHas('availabilities')->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
@@ -94,7 +119,10 @@ class AppointmentController extends Controller
 
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
-            'filters' => $request->only(['status', 'from', 'to', 'view', 'branch_id']),
+            'filters' => array_merge(
+                $request->only(['status', 'from', 'to', 'view', 'branch_id', 'search']),
+                ['sort' => $sort['sort'], 'direction' => $sort['direction']]
+            ),
             'statuses' => Appointment::STATUSES,
             'clients' => $clients,
             'practiceTypes' => $practiceTypes,

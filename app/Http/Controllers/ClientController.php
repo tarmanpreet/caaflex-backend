@@ -9,6 +9,7 @@ use App\Actions\Client\UpdateClientAction;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\ClientProfile;
+use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,16 +17,31 @@ use Inertia\Inertia;
 class ClientController extends Controller
 {
     use AuthorizesRequests;
+    use Sortable;
+
+    /** @var array<string,string> */
+    protected array $sortableColumns = [
+        'first_name' => 'first_name',
+        'last_name' => 'last_name',
+        'phone' => 'phone',
+        'date_of_birth' => 'date_of_birth',
+        'fiscal_code' => 'fiscal_code',
+        'city' => 'city',
+    ];
 
     public function index(Request $request, IndexClientAction $action)
     {
         $this->authorize('viewAny', ClientProfile::class);
 
         $clients = $action->execute($request);
+        $sort = $this->sortParams($request, $this->sortableColumns, 'last_name');
 
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
-            'filters' => ['search' => $request->search],
+            'filters' => array_merge(
+                $request->only(['search']),
+                ['sort' => $sort['sort'], 'direction' => $sort['direction']]
+            ),
         ]);
     }
 

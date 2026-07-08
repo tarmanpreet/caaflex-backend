@@ -14,51 +14,84 @@ const props = defineProps({
         type: String,
         default: 'Nessun dato trovato.',
     },
+    // Controlled mode: sorting is delegated to the parent (e.g. backend).
+    controlled: {
+        type: Boolean,
+        default: false,
+    },
+    sortKey: {
+        type: String,
+        default: null,
+    },
+    sortDir: {
+        type: String,
+        default: 'asc',
+    },
 });
 
+const emit = defineEmits(['sort']);
+
 const slots = useSlots();
-const sortKey = ref(null);
-const sortDir = ref('asc');
+const localSortKey = ref(null);
+const localSortDir = ref('asc');
+
+const currentSortKey = computed(() => (props.controlled ? props.sortKey : localSortKey.value));
+const currentSortDir = computed(() => (props.controlled ? props.sortDir : localSortDir.value));
 
 const setSort = (col) => {
     if (col.sortable === false) return;
 
-    if (sortKey.value === col.key) {
-        sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+    let key;
+    let dir;
+
+    if (currentSortKey.value === col.key) {
+        key = col.key;
+        dir = currentSortDir.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        key = col.key;
+        dir = 'asc';
+    }
+
+    if (props.controlled) {
+        emit('sort', { key, dir });
         return;
     }
 
-    sortKey.value = col.key;
-    sortDir.value = 'asc';
+    localSortKey.value = key;
+    localSortDir.value = dir;
 };
 
 const getNestedValue = (obj, key) => key.split('.').reduce((o, k) => (o != null ? o[k] : null), obj);
 
 const sortedRows = computed(() => {
-    if (!sortKey.value) return props.rows;
+    // In controlled mode, the parent/backend is responsible for sorting.
+    if (props.controlled) return props.rows;
+
+    const sortKey = localSortKey.value;
+    if (!sortKey) return props.rows;
 
     return [...props.rows].sort((a, b) => {
-        const av = getNestedValue(a, sortKey.value);
-        const bv = getNestedValue(b, sortKey.value);
+        const av = getNestedValue(a, sortKey);
+        const bv = getNestedValue(b, sortKey);
 
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
 
         if (typeof av === 'number' && typeof bv === 'number') {
-            return sortDir.value === 'asc' ? av - bv : bv - av;
+            return localSortDir.value === 'asc' ? av - bv : bv - av;
         }
 
         const da = Date.parse(av);
         const db = Date.parse(bv);
         if (!Number.isNaN(da) && !Number.isNaN(db)) {
-            return sortDir.value === 'asc' ? da - db : db - da;
+            return localSortDir.value === 'asc' ? da - db : db - da;
         }
 
         const sa = String(av).toLowerCase();
         const sb = String(bv).toLowerCase();
-        if (sa < sb) return sortDir.value === 'asc' ? -1 : 1;
-        if (sa > sb) return sortDir.value === 'asc' ? 1 : -1;
+        if (sa < sb) return localSortDir.value === 'asc' ? -1 : 1;
+        if (sa > sb) return localSortDir.value === 'asc' ? 1 : -1;
         return 0;
     });
 });
@@ -90,7 +123,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                                     fill="currentColor"
                                     :class="[
                                         'h-3 w-3 -mb-1 transition-colors',
-                                        sortKey === col.key && sortDir === 'asc' ? 'text-primary' : 'text-outline-variant',
+                                        currentSortKey === col.key && currentSortDir === 'asc' ? 'text-primary' : 'text-outline-variant',
                                     ]"
                                 >
                                     <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
@@ -100,7 +133,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                                     fill="currentColor"
                                     :class="[
                                         'h-3 w-3 transition-colors',
-                                        sortKey === col.key && sortDir === 'desc' ? 'text-primary' : 'text-outline-variant',
+                                        currentSortKey === col.key && currentSortDir === 'desc' ? 'text-primary' : 'text-outline-variant',
                                     ]"
                                 >
                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />

@@ -19,6 +19,7 @@ class CreateUserAction
 
         if ($data['role'] === 'employee') {
             $user->practiceTypes()->sync($data['practice_type_ids'] ?? []);
+            $user->branches()->sync($data['branch_ids'] ?? []);
         }
 
         return $user->load(['roles', 'practiceTypes:id,name']);

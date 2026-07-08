@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Database\Query\Builder;
 
 class StoreUserRequest extends FormRequest
 {
@@ -16,18 +15,18 @@ class StoreUserRequest extends FormRequest
 
     public function rules(): array
     {
+        $assignable = $this->user()->assignableRoles();
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => [
-                'required',
-                'string',
-                Rule::exists('roles', 'name')->where(fn (Builder $query) => $query->where('guard_name', 'web')),
-            ],
+            'role' => ['required', 'string', Rule::in($assignable)],
             'is_active' => ['sometimes', 'boolean'],
             'practice_type_ids' => ['nullable', 'array'],
             'practice_type_ids.*' => ['integer', 'exists:practice_types,id'],
+            'branch_ids' => ['nullable', 'array'],
+            'branch_ids.*' => ['integer', 'exists:branches,id'],
         ];
     }
 }
