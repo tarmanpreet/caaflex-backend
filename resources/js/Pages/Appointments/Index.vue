@@ -58,7 +58,12 @@ const props = defineProps({
 });
 
 const page = usePage();
-const currentTab = ref(props.filters?.view === 'calendar' ? 'calendario' : 'lista');
+const storedView = localStorage.getItem('appointments-view');
+const currentTab = ref(
+    storedView === 'lista' || storedView === 'calendario'
+        ? storedView
+        : (props.filters?.view === 'calendar' ? 'calendario' : 'lista'),
+);
 const statusFilter = ref(props.filters?.status ?? '');
 const searchFilter = ref(props.filters?.search ?? '');
 const sortKey = ref(props.filters?.sort ?? 'scheduled_at');
@@ -95,6 +100,7 @@ const resetFilter = () => {
 };
 
 watch(currentTab, (newTab) => {
+    localStorage.setItem('appointments-view', newTab);
     if (newTab === 'calendario') {
         if (!props.clients) {
             router.get(route('appointments.index'), { view: 'calendar' }, { preserveState: true, replace: true });
@@ -113,9 +119,10 @@ function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) {
         .catch(() => failureCallback());
 }
 
+const storedCalendarView = localStorage.getItem('appointments-calendar-view');
 const calendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
+    initialView: ['dayGridMonth', 'timeGridWeek', 'timeGridDay'].includes(storedCalendarView) ? storedCalendarView : 'dayGridMonth',
     locale: itLocale,
     height: 680,
     headerToolbar: {
@@ -135,11 +142,40 @@ const calendarOptions = {
     datesSet: handleCalendarDatesSet,
 };
 
-function handleCalendarDatesSet({ start }) {
+function handleCalendarDatesSet({ start, view }) {
     miniCalendarDate.value = new Date(start.getFullYear(), start.getMonth(), 1);
+    if (view?.type) {
+        localStorage.setItem('appointments-calendar-view', view.type);
+    }
 }
 
-async function handleEventDrop({ event, revert }) {
+const confirmingReschedule = ref(false);
+const pendingReschedule = ref(null);
+
+const pendingRescheduleInfo = computed(() => {
+    const p = pendingReschedule.value;
+    if (!p) return null;
+    const event = p.event;
+    return {
+        title: event.title,
+        newStart: formatDateTime(event.startStr),
+        duration: event.end ? Math.round((event.end - event.start) / 60000) : event.extendedProps.duration_minutes,
+    };
+});
+
+function handleEventDrop({ event, revert }) {
+    pendingReschedule.value = { event, revert };
+    confirmingReschedule.value = true;
+}
+
+function handleEventResize({ event, revert }) {
+    pendingReschedule.value = { event, revert };
+    confirmingReschedule.value = true;
+}
+
+async function confirmReschedule() {
+    const { event, revert } = pendingReschedule.value;
+    confirmingReschedule.value = false;
     try {
         await axios.patch(route('appointments.reschedule', event.id), {
             scheduled_at: event.startStr.replace('T', ' ').substring(0, 19),
@@ -147,18 +183,16 @@ async function handleEventDrop({ event, revert }) {
         });
     } catch {
         revert();
+    } finally {
+        pendingReschedule.value = null;
     }
 }
 
-async function handleEventResize({ event, revert }) {
-    try {
-        await axios.patch(route('appointments.reschedule', event.id), {
-            scheduled_at: event.startStr.replace('T', ' ').substring(0, 19),
-            duration_minutes: Math.round((event.end - event.start) / 60000),
-        });
-    } catch {
-        revert();
-    }
+function cancelReschedule() {
+    const { revert } = pendingReschedule.value;
+    confirmingReschedule.value = false;
+    if (revert) revert();
+    pendingReschedule.value = null;
 }
 
 const detailModal = ref(false);
@@ -988,6 +1022,24 @@ async function selectMiniDate(day) {
                 </div>
             </Transition>
         </Teleport>
+
+        <!-- Reschedule Confirmation Modal -->
+        <ConfirmationModal :show="confirmingReschedule" @close="cancelReschedule">
+            <template #title>Conferma spostamento</template>
+            <template #content>
+                <p class="text-on-surface-variant">
+                    Sei sicuro di voler spostare l'appuntamento
+                    <span v-if="pendingRescheduleInfo" class="font-semibold text-on-surface">"{{ pendingRescheduleInfo.title }}"</span>?
+                </p>
+                <p v-if="pendingRescheduleInfo" class="mt-2 text-on-surface-variant">
+                    Nuova data/ora: <span class="font-semibold text-on-surface">{{ pendingRescheduleInfo.newStart }}</span> ({{ pendingRescheduleInfo.duration }} min)
+                </p>
+            </template>
+            <template #footer>
+                <SecondaryButton @click="cancelReschedule">Annulla</SecondaryButton>
+                <PrimaryButton class="ml-3" @click="confirmReschedule">Conferma</PrimaryButton>
+            </template>
+        </ConfirmationModal>
 
         <!-- Delete Confirmation Modal -->
         <ConfirmationModal :show="confirmingDelete" @close="confirmingDelete = false">
