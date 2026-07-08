@@ -6,6 +6,7 @@ use App\Models\Practice;
 use App\Models\User;
 use App\Traits\Sortable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class IndexPracticeAction
@@ -22,6 +23,37 @@ class IndexPracticeAction
 
     public function execute(Request $request, User $user): LengthAwarePaginator
     {
+        $query = $this->baseScope($user);
+        $this->applyFilters($query, $request);
+
+        $sort = $this->sortParams($request, $this->sortableColumns, 'id', 'desc');
+        $this->applySorting($query, $sort, $this->sortableColumns);
+
+        return $query->with('client', 'assignedUsers')->paginate(20)->withQueryString();
+    }
+
+    /** @return array{total:int,active:int,pending:int,complete:int} */
+    public function summary(User $user): array
+    {
+        $stats = (clone $this->baseScope($user))
+            ->selectRaw(
+                'count(*) as total, '
+                ."sum(case when status = 'in_lavorazione' then 1 else 0 end) as active, "
+                ."sum(case when status = 'in_attesa_documenti' then 1 else 0 end) as pending, "
+                ."sum(case when status = 'completata' then 1 else 0 end) as complete"
+            )
+            ->first();
+
+        return [
+            'total' => (int) $stats->total,
+            'active' => (int) $stats->active,
+            'pending' => (int) $stats->pending,
+            'complete' => (int) $stats->complete,
+        ];
+    }
+
+    private function baseScope(User $user): Builder
+    {
         $query = Practice::query();
 
         if ($user->hasRole('employee') && ! $user->hasRole('admin') && ! $user->hasRole('superadmin')) {
@@ -32,6 +64,11 @@ class IndexPracticeAction
             });
         }
 
+        return $query;
+    }
+
+    private function applyFilters(Builder $query, Request $request): void
+    {
         if ($request->filled('branch_id')) {
             $query->where('branch_id', (int) $request->branch_id);
         }
@@ -62,10 +99,5 @@ class IndexPracticeAction
         if ($request->filled('client_profile_id')) {
             $query->where('client_profile_id', (int) $request->client_profile_id);
         }
-
-        $sort = $this->sortParams($request, $this->sortableColumns, 'id', 'desc');
-        $this->applySorting($query, $sort, $this->sortableColumns);
-
-        return $query->with('client', 'assignedUsers')->paginate(20)->withQueryString();
     }
 }

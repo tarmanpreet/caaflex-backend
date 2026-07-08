@@ -44,6 +44,7 @@ class PracticeController extends Controller
 
         return Inertia::render('Practices/Index', [
             'practices' => $practices,
+            'summary' => $action->summary($user),
             'filters' => array_merge(
                 $request->only(['search', 'status', 'type', 'branch_id', 'reference_year']),
                 ['sort' => $sort['sort'], 'direction' => $sort['direction']]

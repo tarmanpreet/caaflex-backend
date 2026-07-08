@@ -7,11 +7,12 @@ import Pagination from '@/Components/Pagination.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import UiStatusBadge from '@/Components/ui/UiStatusBadge.vue';
-import { EyeIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { EyeIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     practices: Object,
     filters: Object,
+    summary: Object,
 });
 
 const columns = [
@@ -50,23 +51,20 @@ const onSort = ({ key, dir }) => {
     }, { preserveState: true, replace: true });
 };
 
+const filterByStatus = (status) => {
+    statusFilter.value = status;
+    performSearch();
+};
+
+const activeStatus = computed(() => props.filters?.status ?? '');
+
 const formatStatus = (status) => status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
 
-const summary = computed(() => {
-    const rows = props.practices?.data ?? [];
-    return {
-        total: rows.length,
-        pending: rows.filter((item) => item.status === 'in_attesa_documenti').length,
-        active: rows.filter((item) => item.status === 'in_lavorazione').length,
-        complete: rows.filter((item) => item.status === 'completata').length,
-    };
-});
-
 const statCards = computed(() => [
-    { label: 'Totale in pagina', value: summary.value.total, tone: 'nuova' },
-    { label: 'In lavorazione', value: summary.value.active, tone: 'in_lavorazione' },
-    { label: 'In attesa documenti', value: summary.value.pending, tone: 'in_attesa_documenti' },
-    { label: 'Completate', value: summary.value.complete, tone: 'completata' },
+    { label: 'Totale', value: props.summary?.total ?? 0, tone: 'nuova', status: '' },
+    { label: 'In lavorazione', value: props.summary?.active ?? 0, tone: 'in_lavorazione', status: 'in_lavorazione' },
+    { label: 'In attesa documenti', value: props.summary?.pending ?? 0, tone: 'in_attesa_documenti', status: 'in_attesa_documenti' },
+    { label: 'Completate', value: props.summary?.complete ?? 0, tone: 'completata', status: 'completata' },
 ]);
 </script>
 
@@ -93,8 +91,31 @@ const statCards = computed(() => [
 
         <div class="space-y-8">
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div v-for="card in statCards" :key="card.label" class="rounded-[1.5rem] bg-surface-container-lowest p-5 shadow-[0px_20px_40px_rgba(12,15,16,0.06)] ring-1 ring-outline-variant/10">
-                    <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">{{ card.label }}</p>
+                <div
+                    v-for="card in statCards"
+                    :key="card.label"
+                    :class="[
+                        'rounded-[1.5rem] bg-surface-container-lowest p-5 shadow-[0px_20px_40px_rgba(12,15,16,0.06)] ring-1 ring-outline-variant/10 transition',
+                        activeStatus === card.status ? 'ring-2 ring-primary/50' : '',
+                    ]"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">{{ card.label }}</p>
+                        <button
+                            type="button"
+                            @click="filterByStatus(card.status)"
+                            :class="[
+                                'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] transition',
+                                activeStatus === card.status
+                                    ? 'bg-primary text-on-primary'
+                                    : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest',
+                            ]"
+                            :title="activeStatus === card.status ? 'Filtro attivo' : 'Filtra per ' + card.label"
+                        >
+                            <FunnelIcon class="h-3 w-3" />
+                            <span>{{ activeStatus === card.status ? 'Attivo' : 'Filtra' }}</span>
+                        </button>
+                    </div>
                     <div class="mt-4 flex items-end justify-between gap-4">
                         <p class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">{{ card.value }}</p>
                         <UiStatusBadge :label="card.label" :status="card.tone" size="sm" />

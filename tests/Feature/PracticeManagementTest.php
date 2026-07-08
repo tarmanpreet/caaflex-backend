@@ -35,6 +35,30 @@ class PracticeManagementTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('Practices/Index')
                 ->has('practices')
+                ->has('summary')
+            );
+    }
+
+    public function test_summary_is_independent_of_status_filter(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        Practice::factory()->create(['status' => 'in_lavorazione']);
+        Practice::factory()->create(['status' => 'in_lavorazione']);
+        Practice::factory()->create(['status' => 'completata']);
+        Practice::factory()->create(['status' => 'in_attesa_documenti']);
+
+        $this->actingAs($admin)
+            ->get('/practices?status=completata')
+            ->assertStatus(200)
+            ->assertInertia(fn ($page) => $page
+                ->component('Practices/Index')
+                ->where('summary.total', 4)
+                ->where('summary.active', 2)
+                ->where('summary.pending', 1)
+                ->where('summary.complete', 1)
+                ->has('practices.data', 1)
             );
     }
 
