@@ -17,6 +17,8 @@ import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import UiStatusBadge from '@/Components/ui/UiStatusBadge.vue';
 import {
     CalendarDaysIcon,
+    CheckIcon,
+    ClipboardDocumentIcon,
     ClockIcon,
     DocumentArrowDownIcon,
     DocumentArrowUpIcon,
@@ -61,6 +63,23 @@ const STATUSES = ['nuova', 'in_lavorazione', 'in_attesa_documenti', 'completata'
 
 // Edit Logic
 const editMode = ref(false);
+const trackingCodeCopied = ref(false);
+
+const copyTrackingCode = async () => {
+    if (!props.practice?.tracking_code || !navigator.clipboard) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(props.practice.tracking_code);
+        trackingCodeCopied.value = true;
+    } catch {
+        return;
+    }
+    window.setTimeout(() => {
+        trackingCodeCopied.value = false;
+    }, 1800);
+};
 
 const editForm = useForm({
     type: props.practice?.type ?? '',
@@ -339,6 +358,26 @@ const completionPercentage = computed(() => {
                     <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm shadow-blue-900/5 ring-1 ring-outline-variant/10">
                         <h3 class="text-sm font-bold text-on-surface uppercase tracking-wider mb-6">Riepilogo Pratica</h3>
                         <div class="space-y-6">
+                            <div class="rounded-2xl border border-primary/20 bg-primary-container/35 p-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-on-surface-variant">Codice controllo pubblico</p>
+                                        <p class="mt-1 truncate font-mono text-lg font-extrabold tracking-[0.14em] text-on-surface">{{ practice.tracking_code }}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="app-icon-button shrink-0 border border-outline-variant/35 bg-surface-container-lowest shadow-sm"
+                                        :aria-label="trackingCodeCopied ? 'Codice copiato' : 'Copia codice pratica'"
+                                        :title="trackingCodeCopied ? 'Codice copiato' : 'Copia codice'"
+                                        @click="copyTrackingCode"
+                                    >
+                                        <CheckIcon v-if="trackingCodeCopied" class="h-5 w-5 text-secondary" aria-hidden="true" />
+                                        <ClipboardDocumentIcon v-else class="h-5 w-5" aria-hidden="true" />
+                                    </button>
+                                </div>
+                                <p class="mt-2 text-xs leading-5 text-on-surface-variant">Consegna questo codice al cliente per consultare esclusivamente lo stato della pratica.</p>
+                            </div>
+
                             <div class="flex items-start">
                                 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center mr-4 shrink-0">
                                     <DocumentTextIcon class="h-5 w-5 text-on-primary-container" />

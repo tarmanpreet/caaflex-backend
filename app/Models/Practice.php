@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Practice extends Model
 {
@@ -57,6 +58,24 @@ class Practice extends Model
             'reference_year' => 'integer',
             'deadline_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Practice $practice): void {
+            if (blank($practice->tracking_code)) {
+                $practice->tracking_code = static::uniqueTrackingCode();
+            }
+        });
+    }
+
+    public static function uniqueTrackingCode(): string
+    {
+        do {
+            $trackingCode = Str::upper(Str::random(10));
+        } while (static::query()->where('tracking_code', $trackingCode)->exists());
+
+        return $trackingCode;
     }
 
     /**

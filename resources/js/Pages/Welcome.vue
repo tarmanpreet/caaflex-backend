@@ -9,6 +9,7 @@ import {
     ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     ClockIcon,
+    DocumentMagnifyingGlassIcon,
     DocumentTextIcon,
     LockClosedIcon,
     ShieldCheckIcon,
@@ -121,7 +122,7 @@ const workflow = [
                 <div class="hidden items-center gap-7 text-sm font-medium text-slate-300 md:flex">
                     <a href="#funzionalita" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Funzionalità</a>
                     <a href="#metodo" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Come funziona</a>
-                    <a href="#sicurezza" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Sicurezza</a>
+                    <Link :href="route('practice-status.index')" prefetch class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Controlla pratica</Link>
                 </div>
 
                 <div v-if="canLogin" class="flex items-center gap-2">
@@ -131,7 +132,8 @@ const workflow = [
                         prefetch
                         class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
                     >
-                        Vai alla dashboard
+                        <span class="hidden min-[400px]:inline">Vai alla dashboard</span>
+                        <span class="min-[400px]:hidden">Dashboard</span>
                         <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
                     </Link>
                     <template v-else>
@@ -170,27 +172,39 @@ const workflow = [
                             Un unico spazio per coordinare clienti, pratiche, appuntamenti e documenti. Più chiarezza per gli operatori, più velocità per i cittadini, più controllo per tutta la rete.
                         </p>
 
-                        <div class="hero-enter hero-delay-4 mt-9 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                        <div class="hero-enter hero-delay-4 mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-2.5 lg:justify-start">
                             <Link
                                 v-if="$page.props.auth.user"
                                 :href="route('dashboard')"
                                 prefetch
-                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
+                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
                             >
-                                Apri il tuo workspace
+                                <span class="sm:hidden">Apri il tuo workspace</span>
+                                <span class="hidden sm:inline">Workspace</span>
                                 <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
                             </Link>
                             <Link
                                 v-else-if="canLogin"
                                 :href="route('login')"
                                 prefetch
-                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
+                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
                             >
-                                Accedi al gestionale
+                                <span class="sm:hidden">Accedi al gestionale</span>
+                                <span class="hidden sm:inline">Accedi</span>
                                 <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
                             </Link>
-                            <a href="#funzionalita" class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 font-semibold text-white backdrop-blur transition duration-200 hover:border-white/30 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
-                                Scopri la piattaforma
+                            <Link
+                                :href="route('practice-status.index')"
+                                prefetch
+                                class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-6 font-semibold text-cyan-50 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-cyan-300/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
+                            >
+                                <DocumentMagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
+                                <span class="sm:hidden">Controlla pratica</span>
+                                <span class="hidden sm:inline">Stato pratica</span>
+                            </Link>
+                            <a href="#funzionalita" class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 font-semibold text-white backdrop-blur transition duration-200 hover:border-white/30 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:border-transparent sm:bg-transparent sm:px-3 sm:text-sm sm:text-slate-300 sm:backdrop-blur-0 sm:hover:border-transparent sm:hover:bg-white/5 sm:hover:text-white">
+                                <span class="sm:hidden">Scopri la piattaforma</span>
+                                <span class="hidden sm:inline">Scopri</span>
                                 <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
                             </a>
                         </div>

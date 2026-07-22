@@ -164,7 +164,14 @@ const statCards = computed(() => [
                         @sort="onSort"
                     >
                         <template #cell-id="{ row }">
-                            <span class="font-semibold text-primary">#{{ row.id }}</span>
+                            <Link
+                                :href="route('practices.show', row.id)"
+                                prefetch
+                                class="inline-flex min-h-[44px] items-center rounded-lg font-semibold text-primary underline-offset-4 transition hover:text-primary-dim hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                                :aria-label="`Apri pratica ${row.id}`"
+                            >
+                                #{{ row.id }}
+                            </Link>
                         </template>
                         <template #[`cell-client.first_name`]="{ row }">
                             <Link :href="route('clients.show', row.client.id)" class="font-semibold text-on-surface transition hover:text-primary">

@@ -12,6 +12,7 @@ use App\Http\Controllers\PracticeDocumentController;
 use App\Http\Controllers\PracticeNoteController;
 use App\Http\Controllers\PracticeTypeController;
 use App\Http\Controllers\ProcedureController;
+use App\Http\Controllers\PublicPracticeStatusController;
 use App\Http\Controllers\UserAvailabilityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -25,7 +26,12 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
+
+Route::get('/controlla-pratica', [PublicPracticeStatusController::class, 'index'])->name('practice-status.index');
+Route::post('/controlla-pratica', [PublicPracticeStatusController::class, 'lookup'])
+    ->middleware('throttle:10,1')
+    ->name('practice-status.lookup');
 
 Route::middleware([
     'auth:sanctum',
