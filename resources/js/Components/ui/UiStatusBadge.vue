@@ -22,13 +22,14 @@ const toneMap = {
 };
 
 const sizeMap = {
-    sm: 'px-2.5 py-1 text-[10px]',
-    md: 'px-3 py-1.5 text-[11px]',
+    sm: 'px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]',
+    md: 'px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em]',
+    table: 'whitespace-nowrap px-2.5 py-1 text-xs font-semibold leading-5 tracking-normal',
 };
 </script>
 
 <template>
-    <span :class="['inline-flex items-center rounded-full font-bold uppercase tracking-[0.14em] ring-1 ring-inset ring-current/10', sizeMap[size], toneMap[status] ?? 'bg-surface-container-high text-on-surface-variant']">
+    <span :class="['inline-flex items-center rounded-full ring-1 ring-inset ring-current/10', sizeMap[size], toneMap[status] ?? 'bg-surface-container-high text-on-surface-variant']">
         {{ label }}
     </span>
 </template>

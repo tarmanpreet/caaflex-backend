@@ -182,7 +182,7 @@ const statCards = computed(() => [
                             <span class="rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-on-surface-variant">{{ row.type }}</span>
                         </template>
                         <template #cell-status="{ row }">
-                            <UiStatusBadge :label="formatStatus(row.status)" :status="row.status" />
+                            <UiStatusBadge :label="formatStatus(row.status)" :status="row.status" size="table" />
                         </template>
                         <template #cell-reference_year="{ row }">
                             <span class="font-medium text-on-surface-variant">{{ row.reference_year || '—' }}</span>
