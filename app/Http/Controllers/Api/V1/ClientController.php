@@ -9,6 +9,7 @@ use App\Actions\Client\UpdateClientAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Branch;
 use App\Models\ClientProfile;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', ClientProfile::class);
 
-        $clients = $action->execute($request);
+        $clients = $action->execute($request, $request->user());
 
         return response()->json($clients);
     }
@@ -31,17 +32,19 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', ClientProfile::class);
 
-        $q       = $request->get('q', '');
+        $q = $request->get('q', '');
         $perPage = max(1, min(100, (int) $request->get('per_page', 15)));
-        $page    = max(1, (int) $request->get('page', 1));
-        $like    = '%' . $q . '%';
+        $page = max(1, (int) $request->get('page', 1));
+        $like = '%'.$q.'%';
 
-        $paginator = ClientProfile::select('id', 'first_name', 'last_name')
+        $paginator = ClientProfile::select('id', 'first_name', 'last_name', 'branch_id')
+            ->when(Branch::query()->exists(), fn ($query) => $query->whereIn('branch_id', $request->user()->accessibleBranchIds()))
+            ->with('branch:id,name')
             ->when($q, function ($query) use ($like) {
                 $query->where(function ($q) use ($like) {
                     $q->where('first_name', 'like', $like)
-                      ->orWhere('last_name', 'like', $like)
-                      ->orWhere('fiscal_code', 'like', $like);
+                        ->orWhere('last_name', 'like', $like)
+                        ->orWhere('fiscal_code', 'like', $like);
                 });
             })
             ->orderBy('last_name')
@@ -49,9 +52,9 @@ class ClientController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'results' => collect($paginator->items())->map(fn($c) => [
+            'results' => collect($paginator->items())->map(fn ($c) => [
                 'value' => $c->id,
-                'label' => $c->last_name . ' ' . $c->first_name,
+                'label' => $c->last_name.' '.$c->first_name.($c->branch ? ' · '.$c->branch->name : ''),
             ]),
             'hasMore' => $paginator->hasMorePages(),
         ]);
@@ -95,7 +98,7 @@ class ClientController extends Controller
         if (empty($client->email)) {
             return response()->json([
                 'message' => 'Il profilo cliente non ha un indirizzo email.',
-                'error'   => 'no_email',
+                'error' => 'no_email',
             ], 422);
         }
 
@@ -105,8 +108,8 @@ class ClientController extends Controller
             $conflictingClient = ClientProfile::whereHas('user', fn ($q) => $q->where('email', $client->email))->first();
 
             return response()->json([
-                'message'            => 'Questo indirizzo email è già associato a un altro profilo cliente.',
-                'error'              => 'conflict',
+                'message' => 'Questo indirizzo email è già associato a un altro profilo cliente.',
+                'error' => 'conflict',
                 'conflict_client_id' => $conflictingClient?->id,
             ], 409);
         }
@@ -118,7 +121,7 @@ class ClientController extends Controller
                 ? 'Account utente creato e collegato al profilo.'
                 : 'Utente esistente collegato al profilo.',
             'outcome' => $outcome,
-            'data'    => $client,
+            'data' => $client,
         ]);
     }
 

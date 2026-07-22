@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-    <button :type="type" class="inline-flex items-center rounded-lg border border-outline-variant/30 bg-surface-container-lowest px-4 py-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant shadow-sm transition ease-in-out duration-150 select-none hover:bg-surface-container-low hover:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-25">
+    <button :type="type" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm font-semibold text-on-surface shadow-sm transition duration-200 select-none hover:border-outline hover:bg-surface-container-low focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none">
         <slot />
     </button>
 </template>

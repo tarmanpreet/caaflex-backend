@@ -9,7 +9,12 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 
+const props = defineProps({
+    branches: Array,
+});
+
 const form = useForm({
+    branch_id: props.branches?.[0]?.id ?? null,
     first_name: '',
     last_name: '',
     phone: '',
@@ -47,6 +52,14 @@ const submitForm = () => {
                     </template>
 
                     <template #form>
+                        <div v-if="branches?.length" class="col-span-6">
+                            <InputLabel for="branch_id" value="Filiale" />
+                            <select id="branch_id" v-model="form.branch_id" required class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option>
+                            </select>
+                            <InputError :message="form.errors.branch_id" class="mt-2" />
+                        </div>
+
                         <div class="col-span-6 sm:col-span-3">
                             <InputLabel for="first_name" value="First Name" />
                             <TextInput

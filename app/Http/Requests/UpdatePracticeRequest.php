@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Procedure;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class UpdatePracticeRequest extends FormRequest
@@ -30,7 +31,7 @@ class UpdatePracticeRequest extends FormRequest
             'user_ids' => ['nullable', 'array'],
             'user_ids.*' => ['exists:users,id'],
             'deadline_at' => ['nullable', 'date'],
-            'branch_id' => ['nullable', 'exists:branches,id'],
+            'branch_id' => ['sometimes', 'required', 'integer', Rule::in($this->user()->accessibleBranchIds()->all())],
         ];
     }
 
@@ -61,6 +62,11 @@ class UpdatePracticeRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             $procedureId = $this->procedure_id;
             $practiceTypeId = $this->practice_type_id;
+            $practice = $this->route('practice');
+
+            if ($this->has('branch_id') && $practice?->client?->branch_id !== null && (int) $this->branch_id !== $practice->client->branch_id) {
+                $validator->errors()->add('branch_id', 'La filiale della pratica deve coincidere con quella del cliente.');
+            }
 
             if ($procedureId) {
                 $procedure = Procedure::find($procedureId);

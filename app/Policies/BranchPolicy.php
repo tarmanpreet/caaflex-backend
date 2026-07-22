@@ -19,11 +19,18 @@ class BranchPolicy
 
     public function update(User $user, Branch $branch): bool
     {
-        return $user->hasPermissionTo('branches.update');
+        return $user->hasPermissionTo('branches.update') && $user->canAccessBranchId($branch->id);
     }
 
     public function delete(User $user, Branch $branch): bool
     {
-        return $user->hasPermissionTo('branches.delete') && Branch::count() > 1;
+        return $user->hasPermissionTo('branches.delete')
+            && $user->canAccessBranchId($branch->id)
+            && $branch->parent_id !== null
+            && ! $branch->children()->exists()
+            && ! $branch->clients()->exists()
+            && ! $branch->practices()->exists()
+            && ! $branch->appointments()->exists()
+            && ! $branch->employees()->exists();
     }
 }

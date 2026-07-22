@@ -15,12 +15,12 @@ watchEffect(async () => {
 </script>
 
 <template>
-    <div>
-        <div v-if="show && message" :class="{ 'bg-indigo-600 dark:bg-indigo-800': style == 'success', 'bg-red-700': style == 'danger' }">
-            <div class="max-w-screen-xl mx-auto py-2 px-3 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between flex-wrap">
+    <div class="fixed inset-x-0 top-3 z-[70] px-3 sm:px-6">
+        <div v-if="show && message" class="mx-auto max-w-3xl overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl" :class="{ 'border-emerald-300/40 bg-emerald-600 text-white': style == 'success', 'border-red-300/40 bg-red-600 text-white': style == 'danger' }" role="status" aria-live="polite">
+            <div class="px-3 py-2.5 sm:px-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="w-0 flex-1 flex items-center min-w-0">
-                        <span class="flex p-2 rounded-lg" :class="{ 'bg-indigo-600 dark:bg-indigo-800': style == 'success', 'bg-red-600': style == 'danger' }">
+                        <span class="flex rounded-xl bg-white/15 p-2">
                             <svg v-if="style == 'success'" class="size-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -35,12 +35,11 @@ watchEffect(async () => {
                         </p>
                     </div>
 
-                    <div class="shrink-0 sm:ms-3">
+                    <div class="shrink-0">
                             <button
                                 type="button"
-                                class="-me-1 flex p-2 rounded-md focus:outline-none sm:-me-2 transition"
-                                :class="{ 'hover:bg-indigo-600 dark:hover:bg-indigo-700 focus:bg-indigo-600 dark:focus:bg-indigo-700': style == 'success', 'hover:bg-red-600 focus:bg-red-600': style == 'danger' }"
-                                aria-label="Dismiss"
+                                class="grid h-10 w-10 place-items-center rounded-xl transition hover:bg-white/15 focus:outline-none"
+                                aria-label="Chiudi notifica"
                                 @click.prevent="show = false"
                             >
                             <svg class="size-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

@@ -5,6 +5,8 @@ import ApplicationMark from './ApplicationMark.vue';
 
 <template>
     <Link :href="'/'">
-        <ApplicationMark class="size-16 dark:brightness-0 dark:invert lg:brightness-0 lg:invert" />
+        <span class="grid size-16 place-items-center rounded-2xl bg-primary text-on-primary shadow-xl shadow-primary/20 lg:bg-white lg:text-blue-600">
+            <ApplicationMark class="size-10" />
+        </span>
     </Link>
 </template>

@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Passport\HasApiTokens;
@@ -14,6 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
+    private ?Collection $accessibleBranchIdsCache = null;
+
     use HasApiTokens;
 
     /** @use HasFactory<UserFactory> */
@@ -118,6 +121,33 @@ class User extends Authenticatable
     public function branches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Branch::class, 'branch_user')->withPivot('assigned_at');
+    }
+
+    /** @return Collection<int, int> */
+    public function accessibleBranchIds(): Collection
+    {
+        if ($this->accessibleBranchIdsCache !== null) {
+            return $this->accessibleBranchIdsCache;
+        }
+
+        if ($this->hasRole('superadmin')) {
+            return $this->accessibleBranchIdsCache = Branch::query()->pluck('id')->map(fn ($id): int => (int) $id);
+        }
+
+        $assignedIds = $this->branches()->pluck('branches.id');
+
+        if ($assignedIds->isEmpty()) {
+            $assignedIds = Branch::query()->whereNull('parent_id')->pluck('id');
+        }
+
+        return $this->accessibleBranchIdsCache = Branch::descendantIdsFor($assignedIds);
+    }
+
+    public function canAccessBranchId(?int $branchId): bool
+    {
+        return $branchId === null
+            ? Branch::query()->doesntExist()
+            : $this->accessibleBranchIds()->contains($branchId);
     }
 
     /**

@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Branch;
 use App\Models\Procedure;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StorePracticeRequest extends FormRequest
@@ -20,8 +22,12 @@ class StorePracticeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $clientRule = Branch::query()->exists()
+            ? Rule::exists('client_profiles', 'id')->whereIn('branch_id', $this->user()->accessibleBranchIds())
+            : Rule::exists('client_profiles', 'id');
+
         return [
-            'client_profile_id' => ['required', 'exists:client_profiles,id'],
+            'client_profile_id' => ['required', $clientRule],
             'type' => ['required', 'in:730,ISEE,IMU_TASI,RED_INPS,SUCCESSIONE,BONUS_AGEVOLAZIONI,ALTRO'],
             'status' => ['nullable', 'in:nuova,in_lavorazione,in_attesa_documenti,completata,annullata,sospesa'],
             'reference_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
@@ -31,7 +37,7 @@ class StorePracticeRequest extends FormRequest
             'user_ids' => ['nullable', 'array'],
             'user_ids.*' => ['exists:users,id'],
             'deadline_at' => ['nullable', 'date'],
-            'branch_id' => ['nullable', 'exists:branches,id'],
+            'branch_id' => ['nullable', 'integer', Rule::in($this->user()->accessibleBranchIds()->all())],
         ];
     }
 

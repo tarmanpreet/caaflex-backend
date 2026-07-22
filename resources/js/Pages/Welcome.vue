@@ -1,176 +1,479 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import ApplicationMark from '@/Components/ApplicationMark.vue';
+import {
+    ArrowRightIcon,
+    BuildingOffice2Icon,
+    CalendarDaysIcon,
+    CheckCircleIcon,
+    ChevronRightIcon,
+    ClipboardDocumentCheckIcon,
+    ClockIcon,
+    DocumentTextIcon,
+    LockClosedIcon,
+    ShieldCheckIcon,
+    SparklesIcon,
+    UserGroupIcon,
+    UsersIcon,
+} from '@heroicons/vue/24/outline';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
+    canLogin: Boolean,
+    canRegister: Boolean,
 });
 
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
-}
+const hero = ref(null);
+let observer;
+
+const handlePointerMove = (event) => {
+    if (!hero.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    const bounds = hero.value.getBoundingClientRect();
+    hero.value.style.setProperty('--pointer-x', `${event.clientX - bounds.left}px`);
+    hero.value.style.setProperty('--pointer-y', `${event.clientY - bounds.top}px`);
+};
+
+onMounted(() => {
+    const revealElements = document.querySelectorAll('[data-reveal]');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        revealElements.forEach(element => element.classList.add('is-visible'));
+        return;
+    }
+
+    observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px' });
+
+    revealElements.forEach(element => observer.observe(element));
+});
+
+onBeforeUnmount(() => observer?.disconnect());
+
+const features = [
+    {
+        icon: BuildingOffice2Icon,
+        eyebrow: 'Organizzazione',
+        title: 'Filiali davvero gerarchiche',
+        description: 'La sede principale governa l’intera rete. Ogni filiale accede solo al proprio ramo e ai livelli sottostanti.',
+        accent: 'blue',
+    },
+    {
+        icon: ClipboardDocumentCheckIcon,
+        eyebrow: 'Operatività',
+        title: 'Pratiche sotto controllo',
+        description: 'Stati, scadenze, documenti, note e responsabili riuniti in un flusso chiaro e sempre aggiornato.',
+        accent: 'amber',
+    },
+    {
+        icon: UsersIcon,
+        eyebrow: 'Relazioni',
+        title: 'Un cliente, tutto il contesto',
+        description: 'Anagrafica, storico e documenti restano connessi, protetti e immediatamente disponibili agli operatori autorizzati.',
+        accent: 'cyan',
+    },
+    {
+        icon: CalendarDaysIcon,
+        eyebrow: 'Tempo',
+        title: 'Agenda che lavora con te',
+        description: 'Appuntamenti, disponibilità e conferme convivono con le pratiche per ridurre attese e passaggi manuali.',
+        accent: 'violet',
+    },
+];
+
+const workflow = [
+    { number: '01', title: 'Accogli il cliente', text: 'Crea o ritrova subito il profilo nella filiale corretta.' },
+    { number: '02', title: 'Avvia la pratica', text: 'Assegna tipo, procedura, responsabili e scadenze in pochi passaggi.' },
+    { number: '03', title: 'Lavora in squadra', text: 'Documenti, note e attività restano leggibili da chi ne ha davvero bisogno.' },
+    { number: '04', title: 'Chiudi con sicurezza', text: 'Lo storico conserva ogni passaggio e rende il lavoro verificabile.' },
+];
 </script>
 
 <template>
-    <Head title="Welcome" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-        <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" />
-        <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
-            <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-                <header class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3">
-                    <div class="flex lg:justify-center lg:col-start-2">
-                        <svg class="h-12 w-auto text-white lg:h-16 lg:text-[#FF2D20]" viewBox="0 0 62 65" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z" fill="currentColor"/></svg>
-                    </div>
-                    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
+    <Head title="Il gestionale per CAF moderni">
+        <meta name="description" content="Gestisci clienti, pratiche, filiali e appuntamenti in un unico spazio di lavoro sicuro e organizzato." />
+    </Head>
+
+    <div class="min-h-screen overflow-x-hidden bg-slate-950 font-sans text-white selection:bg-amber-300 selection:text-slate-950">
+        <a href="#top" class="fixed left-4 top-4 z-[60] -translate-y-24 rounded-xl bg-white px-4 py-3 font-semibold text-slate-950 shadow-xl transition focus:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transition-none">
+            Vai al contenuto principale
+        </a>
+        <header class="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
+            <nav class="mx-auto flex min-h-[64px] max-w-7xl items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/70 px-4 shadow-2xl shadow-slate-950/20 backdrop-blur-xl sm:px-6" aria-label="Navigazione principale">
+                <a href="#top" class="group flex min-h-[44px] items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
+                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/20 transition duration-300 group-hover:rotate-3 group-hover:scale-105 motion-reduce:transform-none">
+                        <ApplicationMark class="h-7 w-7" aria-hidden="true" />
+                    </span>
+                    <span>
+                        <span class="block text-sm font-bold tracking-tight text-white">CAF Gestionale</span>
+                        <span class="block text-[11px] font-medium tracking-[0.16em] text-slate-400">WORKSPACE</span>
+                    </span>
+                </a>
+
+                <div class="hidden items-center gap-7 text-sm font-medium text-slate-300 md:flex">
+                    <a href="#funzionalita" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Funzionalità</a>
+                    <a href="#metodo" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Come funziona</a>
+                    <a href="#sicurezza" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Sicurezza</a>
+                </div>
+
+                <div v-if="canLogin" class="flex items-center gap-2">
+                    <Link
+                        v-if="$page.props.auth.user"
+                        :href="route('dashboard')"
+                        prefetch
+                        class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
+                    >
+                        Vai alla dashboard
+                        <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                    <template v-else>
+                        <Link :href="route('login')" prefetch class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-white transition duration-200 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:px-4">
+                            Accedi
                         </Link>
+                        <Link v-if="canRegister" :href="route('register')" prefetch class="hidden min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:inline-flex">
+                            Inizia ora
+                            <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                    </template>
+                </div>
+            </nav>
+        </header>
 
-                        <template v-else>
+        <main id="top">
+            <section ref="hero" class="hero-grid relative isolate min-h-screen overflow-hidden px-5 pb-20 pt-36 sm:px-8 lg:px-12 lg:pb-28 lg:pt-44" @pointermove="handlePointerMove">
+                <div class="pointer-glow absolute inset-0 -z-10" aria-hidden="true"></div>
+                <div class="orb orb-blue absolute -left-24 top-32 -z-20 h-80 w-80 rounded-full bg-blue-600/30 blur-3xl" aria-hidden="true"></div>
+                <div class="orb orb-cyan absolute -right-20 top-20 -z-20 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden="true"></div>
+                <div class="orb orb-amber absolute bottom-0 left-1/3 -z-20 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" aria-hidden="true"></div>
+
+                <div class="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+                    <div class="relative z-10 text-center lg:text-left">
+                        <div class="hero-enter hero-delay-1 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 shadow-lg shadow-cyan-950/20 backdrop-blur">
+                            <SparklesIcon class="h-4 w-4" aria-hidden="true" />
+                            Il lavoro del CAF, finalmente connesso
+                        </div>
+
+                        <h1 class="hero-enter hero-delay-2 mt-7 text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:text-6xl lg:text-7xl">
+                            Ogni pratica al posto giusto.
+                            <span class="mt-2 block bg-gradient-to-r from-cyan-300 via-blue-300 to-amber-200 bg-clip-text text-transparent">Ogni filiale, in perfetto controllo.</span>
+                        </h1>
+
+                        <p class="hero-enter hero-delay-3 mx-auto mt-7 max-w-2xl text-pretty text-lg leading-8 text-slate-300 lg:mx-0 lg:max-w-xl">
+                            Un unico spazio per coordinare clienti, pratiche, appuntamenti e documenti. Più chiarezza per gli operatori, più velocità per i cittadini, più controllo per tutta la rete.
+                        </p>
+
+                        <div class="hero-enter hero-delay-4 mt-9 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                             <Link
+                                v-if="$page.props.auth.user"
+                                :href="route('dashboard')"
+                                prefetch
+                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
+                            >
+                                Apri il tuo workspace
+                                <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
+                            </Link>
+                            <Link
+                                v-else-if="canLogin"
                                 :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                                prefetch
+                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
                             >
-                                Log in
+                                Accedi al gestionale
+                                <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
                             </Link>
+                            <a href="#funzionalita" class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 font-semibold text-white backdrop-blur transition duration-200 hover:border-white/30 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
+                                Scopri la piattaforma
+                                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+                            </a>
+                        </div>
 
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </template>
-                    </nav>
-                </header>
-
-                <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a
-                            href="https://laravel.com/docs"
-                            id="docs-card"
-                            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div id="screenshot-container" class="relative flex w-full flex-1 items-stretch">
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-light.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="aspect-video h-full w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                    @error="handleImageError"
-                                />
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-dark.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="hidden aspect-video h-full w-full flex-1 rounded-[10px] object-top object-cover drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
-                                />
-                                <div
-                                    class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                ></div>
-                            </div>
-
-                            <div class="relative flex items-center gap-6 lg:items-end">
-                                <div id="docs-card-content" class="flex items-start gap-6 lg:flex-col">
-                                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                        <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="#FF2D20" d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z"/><path fill="#FF2D20" d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z"/></svg>
-                                    </div>
-
-                                    <div class="pt-3 sm:pt-5 lg:pt-0">
-                                        <h2 class="text-xl font-semibold text-black dark:text-white">Documentation</h2>
-
-                                        <p class="mt-4 text-sm/relaxed">
-                                            Laravel has wonderful documentation covering every aspect of the framework. Whether you are a newcomer or have prior experience with Laravel, we recommend reading our documentation from beginning to end.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <svg class="size-6 shrink-0 stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                            </div>
-                        </a>
-
-                        <a
-                            href="https://laracasts.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><g fill="#FF2D20"><path d="M24 8.25a.5.5 0 0 0-.5-.5H.5a.5.5 0 0 0-.5.5v12a2.5 2.5 0 0 0 2.5 2.5h19a2.5 2.5 0 0 0 2.5-2.5v-12Zm-7.765 5.868a1.221 1.221 0 0 1 0 2.264l-6.626 2.776A1.153 1.153 0 0 1 8 18.123v-5.746a1.151 1.151 0 0 1 1.609-1.035l6.626 2.776ZM19.564 1.677a.25.25 0 0 0-.177-.427H15.6a.106.106 0 0 0-.072.03l-4.54 4.543a.25.25 0 0 0 .177.427h3.783c.027 0 .054-.01.073-.03l4.543-4.543ZM22.071 1.318a.047.047 0 0 0-.045.013l-4.492 4.492a.249.249 0 0 0 .038.385.25.25 0 0 0 .14.042h5.784a.5.5 0 0 0 .5-.5v-2a2.5 2.5 0 0 0-1.925-2.432ZM13.014 1.677a.25.25 0 0 0-.178-.427H9.101a.106.106 0 0 0-.073.03l-4.54 4.543a.25.25 0 0 0 .177.427H8.4a.106.106 0 0 0 .073-.03l4.54-4.543ZM6.513 1.677a.25.25 0 0 0-.177-.427H2.5A2.5 2.5 0 0 0 0 3.75v2a.5.5 0 0 0 .5.5h1.4a.106.106 0 0 0 .073-.03l4.54-4.543Z"/></g></svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Laracasts</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-                                </p>
-                            </div>
-
-                            <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                        </a>
-
-                        <a
-                            href="https://laravel-news.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><g fill="#FF2D20"><path d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z"/><path d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z"/><path d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z"/></g></svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Laravel News</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.
-                                </p>
-                            </div>
-
-                            <svg class="size-6 shrink-0 self-center stroke-[#FF2D20]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"/></svg>
-                        </a>
-
-                        <div class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800">
-                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16">
-                                <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M16.597 12.635a.247.247 0 0 0-.08-.237 2.234 2.234 0 0 1-.769-1.68c.001-.195.03-.39.084-.578a.25.25 0 0 0-.09-.267 8.8 8.8 0 0 0-4.826-1.66.25.25 0 0 0-.268.181 2.5 2.5 0 0 1-2.4 1.824.045.045 0 0 0-.045.037 12.255 12.255 0 0 0-.093 3.86.251.251 0 0 0 .208.214c2.22.366 4.367 1.08 6.362 2.118a.252.252 0 0 0 .32-.079 10.09 10.09 0 0 0 1.597-3.733ZM13.616 17.968a.25.25 0 0 0-.063-.407A19.697 19.697 0 0 0 8.91 15.98a.25.25 0 0 0-.287.325c.151.455.334.898.548 1.328.437.827.981 1.594 1.619 2.28a.249.249 0 0 0 .32.044 29.13 29.13 0 0 0 2.506-1.99ZM6.303 14.105a.25.25 0 0 0 .265-.274 13.048 13.048 0 0 1 .205-4.045.062.062 0 0 0-.022-.07 2.5 2.5 0 0 1-.777-.982.25.25 0 0 0-.271-.149 11 11 0 0 0-5.6 2.815.255.255 0 0 0-.075.163c-.008.135-.02.27-.02.406.002.8.084 1.598.246 2.381a.25.25 0 0 0 .303.193 19.924 19.924 0 0 1 5.746-.438ZM9.228 20.914a.25.25 0 0 0 .1-.393 11.53 11.53 0 0 1-1.5-2.22 12.238 12.238 0 0 1-.91-2.465.248.248 0 0 0-.22-.187 18.876 18.876 0 0 0-5.69.33.249.249 0 0 0-.179.336c.838 2.142 2.272 4 4.132 5.353a.254.254 0 0 0 .15.048c1.41-.01 2.807-.282 4.117-.802ZM18.93 12.957l-.005-.008a.25.25 0 0 0-.268-.082 2.21 2.21 0 0 1-.41.081.25.25 0 0 0-.217.2c-.582 2.66-2.127 5.35-5.75 7.843a.248.248 0 0 0-.09.299.25.25 0 0 0 .065.091 28.703 28.703 0 0 0 2.662 2.12.246.246 0 0 0 .209.037c2.579-.701 4.85-2.242 6.456-4.378a.25.25 0 0 0 .048-.189 13.51 13.51 0 0 0-2.7-6.014ZM5.702 7.058a.254.254 0 0 0 .2-.165A2.488 2.488 0 0 1 7.98 5.245a.093.093 0 0 0 .078-.062 19.734 19.734 0 0 1 3.055-4.74.25.25 0 0 0-.21-.41 12.009 12.009 0 0 0-10.4 8.558.25.25 0 0 0 .373.281 12.912 12.912 0 0 1 4.826-1.814ZM10.773 22.052a.25.25 0 0 0-.28-.046c-.758.356-1.55.635-2.365.833a.25.25 0 0 0-.022.48c1.252.43 2.568.65 3.893.65.1 0 .2 0 .3-.008a.25.25 0 0 0 .147-.444c-.526-.424-1.1-.917-1.673-1.465ZM18.744 8.436a.249.249 0 0 0 .15.228 2.246 2.246 0 0 1 1.352 2.054c0 .337-.08.67-.23.972a.25.25 0 0 0 .042.28l.007.009a15.016 15.016 0 0 1 2.52 4.6.25.25 0 0 0 .37.132.25.25 0 0 0 .096-.114c.623-1.464.944-3.039.945-4.63a12.005 12.005 0 0 0-5.78-10.258.25.25 0 0 0-.373.274c.547 2.109.85 4.274.901 6.453ZM9.61 5.38a.25.25 0 0 0 .08.31c.34.24.616.561.8.935a.25.25 0 0 0 .3.127.631.631 0 0 1 .206-.034c2.054.078 4.036.772 5.69 1.991a.251.251 0 0 0 .267.024c.046-.024.093-.047.141-.067a.25.25 0 0 0 .151-.23A29.98 29.98 0 0 0 15.957.764a.25.25 0 0 0-.16-.164 11.924 11.924 0 0 0-2.21-.518.252.252 0 0 0-.215.076A22.456 22.456 0 0 0 9.61 5.38Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">Vibrant Ecosystem</h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white dark:focus-visible:ring-[#FF2D20]">Forge</a>, <a href="https://vapor.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Vapor</a>, <a href="https://nova.laravel.com" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Nova</a>, and <a href="https://envoyer.io" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Echo</a>, <a href="https://laravel.com/docs/horizon" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white">Telescope</a>, and more.
-                                </p>
-                            </div>
+                        <div class="hero-enter hero-delay-5 mt-9 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-slate-400 lg:justify-start">
+                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Dati separati per filiale</span>
+                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Flussi tracciabili</span>
+                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Portale cliente</span>
                         </div>
                     </div>
-                </main>
 
-                <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
-                </footer>
+                    <div class="hero-enter hero-delay-3 relative mx-auto w-full max-w-3xl lg:mx-0">
+                        <div class="dashboard-shell relative rounded-[28px] border border-white/15 bg-white/10 p-2 shadow-[0_35px_100px_-30px_rgba(37,99,235,0.55)] backdrop-blur-xl sm:p-3">
+                            <div class="overflow-hidden rounded-[22px] border border-white/10 bg-slate-900/95">
+                                <div class="flex h-11 items-center gap-2 border-b border-white/10 px-4">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-amber-300"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                                    <span class="ml-3 h-5 flex-1 rounded-md bg-white/5"></span>
+                                </div>
+
+                                <div class="grid min-h-[430px] grid-cols-[64px_1fr] sm:grid-cols-[150px_1fr]">
+                                    <aside class="border-r border-white/10 bg-slate-950/60 p-3 sm:p-4">
+                                        <div class="mb-6 hidden items-center gap-2 sm:flex">
+                                            <span class="grid h-8 w-8 place-items-center rounded-lg bg-blue-500"><BuildingOffice2Icon class="h-4 w-4" /></span>
+                                            <span class="text-xs font-bold">CAF Workspace</span>
+                                        </div>
+                                        <div class="grid gap-2">
+                                            <div v-for="(item, index) in ['Dashboard', 'Pratiche', 'Clienti', 'Agenda']" :key="item" :class="index === 0 ? 'bg-blue-500/15 text-blue-200' : 'text-slate-500'" class="flex h-9 items-center gap-2 rounded-lg px-2 text-[11px] font-medium sm:px-3">
+                                                <span class="h-4 w-4 rounded bg-current opacity-20"></span>
+                                                <span class="hidden sm:inline">{{ item }}</span>
+                                            </div>
+                                        </div>
+                                    </aside>
+
+                                    <div class="p-3 sm:p-5">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div>
+                                                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Panoramica operativa</p>
+                                                <p class="mt-1 text-base font-bold sm:text-xl">Buongiorno, Martina</p>
+                                            </div>
+                                            <div class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-amber-200 to-amber-400 text-xs font-black text-slate-900">MR</div>
+                                        </div>
+
+                                        <div class="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+                                            <div v-for="stat in [{ value: '128', label: 'Attive', color: 'text-cyan-300' }, { value: '24', label: 'Scadenze', color: 'text-amber-300' }, { value: '91%', label: 'Efficienza', color: 'text-emerald-300' }]" :key="stat.label" class="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-3">
+                                                <p :class="stat.color" class="text-lg font-black sm:text-2xl">{{ stat.value }}</p>
+                                                <p class="mt-1 text-[9px] text-slate-500 sm:text-[11px]">{{ stat.label }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 grid gap-3 sm:grid-cols-[1.3fr_0.7fr]">
+                                            <div class="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-[11px] font-semibold text-slate-300">Carico pratiche</span>
+                                                    <span class="text-[9px] text-emerald-300">+12% questo mese</span>
+                                                </div>
+                                                <div class="mt-4 flex h-24 items-end gap-2">
+                                                    <span v-for="(height, index) in [38, 62, 48, 78, 58, 88, 70, 96]" :key="index" class="chart-bar flex-1 rounded-t bg-gradient-to-t from-blue-600 to-cyan-300" :style="{ height: `${height}%`, animationDelay: `${index * 80}ms` }"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="hidden rounded-xl border border-white/10 bg-white/[0.04] p-3 sm:block">
+                                                <p class="text-[11px] font-semibold text-slate-300">Rete filiali</p>
+                                                <div class="mt-4 grid gap-2 text-[9px] text-slate-400">
+                                                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-blue-400"></span>Sede centrale</div>
+                                                    <div class="ml-3 flex items-center gap-2 border-l border-blue-400/30 pl-3"><span class="h-2 w-2 rounded-full bg-cyan-400"></span>Milano Nord</div>
+                                                    <div class="ml-3 flex items-center gap-2 border-l border-blue-400/30 pl-3"><span class="h-2 w-2 rounded-full bg-amber-300"></span>Monza Centro</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                                            <div class="flex items-center justify-between"><span class="text-[11px] font-semibold text-slate-300">Attività recenti</span><span class="text-[9px] text-blue-300">Vedi tutte</span></div>
+                                            <div class="mt-3 grid gap-2">
+                                                <div v-for="row in [{ name: 'Rossi Mario', type: '730', state: 'In lavorazione' }, { name: 'Bianchi Sara', type: 'ISEE', state: 'Documenti ricevuti' }]" :key="row.name" class="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg bg-slate-950/45 px-3 py-2">
+                                                    <div class="min-w-0"><p class="truncate text-[10px] font-semibold text-slate-200">{{ row.name }}</p><p class="mt-0.5 text-[8px] text-slate-500">{{ row.type }} · {{ row.state }}</p></div>
+                                                    <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="float-card float-card-left absolute -left-5 top-20 hidden items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-xl sm:flex">
+                            <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400/15 text-emerald-300"><ShieldCheckIcon class="h-5 w-5" /></span>
+                            <span><span class="block text-xs font-bold">Accesso protetto</span><span class="block text-[10px] text-slate-400">Visibilità per filiale</span></span>
+                        </div>
+                        <div class="float-card float-card-right absolute -right-3 bottom-12 hidden items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-xl sm:flex">
+                            <span class="grid h-10 w-10 place-items-center rounded-xl bg-amber-300/15 text-amber-200"><ClockIcon class="h-5 w-5" /></span>
+                            <span><span class="block text-xs font-bold">Scadenza gestita</span><span class="block text-[10px] text-slate-400">Promemoria automatico</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mx-auto mt-20 max-w-7xl border-y border-white/10 py-6">
+                    <p class="text-center text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Un unico ritmo per tutta l’organizzazione</p>
+                    <div class="mt-5 grid grid-cols-2 gap-4 text-center text-sm font-semibold text-slate-300 sm:grid-cols-4">
+                        <span>Clienti connessi</span><span>Pratiche tracciate</span><span>Filiali coordinate</span><span>Scadenze presidiate</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="funzionalita" class="relative bg-slate-50 px-5 py-24 text-slate-950 sm:px-8 lg:px-12 lg:py-32">
+                <div class="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-slate-950 to-transparent opacity-10" aria-hidden="true"></div>
+                <div class="mx-auto max-w-7xl">
+                    <div data-reveal class="reveal mx-auto max-w-3xl text-center">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700"><SparklesIcon class="h-4 w-4" />Tutto ciò che serve, senza rumore</span>
+                        <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">Il lavoro complesso diventa un flusso naturale.</h2>
+                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">Ogni modulo nasce per togliere attrito alle attività quotidiane e restituire una visione completa, dalla singola pratica all’intera rete di filiali.</p>
+                    </div>
+
+                    <div class="mt-16 grid gap-5 md:grid-cols-2">
+                        <article v-for="(feature, index) in features" :key="feature.title" data-reveal class="reveal feature-card group relative overflow-hidden rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl motion-reduce:transform-none sm:p-9" :style="{ transitionDelay: `${index * 70}ms` }">
+                            <div class="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-blue-100/60 blur-3xl transition duration-500 group-hover:scale-125 motion-reduce:transform-none" aria-hidden="true"></div>
+                            <div class="relative">
+                                <div class="flex items-start justify-between gap-5">
+                                    <span :class="{
+                                        'bg-blue-100 text-blue-700': feature.accent === 'blue',
+                                        'bg-amber-100 text-amber-700': feature.accent === 'amber',
+                                        'bg-cyan-100 text-cyan-700': feature.accent === 'cyan',
+                                        'bg-violet-100 text-violet-700': feature.accent === 'violet',
+                                    }" class="grid h-14 w-14 place-items-center rounded-2xl transition duration-300 group-hover:rotate-3 group-hover:scale-110 motion-reduce:transform-none">
+                                        <component :is="feature.icon" class="h-7 w-7" aria-hidden="true" />
+                                    </span>
+                                    <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{{ feature.eyebrow }}</span>
+                                </div>
+                                <h3 class="mt-8 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">{{ feature.title }}</h3>
+                                <p class="mt-4 max-w-xl leading-7 text-slate-600">{{ feature.description }}</p>
+                                <p class="mt-7 text-sm font-bold text-blue-700">Progettato per lavorare meglio</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="metodo" class="relative overflow-hidden bg-white px-5 py-24 text-slate-950 sm:px-8 lg:px-12 lg:py-32">
+                <div class="mx-auto grid max-w-7xl gap-16 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+                    <div data-reveal class="reveal lg:sticky lg:top-28">
+                        <span class="text-sm font-black uppercase tracking-[0.2em] text-blue-600">Dal primo contatto alla chiusura</span>
+                        <h2 class="mt-5 text-balance text-4xl font-black tracking-[-0.04em] sm:text-5xl">Un metodo semplice. Una squadra più veloce.</h2>
+                        <p class="mt-6 text-lg leading-8 text-slate-600">Il gestionale accompagna il lavoro senza imporre rigidità: ogni informazione arriva nel momento giusto, alla persona giusta.</p>
+                        <div class="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                            <div class="flex items-start gap-3"><ShieldCheckIcon class="mt-0.5 h-6 w-6 shrink-0 text-blue-600" /><p class="text-sm leading-6 text-blue-900"><strong>La gerarchia segue l’organizzazione:</strong> i padri vedono il proprio ramo completo, i figli non risalgono mai verso dati superiori o paralleli.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="relative grid gap-5 before:absolute before:bottom-10 before:left-[27px] before:top-10 before:w-px before:bg-gradient-to-b before:from-blue-400 before:via-cyan-300 before:to-transparent sm:before:left-[35px]">
+                        <article v-for="(step, index) in workflow" :key="step.number" data-reveal class="reveal group relative grid grid-cols-[56px_1fr] gap-5 rounded-[26px] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:border-blue-200 hover:bg-white hover:shadow-xl motion-reduce:transform-none sm:grid-cols-[72px_1fr] sm:p-7" :style="{ transitionDelay: `${index * 80}ms` }">
+                            <span class="relative z-10 grid h-14 w-14 place-items-center rounded-2xl bg-slate-950 text-sm font-black text-white shadow-lg shadow-slate-300 transition duration-300 group-hover:bg-blue-600 group-hover:shadow-blue-200 sm:h-[72px] sm:w-[72px]">{{ step.number }}</span>
+                            <div class="pt-1 sm:pt-2">
+                                <h3 class="text-xl font-black text-slate-950 sm:text-2xl">{{ step.title }}</h3>
+                                <p class="mt-3 leading-7 text-slate-600">{{ step.text }}</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sicurezza" class="relative overflow-hidden bg-blue-700 px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+                <div class="absolute inset-0 security-pattern opacity-20" aria-hidden="true"></div>
+                <div class="orb orb-cyan absolute -right-20 -top-24 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl" aria-hidden="true"></div>
+                <div class="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_0.85fr]">
+                    <div data-reveal class="reveal">
+                        <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-blue-50 backdrop-blur"><LockClosedIcon class="h-4 w-4" />Accesso consapevole ai dati</span>
+                        <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">Visibilità dove serve. Riservatezza dove conta.</h2>
+                        <p class="mt-6 max-w-2xl text-lg leading-8 text-blue-100">Ruoli, permessi e filiali lavorano insieme: ogni operatore trova ciò che gli serve senza attraversare confini organizzativi che non gli appartengono.</p>
+                    </div>
+
+                    <div data-reveal class="reveal grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                        <div v-for="item in [{ icon: ShieldCheckIcon, title: 'Filiali isolate', text: 'Nessuna visibilità verso padri o rami fratelli.' }, { icon: UserGroupIcon, title: 'Responsabilità chiare', text: 'Azioni e pratiche restano associate agli operatori.' }, { icon: DocumentTextIcon, title: 'Storico completo', text: 'Documenti, note e stati conservano il contesto.' }]" :key="item.title" class="flex items-start gap-4 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl transition duration-300 hover:bg-white/15">
+                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-blue-700"><component :is="item.icon" class="h-5 w-5" /></span>
+                            <span><strong class="block text-base text-white">{{ item.title }}</strong><span class="mt-1 block text-sm leading-6 text-blue-100">{{ item.text }}</span></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-slate-950 px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+                <div data-reveal class="reveal relative mx-auto max-w-6xl overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.03] px-6 py-14 text-center shadow-2xl backdrop-blur-xl sm:px-12 sm:py-20">
+                    <div class="absolute inset-x-0 top-0 mx-auto h-40 w-2/3 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true"></div>
+                    <div class="relative">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-2 text-sm font-black text-slate-950"><SparklesIcon class="h-4 w-4" />Il prossimo passo è più semplice</span>
+                        <h2 class="mx-auto mt-7 max-w-4xl text-balance text-4xl font-black tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">Porta ordine nella rete. Libera tempo per le persone.</h2>
+                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Entra nel workspace e trasforma ogni attività quotidiana in un processo più chiaro, coordinato e sicuro.</p>
+                        <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+                            <Link v-if="$page.props.auth.user" :href="route('dashboard')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Vai alla dashboard<ArrowRightIcon class="h-5 w-5" /></Link>
+                            <Link v-else-if="canLogin" :href="route('login')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Accedi al gestionale<ArrowRightIcon class="h-5 w-5" /></Link>
+                            <Link v-if="!$page.props.auth.user && canRegister" :href="route('register')" prefetch class="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-7 font-bold text-white transition duration-200 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Crea un account</Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="border-t border-white/10 bg-slate-950 px-5 py-8 sm:px-8">
+            <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-center text-sm text-slate-500 sm:flex-row sm:text-left">
+                <div class="flex items-center gap-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-blue-600 text-white"><ApplicationMark class="h-6 w-6" aria-hidden="true" /></span><span><strong class="block text-white">CAF Gestionale</strong><span>Più ordine. Più servizio.</span></span></div>
+                <p>Clienti, pratiche e filiali in un unico spazio operativo.</p>
             </div>
-        </div>
+        </footer>
     </div>
 </template>
+
+<style scoped>
+:global(html) { scroll-behavior: smooth; }
+
+.hero-grid {
+    --pointer-x: 50%;
+    --pointer-y: 30%;
+    background-image:
+        linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+.pointer-glow {
+    background: radial-gradient(500px circle at var(--pointer-x) var(--pointer-y), rgba(56, 189, 248, 0.12), transparent 55%);
+}
+
+.security-pattern {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.4) 1px, transparent 0);
+    background-size: 28px 28px;
+}
+
+.hero-enter { animation: hero-enter 800ms cubic-bezier(.16, 1, .3, 1) both; }
+.hero-delay-1 { animation-delay: 80ms; }
+.hero-delay-2 { animation-delay: 170ms; }
+.hero-delay-3 { animation-delay: 260ms; }
+.hero-delay-4 { animation-delay: 350ms; }
+.hero-delay-5 { animation-delay: 440ms; }
+
+.dashboard-shell { animation: dashboard-enter 1000ms 300ms cubic-bezier(.16, 1, .3, 1) both; }
+.float-card-left { animation: float-left 5s 1.3s ease-in-out infinite; }
+.float-card-right { animation: float-right 5.8s 900ms ease-in-out infinite; }
+.orb-blue { animation: orb-drift-a 14s ease-in-out infinite alternate; }
+.orb-cyan { animation: orb-drift-b 17s ease-in-out infinite alternate; }
+.orb-amber { animation: orb-drift-a 19s 2s ease-in-out infinite alternate-reverse; }
+.chart-bar { transform-origin: bottom; animation: bar-grow 800ms cubic-bezier(.16, 1, .3, 1) both; }
+
+.cta-shine::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-130%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+    transition: transform 600ms ease;
+}
+.cta-shine { position: relative; }
+.cta-shine:hover::before { transform: translateX(130%) skewX(-20deg); }
+
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 700ms cubic-bezier(.16, 1, .3, 1), transform 700ms cubic-bezier(.16, 1, .3, 1);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+@keyframes hero-enter {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes dashboard-enter {
+    from { opacity: 0; transform: perspective(1000px) rotateY(-8deg) rotateX(4deg) translateY(35px) scale(.96); }
+    to { opacity: 1; transform: perspective(1000px) rotateY(0) rotateX(0) translateY(0) scale(1); }
+}
+@keyframes float-left { 0%, 100% { transform: translate3d(0,0,0) rotate(-2deg); } 50% { transform: translate3d(0,-10px,0) rotate(1deg); } }
+@keyframes float-right { 0%, 100% { transform: translate3d(0,0,0) rotate(2deg); } 50% { transform: translate3d(0,9px,0) rotate(-1deg); } }
+@keyframes orb-drift-a { from { transform: translate3d(-3%, -4%, 0) scale(.94); } to { transform: translate3d(12%, 9%, 0) scale(1.08); } }
+@keyframes orb-drift-b { from { transform: translate3d(5%, -7%, 0) scale(1); } to { transform: translate3d(-10%, 12%, 0) scale(.9); } }
+@keyframes bar-grow { from { transform: scaleY(0); opacity: .2; } to { transform: scaleY(1); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+    :global(html) { scroll-behavior: auto; }
+    .hero-enter,
+    .dashboard-shell,
+    .float-card-left,
+    .float-card-right,
+    .orb,
+    .chart-bar { animation: none !important; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .cta-shine::before { display: none; }
+}
+</style>

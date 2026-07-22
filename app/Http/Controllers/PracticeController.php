@@ -56,7 +56,9 @@ class PracticeController extends Controller
     {
         $this->authorize('create', Practice::class);
 
-        $clients = ClientProfile::select('id', 'first_name', 'last_name')
+        $branchIds = request()->user()->accessibleBranchIds();
+        $clients = ClientProfile::select('id', 'first_name', 'last_name', 'branch_id')
+            ->when(Branch::query()->exists(), fn ($query) => $query->whereIn('branch_id', $branchIds))
             ->orderBy('last_name')
             ->get();
 
@@ -70,7 +72,7 @@ class PracticeController extends Controller
             'users' => $users,
             'procedures' => Procedure::orderBy('name')->get(),
             'practiceTypes' => PracticeType::orderBy('name')->get(),
-            'branches' => Branch::active()->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
+            'branches' => Branch::active()->whereIn('id', $branchIds)->select('id', 'parent_id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
         ]);
     }
 
@@ -102,7 +104,7 @@ class PracticeController extends Controller
             'procedures' => Procedure::orderBy('name')->get(),
             'practiceTypes' => PracticeType::orderBy('name')->get(),
             'procedure_id' => $practice->procedure_id,
-            'branches' => Branch::active()->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
+            'branches' => Branch::active()->whereIn('id', request()->user()->accessibleBranchIds())->select('id', 'parent_id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
         ]);
     }
 

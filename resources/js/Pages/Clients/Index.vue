@@ -16,31 +16,34 @@ const columns = [
     { key: 'phone', label: 'Phone' },
     { key: 'date_of_birth', label: 'Date of Birth' },
     { key: 'fiscal_code', label: 'Fiscal Code' },
-    { key: 'city', label: 'City' }
+    { key: 'city', label: 'City' },
+    { key: 'branch', label: 'Filiale', sortable: false },
 ];
 
 const props = defineProps({
     clients: Object,
     filters: Object,
+    branches: Array,
 });
 
 const page = usePage();
 const search = ref(props.filters?.search ?? '');
 const sortKey = ref(props.filters?.sort ?? 'last_name');
 const sortDir = ref(props.filters?.direction ?? 'asc');
+const branchFilter = ref(props.filters?.branch_id ?? '');
 
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('clients.create'));
 const canDelete = computed(() => page.props.auth.user?.permissions?.includes('clients.delete'));
 
 // Search
 const performSearch = () => {
-    router.get(route('clients.index'), { search: search.value, sort: sortKey.value, direction: sortDir.value }, { preserveState: true, replace: true });
+    router.get(route('clients.index'), { search: search.value, branch_id: branchFilter.value, sort: sortKey.value, direction: sortDir.value }, { preserveState: true, replace: true });
 };
 
 const onSort = ({ key, dir }) => {
     sortKey.value = key;
     sortDir.value = dir;
-    router.get(route('clients.index'), { search: search.value, sort: key, direction: dir }, { preserveState: true, replace: true });
+    router.get(route('clients.index'), { search: search.value, branch_id: branchFilter.value, sort: key, direction: dir }, { preserveState: true, replace: true });
 };
 
 // Delete confirmation
@@ -82,6 +85,10 @@ const deleteClient = () => {
                             placeholder="Search clients..."
                             class="border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
                         />
+                        <select v-if="branches?.length > 1" v-model="branchFilter" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" @change="performSearch">
+                            <option value="">Tutte le filiali visibili</option>
+                            <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option>
+                        </select>
                         <button
                             @click="performSearch"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
@@ -119,6 +126,11 @@ const deleteClient = () => {
                             <template #cell-date_of_birth="{ row }">
                                 <span class="text-gray-500 dark:text-gray-400">
                                     {{ formatDate(row.date_of_birth) }}
+                                </span>
+                            </template>
+                            <template #cell-branch="{ row }">
+                                <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+                                    {{ row.branch?.name || '—' }}
                                 </span>
                             </template>
                             <template #actions="{ row }">

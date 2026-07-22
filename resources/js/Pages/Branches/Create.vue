@@ -9,7 +9,13 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 
+const props = defineProps({
+    parentBranches: Array,
+    hasBranches: Boolean,
+});
+
 const form = useForm({
+    parent_id: props.hasBranches ? (props.parentBranches?.[0]?.id ?? null) : null,
     name: '',
     address: '',
     city: '',
@@ -38,6 +44,23 @@ const submitForm = () => {
                     <template #description>Crea una nuova filiale del CAF.</template>
 
                     <template #form>
+                        <div v-if="hasBranches" class="col-span-6">
+                            <InputLabel for="parent_id" value="Filiale superiore" />
+                            <select
+                                id="parent_id"
+                                v-model="form.parent_id"
+                                required
+                                class="mt-1 block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                <option :value="null" disabled>Seleziona la filiale superiore</option>
+                                <option v-for="branch in parentBranches" :key="branch.id" :value="branch.id">
+                                    {{ branch.name }}
+                                </option>
+                            </select>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">La nuova filiale vedrà solo i propri dati e quelli delle filiali create sotto di essa.</p>
+                            <InputError :message="form.errors.parent_id" class="mt-2" />
+                        </div>
+
                         <!-- Nome -->
                         <div class="col-span-6">
                             <InputLabel for="name" value="Nome" />

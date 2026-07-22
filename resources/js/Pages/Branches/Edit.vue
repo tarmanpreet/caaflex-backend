@@ -11,9 +11,11 @@ import Checkbox from '@/Components/Checkbox.vue';
 
 const props = defineProps({
     branch: Object,
+    parentBranches: Array,
 });
 
 const form = useForm({
+    parent_id: props.branch.parent_id,
     name: props.branch.name,
     address: props.branch.address,
     city: props.branch.city,
@@ -42,6 +44,26 @@ const submitForm = () => {
                     <template #description>Aggiorna i dati della filiale.</template>
 
                     <template #form>
+                        <div class="col-span-6">
+                            <InputLabel for="parent_id" value="Filiale superiore" />
+                            <select
+                                id="parent_id"
+                                v-model="form.parent_id"
+                                :disabled="branch.parent_id === null"
+                                :required="branch.parent_id !== null"
+                                class="mt-1 block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                <option v-if="branch.parent_id === null" :value="null">Filiale principale</option>
+                                <option v-for="parentBranch in parentBranches" :key="parentBranch.id" :value="parentBranch.id">
+                                    {{ parentBranch.name }}
+                                </option>
+                            </select>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                {{ branch.parent_id === null ? 'La filiale principale non può essere spostata.' : 'Puoi spostare la filiale senza creare cicli nella gerarchia.' }}
+                            </p>
+                            <InputError :message="form.errors.parent_id" class="mt-2" />
+                        </div>
+
                         <!-- Nome -->
                         <div class="col-span-6">
                             <InputLabel for="name" value="Nome" />

@@ -3,6 +3,7 @@
 namespace App\Actions\Appointment;
 
 use App\Models\Appointment;
+use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,6 +33,10 @@ class IndexManageAppointmentsAction
 
     private function applyVisibilityScope(Builder $query, User $user): void
     {
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
+
         if ($user->hasPermissionTo('appointments.view-any')) {
             return;
         }
@@ -48,7 +53,7 @@ class IndexManageAppointmentsAction
     private function applyFilters(Builder $query, Request $request): void
     {
         if ($request->filled('search')) {
-            $search = '%' . $request->string('search')->trim() . '%';
+            $search = '%'.$request->string('search')->trim().'%';
 
             $query->where(function (Builder $builder) use ($search) {
                 $builder->whereHas('client', function (Builder $clientQuery) use ($search) {

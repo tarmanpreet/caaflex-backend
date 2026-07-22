@@ -15,7 +15,7 @@ class ClientPolicy
 
     public function view(User $user, ClientProfile $clientProfile): bool
     {
-        return $user->hasPermissionTo('clients.view-any') ||
+        return ($user->hasPermissionTo('clients.view-any') && $user->canAccessBranchId($clientProfile->branch_id)) ||
                ($user->hasPermissionTo('clients.view-own') && $clientProfile->user_id === $user->id);
     }
 
@@ -26,13 +26,17 @@ class ClientPolicy
 
     public function update(User $user, ClientProfile $clientProfile): bool
     {
-        return $user->hasPermissionTo('clients.update') && 
+        return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('clients.update') &&
                ($user->hasRole('superadmin') || $user->hasRole('admin') || $clientProfile->created_by === $user->id);
     }
 
     public function delete(User $user, ClientProfile $clientProfile): bool
     {
         if (! $user->hasPermissionTo('clients.delete')) {
+            return false;
+        }
+
+        if (! $user->canAccessBranchId($clientProfile->branch_id)) {
             return false;
         }
 
@@ -46,6 +50,7 @@ class ClientPolicy
             if ($clientProfile->user && $clientProfile->user->hasRole('admin')) {
                 return false;
             }
+
             return true;
         }
 
@@ -54,17 +59,17 @@ class ClientPolicy
 
     public function uploadDocument(User $user, ClientProfile $clientProfile): bool
     {
-        return $user->hasPermissionTo('documents.upload');
+        return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('documents.upload');
     }
 
     public function downloadDocument(User $user, ClientProfile $clientProfile, ClientDocument $document): bool
     {
-        return $user->hasPermissionTo('documents.download') && 
+        return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('documents.download') &&
                ($user->hasRole('superadmin') || $user->hasRole('admin') || $user->hasRole('employee') || $document->clientProfile->user_id === $user->id);
     }
 
     public function deleteDocument(User $user, ClientProfile $clientProfile, ClientDocument $document): bool
     {
-        return $user->hasPermissionTo('documents.delete');
+        return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('documents.delete');
     }
 }

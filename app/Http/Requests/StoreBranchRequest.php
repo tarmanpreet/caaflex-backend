@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Branch;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBranchRequest extends FormRequest
 {
@@ -15,6 +16,7 @@ class StoreBranchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'parent_id' => [Rule::requiredIf(Branch::query()->exists()), 'nullable', 'integer', Rule::in($this->user()->accessibleBranchIds()->all())],
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],

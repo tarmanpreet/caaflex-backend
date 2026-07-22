@@ -100,20 +100,24 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
 </script>
 
 <template>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto rounded-2xl border border-outline-variant/35">
         <table class="min-w-full border-collapse text-sm text-on-surface">
-            <thead class="bg-surface-container-low text-on-surface-variant">
+            <thead class="border-b border-outline-variant/35 bg-surface-container-low text-on-surface-variant">
                 <tr>
                     <th
                         v-for="col in columns"
                         :key="col.key"
                         scope="col"
                         :class="[
-                            'px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] select-none',
+                            'whitespace-nowrap px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em] select-none',
                             col.align === 'right' ? 'text-right' : 'text-left',
-                            col.sortable !== false ? 'cursor-pointer transition hover:text-primary' : '',
+                            col.sortable !== false ? 'cursor-pointer transition hover:text-primary focus-visible:outline-none' : '',
                         ]"
+                        :tabindex="col.sortable !== false ? 0 : undefined"
+                        :aria-sort="currentSortKey === col.key ? (currentSortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
                         @click="setSort(col)"
+                        @keydown.enter.prevent="setSort(col)"
+                        @keydown.space.prevent="setSort(col)"
                     >
                         <span class="inline-flex items-center gap-2">
                             {{ col.label }}
@@ -145,7 +149,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                     <th
                         v-if="slots.actions"
                         scope="col"
-                        class="px-6 py-4 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant"
+                        class="whitespace-nowrap px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant"
                     >
                         Azioni
                     </th>
@@ -154,7 +158,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
 
             <tbody>
                 <tr v-if="sortedRows.length === 0">
-                    <td :colspan="totalCols" class="px-6 py-12 text-center text-sm text-on-surface-variant">
+                    <td :colspan="totalCols" class="bg-surface-container-lowest px-6 py-16 text-center text-sm text-on-surface-variant">
                         {{ emptyMessage }}
                     </td>
                 </tr>
@@ -163,15 +167,15 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                     v-for="(row, index) in sortedRows"
                     :key="row.id ?? JSON.stringify(row)"
                     :class="[
-                        'transition-colors hover:bg-surface-container-low/60',
-                        index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface/70',
+                        'border-t border-outline-variant/25 transition-colors first:border-t-0 hover:bg-primary-container/25',
+                        index % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface/45',
                     ]"
                 >
                     <td
                         v-for="col in columns"
                         :key="col.key"
                         :class="[
-                            'px-6 py-5 align-middle text-sm',
+                            'px-5 py-4 align-middle text-sm',
                             col.align === 'right' ? 'text-right' : 'text-left',
                         ]"
                     >
@@ -182,7 +186,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                         </slot>
                     </td>
 
-                    <td v-if="slots.actions" class="px-6 py-5 text-right align-middle">
+                    <td v-if="slots.actions" class="px-5 py-4 text-right align-middle">
                         <slot name="actions" :row="row" />
                     </td>
                 </tr>

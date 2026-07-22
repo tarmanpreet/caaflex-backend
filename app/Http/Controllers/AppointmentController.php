@@ -40,15 +40,12 @@ class AppointmentController extends Controller
 
         $query = Appointment::query()->with(['client', 'assignedUser', 'practiceType', 'practice', 'branch']);
 
-        if (! $user->hasPermissionTo('appointments.view-any')) {
-            $query->where('assigned_user_id', $user->id);
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
         }
 
-        if ($user->hasRole('employee')) {
-            $branchIds = $user->branches()->pluck('branches.id');
-            $query->where(function ($q) use ($branchIds) {
-                $q->whereNull('branch_id')->orWhereIn('branch_id', $branchIds);
-            });
+        if (! $user->hasPermissionTo('appointments.view-any')) {
+            $query->where('assigned_user_id', $user->id);
         }
 
         if ($request->branch_id) {
@@ -88,10 +85,10 @@ class AppointmentController extends Controller
 
             $calendarEvents = $calendarAppointments->map(fn ($a) => $this->mapToCalendarEvent($a));
 
-            $clients = ClientProfile::select('id', 'first_name', 'last_name')->orderBy('last_name')->get();
+            $clients = ClientProfile::select('id', 'first_name', 'last_name')->whereIn('branch_id', $user->accessibleBranchIds())->orderBy('last_name')->get();
             $practiceTypes = PracticeType::orderBy('name')->get();
             $users = User::whereHas('availabilities')->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
-            $branches = Branch::active()->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
+            $branches = Branch::active()->whereIn('id', $user->accessibleBranchIds())->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
 
             return Inertia::render('Appointments/Index', [
                 'appointments' => null,
@@ -112,10 +109,10 @@ class AppointmentController extends Controller
         $this->applySorting($query, $sort, $this->sortableColumns);
 
         $appointments = $query->paginate(20)->withQueryString();
-        $clients = ClientProfile::select('id', 'first_name', 'last_name')->orderBy('last_name')->get();
+        $clients = ClientProfile::select('id', 'first_name', 'last_name')->whereIn('branch_id', $user->accessibleBranchIds())->orderBy('last_name')->get();
         $practiceTypes = PracticeType::orderBy('name')->get();
         $users = User::whereHas('availabilities')->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
-        $branches = Branch::active()->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
+        $branches = Branch::active()->whereIn('id', $user->accessibleBranchIds())->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
 
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
@@ -152,7 +149,7 @@ class AppointmentController extends Controller
             'appointment' => $appointment,
             'users' => $users,
             'statuses' => Appointment::STATUSES,
-            'branches' => Branch::active()->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
+            'branches' => Branch::active()->whereIn('id', request()->user()->accessibleBranchIds())->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get(),
         ]);
     }
 
@@ -187,15 +184,12 @@ class AppointmentController extends Controller
         $query = Appointment::query()->with(['client', 'practiceType'])
             ->whereBetween('scheduled_at', [$request->from, $request->to.' 23:59:59']);
 
-        if (! $user->hasPermissionTo('appointments.view-any')) {
-            $query->where('assigned_user_id', $user->id);
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
         }
 
-        if ($user->hasRole('employee')) {
-            $branchIds = $user->branches()->pluck('branches.id');
-            $query->where(function ($q) use ($branchIds) {
-                $q->whereNull('branch_id')->orWhereIn('branch_id', $branchIds);
-            });
+        if (! $user->hasPermissionTo('appointments.view-any')) {
+            $query->where('assigned_user_id', $user->id);
         }
 
         $events = $query->get()->map(fn ($a) => $this->mapToCalendarEvent($a));

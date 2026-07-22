@@ -15,9 +15,9 @@ const props = defineProps({
 
 const sizeClasses = computed(() => props.size === 'sm' ? 'h-9 w-9 text-xs' : 'h-10 w-10 text-sm');
 
-const baseClasses = 'inline-flex items-center justify-center rounded-xl bg-surface-container-lowest text-on-surface-variant ring-1 ring-outline-variant/15 transition hover:bg-surface-container-low hover:text-primary';
-const activeClasses = 'inline-flex items-center justify-center rounded-xl bg-primary text-on-primary shadow-[0px_12px_24px_rgba(0,86,210,0.18)]';
-const disabledClasses = 'inline-flex items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant/60';
+const baseClasses = 'inline-flex items-center justify-center rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface-variant shadow-sm transition duration-200 hover:border-primary/40 hover:bg-primary-container/35 hover:text-primary focus-visible:outline-none';
+const activeClasses = 'inline-flex items-center justify-center rounded-xl bg-primary font-semibold text-on-primary shadow-lg shadow-primary/15';
+const disabledClasses = 'inline-flex items-center justify-center rounded-xl bg-surface-container-low text-on-surface-variant/50';
 </script>
 
 <template>

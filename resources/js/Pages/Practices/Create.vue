@@ -39,7 +39,7 @@ const form = useForm({
     notes: '',
     user_ids: [],
     deadline_at: '',
-    branch_id: null,
+    branch_id: props.branches?.[0]?.id ?? null,
 });
 
 const {
@@ -269,22 +269,8 @@ const steps = [
                                     <InputError :message="form.errors.user_ids" class="mt-2" />
                                 </div>
 
-                                <div class="col-span-6">
-                                    <InputLabel for="branch_id" value="Filiale" />
-                                    <Multiselect
-                                        v-model="form.branch_id"
-                                        :options="[{ value: null, label: 'Nessuna' }, ...(branches ?? []).map(b => ({ value: b.id, label: b.name + ' - ' + b.city + ' (' + b.province + ')' }))]"
-                                        mode="single"
-                                        :searchable="true"
-                                        value-prop="value"
-                                        label="label"
-                                        track-by="label"
-                                        placeholder="Seleziona filiale..."
-                                        no-options-text="Nessuna filiale trovata"
-                                        no-results-text="Nessun risultato"
-                                        class="mt-1"
-                                    />
-                                    <InputError :message="form.errors.branch_id" class="mt-2" />
+                                <div class="col-span-6 rounded-xl border border-indigo-100 bg-indigo-50/70 p-4 text-sm text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
+                                    La filiale della pratica viene assegnata automaticamente in base al cliente selezionato.
                                 </div>
                             </template>
 

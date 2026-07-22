@@ -10,7 +10,6 @@ import { useSidebar } from '@/Composables/useSidebar.js';
 import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
-    BellIcon,
     BuildingOfficeIcon,
     CalendarDaysIcon,
     ChevronLeftIcon,
@@ -18,7 +17,6 @@ import {
     ClipboardDocumentListIcon,
     Cog6ToothIcon,
     FolderOpenIcon,
-    MagnifyingGlassIcon,
     MoonIcon,
     PlusIcon,
     Squares2X2Icon,
@@ -63,7 +61,7 @@ const navItems = computed(() => {
 </script>
 
 <template>
-    <div>
+    <div class="app-shell">
         <Head :title="title" />
         <Banner />
 
@@ -72,19 +70,19 @@ const navItems = computed(() => {
                 <aside
                     :class="[
                         isCollapsed ? 'w-[92px]' : 'w-[280px]',
-                        'hidden shrink-0 border-r border-outline-variant/10 bg-surface-container-low/90 backdrop-blur-xl transition-all duration-300 lg:flex lg:flex-col',
+                        'hidden shrink-0 border-r border-outline-variant/40 bg-surface-container-lowest transition-[width] duration-300 motion-reduce:transition-none lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col',
                     ]"
                 >
                     <div class="flex h-full flex-col px-4 py-5">
                         <div class="mb-8 flex items-center gap-3 px-3">
                             <Link :href="route('dashboard')" class="flex items-center gap-3 overflow-hidden">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-gradient-to-br from-primary to-primary-dim text-on-primary shadow-[0px_16px_30px_rgba(0,86,210,0.22)]">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-primary text-on-primary shadow-[0px_16px_30px_rgba(0,86,210,0.22)]">
                                     <ApplicationMark class="h-7 w-7" />
                                 </div>
 
                                 <div v-if="!isCollapsed" class="min-w-0">
-                                    <p class="truncate font-headline text-lg font-extrabold tracking-tight text-primary">Fiscal Clarity</p>
-                                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-on-surface-variant">Workspace CAF</p>
+                                    <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">CAF Gestionale</p>
+                                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Workspace operativo</p>
                                 </div>
                             </Link>
                         </div>
@@ -97,10 +95,10 @@ const navItems = computed(() => {
                                     @click="closeMobile"
                                     :title="isCollapsed ? item.name : ''"
                                     :class="[
-                                        'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all',
+                                        'group flex min-h-[46px] items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition duration-200',
                                         item.active
-                                            ? 'bg-surface-container-lowest text-primary shadow-[0px_12px_30px_rgba(12,15,16,0.06)] ring-1 ring-primary/10'
-                                            : 'text-on-surface-variant hover:bg-surface-container-high/70 hover:text-on-surface',
+                                            ? 'bg-primary-container text-on-primary-container shadow-sm'
+                                            : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface',
                                     ]"
                                 >
                                     <component :is="item.icon" class="h-5 w-5 shrink-0" />
@@ -113,19 +111,19 @@ const navItems = computed(() => {
                             <Link
                                 v-if="canCreatePractice"
                                 :href="route('practices.create')"
-                                class="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-4 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.22)] transition hover:scale-[0.99]"
+                                class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition duration-200 hover:bg-primary-dim focus-visible:outline-none"
                             >
                                 <PlusIcon class="h-5 w-5" />
                                 <span v-if="!isCollapsed">Nuova pratica</span>
                             </Link>
 
-                            <div class="flex items-center justify-between rounded-2xl bg-surface-container-lowest px-3 py-2.5 ring-1 ring-outline-variant/10">
-                                <button @click="toggleSidebar" class="flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-low hover:text-primary">
+                            <div class="flex items-center justify-between rounded-xl border border-outline-variant/35 bg-surface-container-low px-2 py-2">
+                                <button type="button" @click="toggleSidebar" class="flex min-h-[40px] items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-lowest hover:text-primary" :aria-label="isCollapsed ? 'Espandi navigazione' : 'Compatta navigazione'">
                                     <component :is="isCollapsed ? ChevronRightIcon : ChevronLeftIcon" class="h-5 w-5" />
                                     <span v-if="!isCollapsed">Compatta</span>
                                 </button>
 
-                                <button @click="toggleDark" class="rounded-xl p-2 text-on-surface-variant transition hover:bg-surface-container-low hover:text-primary">
+                                <button type="button" @click="toggleDark" class="grid h-10 w-10 place-items-center rounded-lg text-on-surface-variant transition hover:bg-surface-container-lowest hover:text-primary" :aria-label="isDark ? 'Attiva modalità chiara' : 'Attiva modalità scura'" :title="isDark ? 'Modalità chiara' : 'Modalità scura'">
                                     <SunIcon v-if="isDark" class="h-5 w-5" />
                                     <MoonIcon v-else class="h-5 w-5" />
                                 </button>
@@ -135,34 +133,26 @@ const navItems = computed(() => {
                 </aside>
 
                 <div class="min-w-0 flex-1">
-                    <header class="sticky top-0 z-30 border-b border-outline-variant/10 bg-background/85 backdrop-blur-xl">
-                        <div class="flex h-20 items-center gap-4 px-4 sm:px-6 lg:px-8">
-                            <button @click="openMobile" class="rounded-2xl bg-surface-container-low p-3 text-on-surface-variant transition hover:text-primary lg:hidden">
+                    <header class="sticky top-0 z-30 border-b border-outline-variant/35 bg-background/90 backdrop-blur-xl">
+                        <div class="mx-auto flex h-[72px] max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+                            <button type="button" @click="openMobile" class="app-icon-button lg:hidden" aria-label="Apri navigazione">
                                 <Bars3Icon class="h-5 w-5" />
                             </button>
 
-                            <div class="hidden flex-1 items-center gap-4 lg:flex">
-                                <div class="relative max-w-xl flex-1">
-                                    <MagnifyingGlassIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
-                                    <input
-                                        type="text"
-                                        placeholder="Cerca pratiche, clienti o documenti..."
-                                        class="h-12 w-full rounded-2xl border-0 bg-surface-container-high pl-12 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
-                                    >
-                                </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-on-surface">{{ title }}</p>
+                                <p class="mt-0.5 hidden text-xs text-on-surface-variant sm:block">Gestisci il lavoro della tua rete in modo semplice e sicuro.</p>
                             </div>
 
                             <div class="ml-auto flex items-center gap-2 sm:gap-3">
-                                <button class="rounded-2xl bg-surface-container-low p-3 text-on-surface-variant transition hover:text-primary">
-                                    <BellIcon class="h-5 w-5" />
-                                </button>
-                                <button class="rounded-2xl bg-surface-container-low p-3 text-on-surface-variant transition hover:text-primary">
-                                    <Cog6ToothIcon class="h-5 w-5" />
+                                <button type="button" @click="toggleDark" class="app-icon-button hidden sm:inline-flex" :aria-label="isDark ? 'Attiva modalità chiara' : 'Attiva modalità scura'" :title="isDark ? 'Modalità chiara' : 'Modalità scura'">
+                                    <SunIcon v-if="isDark" class="h-5 w-5" />
+                                    <MoonIcon v-else class="h-5 w-5" />
                                 </button>
 
                                 <Dropdown align="right" width="48" :content-classes="['py-2', 'bg-surface-container-lowest']">
                                     <template #trigger>
-                                        <button type="button" class="flex items-center gap-3 rounded-[1.25rem] bg-surface-container-low px-3 py-2.5 text-left transition hover:bg-surface-container-high">
+                                        <button type="button" class="flex min-h-[48px] items-center gap-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest px-2.5 py-2 text-left shadow-sm transition duration-200 hover:bg-surface-container-low">
                                             <img
                                                 v-if="$page.props.jetstream.managesProfilePhotos"
                                                 class="h-10 w-10 rounded-2xl object-cover ring-2 ring-primary/10"
@@ -182,11 +172,11 @@ const navItems = computed(() => {
 
                                     <template #content>
                                         <div class="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Account</div>
-                                        <DropdownLink :href="route('profile.show')">Profile</DropdownLink>
-                                        <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">API Tokens</DropdownLink>
+                                        <DropdownLink :href="route('profile.show')">Profilo</DropdownLink>
+                                        <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">Token API</DropdownLink>
                                         <div class="my-1 border-t border-outline-variant/10" />
                                         <form @submit.prevent="logout">
-                                            <DropdownLink as="button">Log Out</DropdownLink>
+                                            <DropdownLink as="button">Esci</DropdownLink>
                                         </form>
                                     </template>
                                 </Dropdown>
@@ -194,11 +184,11 @@ const navItems = computed(() => {
                         </div>
                     </header>
 
-                    <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-                        <section class="mb-8 rounded-[2rem] bg-surface-container-low px-6 py-6 shadow-[0px_20px_40px_rgba(12,15,16,0.04)]">
+                    <main class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+                        <section class="mb-6 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest px-5 py-5 shadow-sm sm:px-6 sm:py-6">
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                                 <div class="min-w-0">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Workspace</p>
+                                    <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">CAF Gestionale</p>
                                     <div class="mt-2">
                                         <slot name="header">
                                             <h1 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">{{ title }}</h1>
@@ -215,21 +205,21 @@ const navItems = computed(() => {
             </div>
 
             <div v-if="isMobileOpen" class="fixed inset-0 z-50 flex lg:hidden">
-                <div class="absolute inset-0 bg-inverse-surface/50 backdrop-blur-sm" @click="closeMobile" />
+                <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="closeMobile" />
 
                 <aside class="relative flex w-[86vw] max-w-sm flex-col bg-surface-container-low px-4 py-5 shadow-2xl">
                     <div class="mb-8 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-gradient-to-br from-primary to-primary-dim text-on-primary">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-primary text-on-primary">
                                 <ApplicationMark class="h-6 w-6" />
                             </div>
                             <div>
-                                <p class="font-headline text-lg font-extrabold text-primary">Fiscal Clarity</p>
-                                <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Workspace CAF</p>
+                                <p class="font-headline text-lg font-extrabold text-on-surface">CAF Gestionale</p>
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Workspace operativo</p>
                             </div>
                         </div>
 
-                        <button @click="closeMobile" class="rounded-2xl bg-surface-container-lowest p-2 text-on-surface-variant">
+                        <button type="button" @click="closeMobile" class="app-icon-button" aria-label="Chiudi navigazione">
                             <ChevronLeftIcon class="h-5 w-5" />
                         </button>
                     </div>
@@ -241,9 +231,9 @@ const navItems = computed(() => {
                                 :href="item.route"
                                 @click="closeMobile"
                                 :class="[
-                                    'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all',
+                                    'flex min-h-[46px] items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition duration-200',
                                     item.active
-                                        ? 'bg-surface-container-lowest text-primary shadow-[0px_12px_30px_rgba(12,15,16,0.06)] ring-1 ring-primary/10'
+                                        ? 'bg-primary-container text-on-primary-container shadow-sm'
                                         : 'text-on-surface-variant hover:bg-surface-container-high',
                                 ]"
                             >
@@ -254,20 +244,20 @@ const navItems = computed(() => {
                     </nav>
 
                     <div class="mt-auto space-y-3 pt-6">
-                        <Link v-if="canCreatePractice" :href="route('practices.create')" class="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-4 py-3 text-sm font-bold text-on-primary">
+                        <Link v-if="canCreatePractice" :href="route('practices.create')" class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-on-primary">
                             <PlusIcon class="h-5 w-5" />
                             Nuova pratica
                         </Link>
 
-                        <button @click="toggleDark" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-surface-container-lowest px-4 py-3 text-sm font-semibold text-on-surface-variant">
+                        <button type="button" @click="toggleDark" class="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/35 bg-surface-container-lowest px-4 py-3 text-sm font-semibold text-on-surface-variant">
                             <SunIcon v-if="isDark" class="h-5 w-5" />
                             <MoonIcon v-else class="h-5 w-5" />
-                            Tema
+                            {{ isDark ? 'Modalità chiara' : 'Modalità scura' }}
                         </button>
 
-                        <button @click="logout" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-error-container/15 px-4 py-3 text-sm font-semibold text-error">
+                        <button type="button" @click="logout" class="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
                             <ArrowRightOnRectangleIcon class="h-5 w-5" />
-                            Log Out
+                            Esci
                         </button>
                     </div>
                 </aside>

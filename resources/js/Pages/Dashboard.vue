@@ -66,9 +66,9 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '�
     <AppLayout title="Dashboard">
         <template #header>
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Overview operativa</p>
+                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Panoramica operativa</p>
                 <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Dashboard principale</h1>
-                <p class="mt-2 text-sm text-on-surface-variant">Panoramica premium delle priorità di studio, ispirata ai nuovi template web.</p>
+                <p class="mt-2 text-sm text-on-surface-variant">Priorità, scadenze e attività della rete in un’unica vista.</p>
             </div>
         </template>
 

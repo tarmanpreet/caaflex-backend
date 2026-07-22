@@ -27,7 +27,10 @@ class BranchController extends Controller
     {
         $this->authorize('viewAny', Branch::class);
 
-        $query = Branch::query();
+        $query = Branch::query()
+            ->whereIn('id', $request->user()->accessibleBranchIds())
+            ->with('parent:id,name')
+            ->withCount(['children', 'employees', 'clients', 'practices']);
 
         if ($request->search) {
             $search = '%'.$request->search.'%';
@@ -43,10 +46,35 @@ class BranchController extends Controller
         }
 
         $sort = $this->sortParams($request, $this->sortableColumns);
-        $this->applySorting($query, $sort, $this->sortableColumns);
+        $branches = $query->get();
+        $branchLookup = Branch::query()
+            ->whereIn('id', $request->user()->accessibleBranchIds())
+            ->get(['id', 'parent_id', 'name'])
+            ->keyBy('id');
+
+        $branches->each(function (Branch $branch) use ($branchLookup): void {
+            $depth = 0;
+            $path = [$branch->name];
+            $parentId = $branch->parent_id;
+            $visited = [$branch->id];
+
+            while ($parentId !== null && $branchLookup->has($parentId) && ! in_array($parentId, $visited, true)) {
+                $parent = $branchLookup->get($parentId);
+                array_unshift($path, $parent->name);
+                $visited[] = $parentId;
+                $parentId = $parent->parent_id;
+                $depth++;
+            }
+
+            $branch->setAttribute('depth', $depth);
+            $branch->setAttribute('hierarchy_path', implode(' / ', $path));
+            $branch->setAttribute('is_main', $branch->parent_id === null);
+        });
+
+        $branches = $branches->sortBy('hierarchy_path', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
         return Inertia::render('Branches/Index', [
-            'branches' => $query->get(),
+            'branches' => $branches,
             'filters' => array_merge(
                 $request->only(['search', 'is_active']),
                 ['sort' => $sort['sort'], 'direction' => $sort['direction']]
@@ -58,7 +86,14 @@ class BranchController extends Controller
     {
         $this->authorize('create', Branch::class);
 
-        return Inertia::render('Branches/Create');
+        return Inertia::render('Branches/Create', [
+            'parentBranches' => Branch::active()
+                ->whereIn('id', request()->user()->accessibleBranchIds())
+                ->select('id', 'parent_id', 'name')
+                ->orderBy('name')
+                ->get(),
+            'hasBranches' => Branch::query()->exists(),
+        ]);
     }
 
     public function store(StoreBranchRequest $request)
@@ -75,6 +110,12 @@ class BranchController extends Controller
 
         return Inertia::render('Branches/Edit', [
             'branch' => $branch,
+            'parentBranches' => Branch::active()
+                ->whereIn('id', request()->user()->accessibleBranchIds())
+                ->whereNotIn('id', Branch::descendantIdsFor([$branch->id]))
+                ->select('id', 'parent_id', 'name')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 

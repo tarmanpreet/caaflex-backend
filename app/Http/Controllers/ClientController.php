@@ -8,10 +8,13 @@ use App\Actions\Client\StoreClientAction;
 use App\Actions\Client\UpdateClientAction;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Branch;
 use App\Models\ClientProfile;
+use App\Models\User;
 use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 
 class ClientController extends Controller
@@ -33,13 +36,14 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', ClientProfile::class);
 
-        $clients = $action->execute($request);
+        $clients = $action->execute($request, $request->user());
         $sort = $this->sortParams($request, $this->sortableColumns, 'last_name');
 
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
+            'branches' => $this->accessibleBranches($request->user()),
             'filters' => array_merge(
-                $request->only(['search']),
+                $request->only(['search', 'branch_id']),
                 ['sort' => $sort['sort'], 'direction' => $sort['direction']]
             ),
         ]);
@@ -54,7 +58,9 @@ class ClientController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $like = '%'.$q.'%';
 
-        $paginator = ClientProfile::select('id', 'first_name', 'last_name')
+        $paginator = ClientProfile::select('id', 'first_name', 'last_name', 'branch_id')
+            ->when(Branch::query()->exists(), fn ($query) => $query->whereIn('branch_id', $request->user()->accessibleBranchIds()))
+            ->with('branch:id,name')
             ->when($q, function ($query) use ($like) {
                 $query->where(function ($q) use ($like) {
                     $q->where('first_name', 'like', $like)
@@ -69,7 +75,7 @@ class ClientController extends Controller
         return response()->json([
             'results' => collect($paginator->items())->map(fn ($c) => [
                 'value' => $c->id,
-                'label' => $c->last_name.' '.$c->first_name,
+                'label' => $c->last_name.' '.$c->first_name.($c->branch ? ' · '.$c->branch->name : ''),
             ]),
             'hasMore' => $paginator->hasMorePages(),
         ]);
@@ -79,7 +85,9 @@ class ClientController extends Controller
     {
         $this->authorize('create', ClientProfile::class);
 
-        return Inertia::render('Clients/Create');
+        return Inertia::render('Clients/Create', [
+            'branches' => $this->accessibleBranches(request()->user()),
+        ]);
     }
 
     public function store(StoreClientRequest $request, StoreClientAction $action)
@@ -121,6 +129,7 @@ class ClientController extends Controller
 
         return Inertia::render('Clients/Edit', [
             'client' => $client,
+            'branches' => $this->accessibleBranches(request()->user()),
         ]);
     }
 
@@ -167,5 +176,14 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')
             ->with('success', 'Client deleted.');
+    }
+
+    private function accessibleBranches(User $user): Collection
+    {
+        return Branch::active()
+            ->whereIn('id', $user->accessibleBranchIds())
+            ->select('id', 'parent_id', 'name', 'city', 'province')
+            ->orderBy('name')
+            ->get();
     }
 }

@@ -101,13 +101,13 @@ class BranchManagementTest extends TestCase
         $user->assignRole('admin');
 
         $branch1 = Branch::factory()->create();
-        $branch2 = Branch::factory()->create();
+        $branch2 = Branch::factory()->create(['parent_id' => $branch1->id]);
 
-        $response = $this->actingAs($user)->delete(route('branches.destroy', $branch1));
+        $response = $this->actingAs($user)->delete(route('branches.destroy', $branch2));
 
         $response->assertRedirect(route('branches.index'));
-        $this->assertDatabaseMissing('branches', ['id' => $branch1->id]);
-        $this->assertDatabaseHas('branches', ['id' => $branch2->id]);
+        $this->assertDatabaseHas('branches', ['id' => $branch1->id]);
+        $this->assertDatabaseMissing('branches', ['id' => $branch2->id]);
     }
 
     public function test_branch_has_employees_relationship(): void
@@ -155,8 +155,8 @@ class BranchManagementTest extends TestCase
         $this->actingAs($employee)
             ->get(route('practices.index'))
             ->assertInertia(fn ($page) => $page
-                ->where('practices.total', 2)
-                ->has('practices.data', 2)
+                ->where('practices.total', 1)
+                ->has('practices.data', 1)
             );
     }
 
@@ -170,6 +170,77 @@ class BranchManagementTest extends TestCase
         ]);
 
         $this->assertEquals('Via Roma 1, 20100 Milano (MI)', $branch->fullAddress());
+    }
+
+    public function test_parent_branch_sees_all_descendant_practices(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $main = Branch::factory()->create();
+        $child = Branch::factory()->create(['parent_id' => $main->id]);
+        $grandchild = Branch::factory()->create(['parent_id' => $child->id]);
+        $admin->branches()->attach($main);
+
+        \App\Models\Practice::factory()->create(['branch_id' => $main->id]);
+        \App\Models\Practice::factory()->create(['branch_id' => $child->id]);
+        \App\Models\Practice::factory()->create(['branch_id' => $grandchild->id]);
+
+        $this->actingAs($admin)->get(route('practices.index'))
+            ->assertInertia(fn ($page) => $page->where('practices.total', 3));
+    }
+
+    public function test_child_branch_cannot_see_parent_or_sibling_data(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $main = Branch::factory()->create();
+        $child = Branch::factory()->create(['parent_id' => $main->id]);
+        $sibling = Branch::factory()->create(['parent_id' => $main->id]);
+        $grandchild = Branch::factory()->create(['parent_id' => $child->id]);
+        $admin->branches()->attach($child);
+
+        $parentPractice = \App\Models\Practice::factory()->create(['branch_id' => $main->id]);
+        \App\Models\Practice::factory()->create(['branch_id' => $child->id]);
+        \App\Models\Practice::factory()->create(['branch_id' => $sibling->id]);
+        \App\Models\Practice::factory()->create(['branch_id' => $grandchild->id]);
+
+        $this->actingAs($admin)->get(route('practices.index'))
+            ->assertInertia(fn ($page) => $page->where('practices.total', 2));
+        $this->actingAs($admin)->get(route('practices.show', $parentPractice))->assertForbidden();
+    }
+
+    public function test_child_branch_cannot_see_parent_clients(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $main = Branch::factory()->create();
+        $child = Branch::factory()->create(['parent_id' => $main->id]);
+        $admin->branches()->attach($child);
+        $parentClient = \App\Models\ClientProfile::factory()->create(['branch_id' => $main->id]);
+        \App\Models\ClientProfile::factory()->create(['branch_id' => $child->id]);
+
+        $this->actingAs($admin)->get(route('clients.index'))
+            ->assertInertia(fn ($page) => $page->where('clients.total', 1));
+        $this->actingAs($admin)->get(route('clients.show', $parentClient))->assertForbidden();
+    }
+
+    public function test_branch_cannot_be_moved_below_its_descendant(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $main = Branch::factory()->create();
+        $child = Branch::factory()->create(['parent_id' => $main->id]);
+        $grandchild = Branch::factory()->create(['parent_id' => $child->id]);
+
+        $this->actingAs($admin)->put(route('branches.update', $child), [
+            'parent_id' => $grandchild->id,
+            'name' => $child->name,
+            'address' => $child->address,
+            'city' => $child->city,
+            'province' => $child->province,
+            'postal_code' => $child->postal_code,
+            'is_active' => true,
+        ])->assertSessionHasErrors('parent_id');
     }
 
     public function test_update_appointment_action_preserves_null_branch_id(): void

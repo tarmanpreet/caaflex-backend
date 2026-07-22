@@ -10,24 +10,20 @@ defineProps({
 });
 
 const toneMap = {
-    primary: 'bg-primary-container text-on-primary-container',
-    tertiary: 'bg-tertiary-container text-on-tertiary-container',
-    neutral: 'bg-surface-container-high text-on-surface',
-    success: 'bg-green-100 text-green-700',
+    primary: 'bg-primary',
+    tertiary: 'bg-tertiary',
+    neutral: 'bg-outline',
+    success: 'bg-secondary',
 };
 </script>
 
 <template>
-    <div class="rounded-[1.75rem] bg-surface-container-lowest p-6 shadow-[0px_20px_40px_rgba(12,15,16,0.06)] ring-1 ring-outline-variant/10">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">{{ title }}</p>
-                <p class="mt-4 font-headline text-3xl font-extrabold tracking-tight text-on-surface">{{ value }}</p>
-            </div>
-
-            <div :class="['rounded-2xl px-3 py-2 text-xs font-bold uppercase tracking-[0.18em]', toneMap[tone] ?? toneMap.primary]">
-                {{ caption }}
-            </div>
+    <div class="app-card relative p-5 sm:p-6">
+        <div class="flex items-center gap-2.5">
+            <span :class="['h-2.5 w-2.5 rounded-full', toneMap[tone] ?? toneMap.primary]" aria-hidden="true" />
+            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">{{ title }}</p>
         </div>
+        <p class="mt-4 font-headline text-3xl font-extrabold tracking-tight text-on-surface">{{ value }}</p>
+        <p class="mt-2 text-sm leading-6 text-on-surface-variant">{{ caption }}</p>
     </div>
 </template>

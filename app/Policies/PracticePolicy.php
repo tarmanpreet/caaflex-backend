@@ -14,8 +14,10 @@ class PracticePolicy
 
     public function view(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practices.view-any') || 
-               ($user->hasPermissionTo('practices.view-own') && $practice->assignedUsers()->where('users.id', $user->id)->exists());
+        return $user->canAccessBranchId($practice->branch_id) && (
+            $user->hasPermissionTo('practices.view-any') ||
+            ($user->hasPermissionTo('practices.view-own') && $practice->assignedUsers()->where('users.id', $user->id)->exists())
+        );
     }
 
     public function create(User $user): bool
@@ -25,61 +27,61 @@ class PracticePolicy
 
     public function update(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practices.update') && 
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practices.update') &&
                ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
     }
 
     public function delete(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practices.delete');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practices.delete');
     }
 
     public function assign(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practices.assign');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practices.assign');
     }
 
     public function uploadDocument(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-documents.upload');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.upload');
     }
 
     public function downloadDocument(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-documents.download');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.download');
     }
 
     public function deleteDocument(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-documents.delete');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.delete');
     }
 
     public function createNote(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-notes.create');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-notes.create');
     }
 
     public function viewDeadline(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-deadlines.view') &&
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.view') &&
                ($user->hasPermissionTo('practices.view-any') ||
                 ($user->hasPermissionTo('practices.view-own') && $practice->assignedUsers()->where('users.id', $user->id)->exists()));
     }
 
     public function createDeadline(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-deadlines.create') &&
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.create') &&
                ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
     }
 
     public function updateDeadline(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-deadlines.update') &&
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.update') &&
                ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
     }
 
     public function deleteDeadline(User $user, Practice $practice): bool
     {
-        return $user->hasPermissionTo('practice-deadlines.delete') && $user->hasRole('admin');
+        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.delete') && $user->hasRole('admin');
     }
 }

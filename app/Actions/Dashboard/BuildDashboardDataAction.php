@@ -3,6 +3,7 @@
 namespace App\Actions\Dashboard;
 
 use App\Models\Appointment;
+use App\Models\Branch;
 use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use App\Models\PracticeDocument;
@@ -10,7 +11,6 @@ use App\Models\PracticeNote;
 use App\Models\PracticeStatusLog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class BuildDashboardDataAction
@@ -123,7 +123,7 @@ class BuildDashboardDataAction
             ->get()
             ->map(function (PracticeDocument $document): array {
                 return [
-                    'id' => 'document-' . $document->id,
+                    'id' => 'document-'.$document->id,
                     'kind' => 'document',
                     'label' => 'Documento caricato',
                     'title' => $document->original_name,
@@ -142,7 +142,7 @@ class BuildDashboardDataAction
             ->get()
             ->map(function (PracticeNote $note): array {
                 return [
-                    'id' => 'note-' . $note->id,
+                    'id' => 'note-'.$note->id,
                     'kind' => 'note',
                     'label' => 'Nota aggiunta',
                     'title' => str($note->body)->limit(72)->toString(),
@@ -165,7 +165,7 @@ class BuildDashboardDataAction
                     : $this->formatStatus($log->new_status);
 
                 return [
-                    'id' => 'status-' . $log->id,
+                    'id' => 'status-'.$log->id,
                     'kind' => 'status',
                     'label' => 'Cambio stato',
                     'title' => $transition,
@@ -240,6 +240,10 @@ class BuildDashboardDataAction
     {
         $query = Practice::query();
 
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
+
         if ($user->hasPermissionTo('practices.view-any')) {
             return $query;
         }
@@ -256,6 +260,10 @@ class BuildDashboardDataAction
     private function scopedAppointmentQuery(User $user): Builder
     {
         $query = Appointment::query();
+
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
 
         if ($user->hasPermissionTo('appointments.view-any')) {
             return $query;

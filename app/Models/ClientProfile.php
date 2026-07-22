@@ -38,6 +38,11 @@ class ClientProfile extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     /**
      * Get the documents for this client profile.
      */

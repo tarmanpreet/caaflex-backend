@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Branch;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateBranchRequest extends FormRequest
 {
@@ -13,7 +15,19 @@ class UpdateBranchRequest extends FormRequest
 
     public function rules(): array
     {
+        $branch = $this->route('branch');
+        $forbiddenParentIds = $branch instanceof Branch
+            ? Branch::descendantIdsFor([$branch->id])->all()
+            : [];
+
         return [
+            'parent_id' => [
+                Rule::requiredIf($branch instanceof Branch && $branch->parent_id !== null),
+                'nullable',
+                'integer',
+                Rule::in($this->user()->accessibleBranchIds()->all()),
+                Rule::notIn($forbiddenParentIds),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],

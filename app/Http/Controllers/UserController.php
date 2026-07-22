@@ -67,7 +67,7 @@ class UserController extends Controller
         return Inertia::render('Users/Create', [
             'assignableRoles' => $assignableRoles,
             'allPracticeTypes' => PracticeType::orderBy('name')->get(['id', 'name', 'color']),
-            'branches' => Branch::active()->select('id', 'name', 'city', 'province')->orderBy('name')->get(),
+            'branches' => Branch::active()->whereIn('id', $request->user()->accessibleBranchIds())->select('id', 'name', 'city', 'province')->orderBy('name')->get(),
         ]);
     }
 
@@ -107,7 +107,7 @@ class UserController extends Controller
 
         $roles = Role::where('guard_name', 'web')->pluck('name');
         $allPracticeTypes = PracticeType::orderBy('name')->get(['id', 'name', 'color']);
-        $branches = Branch::active()->select('id', 'name', 'city', 'province')->orderBy('name')->get();
+        $branches = Branch::active()->whereIn('id', $request->user()->accessibleBranchIds())->select('id', 'name', 'city', 'province')->orderBy('name')->get();
 
         return Inertia::render('Users/Show', [
             'user' => $user,

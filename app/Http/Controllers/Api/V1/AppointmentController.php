@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\Branch;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\User;
@@ -24,7 +25,7 @@ class AppointmentController extends Controller
     {
         $client = auth()->user()->clientProfile;
 
-        if (!$client) {
+        if (! $client) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -92,7 +93,7 @@ class AppointmentController extends Controller
     {
         $client = auth()->user()->clientProfile;
 
-        if (!$client || $appointment->client_profile_id !== $client->id) {
+        if (! $client || $appointment->client_profile_id !== $client->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -122,7 +123,7 @@ class AppointmentController extends Controller
 
         return response()->json([
             'message' => 'Appuntamento aggiornato.',
-            'data'    => $appointment->load(['client', 'assignedUser', 'practiceType', 'practice']),
+            'data' => $appointment->load(['client', 'assignedUser', 'practiceType', 'practice']),
         ]);
     }
 
@@ -131,7 +132,7 @@ class AppointmentController extends Controller
         $this->authorize('update', $appointment);
 
         $request->validate([
-            'scheduled_at'     => ['required', 'date'],
+            'scheduled_at' => ['required', 'date'],
             'duration_minutes' => ['required', 'integer', 'min:5'],
         ]);
 
@@ -139,7 +140,7 @@ class AppointmentController extends Controller
 
         return response()->json([
             'message' => 'Appuntamento riprogrammato.',
-            'data'    => $appointment,
+            'data' => $appointment,
         ]);
     }
 
@@ -147,38 +148,42 @@ class AppointmentController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->hasPermissionTo('appointments.view-any') && !$user->hasPermissionTo('appointments.view-own')) {
+        if (! $user->hasPermissionTo('appointments.view-any') && ! $user->hasPermissionTo('appointments.view-own')) {
             abort(403);
         }
 
         $request->validate([
             'from' => ['required', 'date'],
-            'to'   => ['required', 'date'],
+            'to' => ['required', 'date'],
         ]);
 
         $query = Appointment::query()->with(['client', 'practiceType'])
-            ->whereBetween('scheduled_at', [$request->from, $request->to . ' 23:59:59']);
+            ->whereBetween('scheduled_at', [$request->from, $request->to.' 23:59:59']);
 
-        if (!$user->hasPermissionTo('appointments.view-any')) {
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
+
+        if (! $user->hasPermissionTo('appointments.view-any')) {
             $query->where('assigned_user_id', $user->id);
         }
 
-        $events = $query->get()->map(fn($a) => [
-            'id'              => $a->id,
-            'title'           => $a->client->first_name . ' ' . $a->client->last_name
-                                 . ' - ' . ($a->practiceType?->name ?? ''),
-            'start'           => $a->scheduled_at->format('Y-m-d\TH:i:s'),
-            'end'             => $a->scheduled_at->copy()->addMinutes($a->duration_minutes)->format('Y-m-d\TH:i:s'),
+        $events = $query->get()->map(fn ($a) => [
+            'id' => $a->id,
+            'title' => $a->client->first_name.' '.$a->client->last_name
+                                 .' - '.($a->practiceType?->name ?? ''),
+            'start' => $a->scheduled_at->format('Y-m-d\TH:i:s'),
+            'end' => $a->scheduled_at->copy()->addMinutes($a->duration_minutes)->format('Y-m-d\TH:i:s'),
             'backgroundColor' => $a->practiceType?->color ?? '#3B82F6',
-            'borderColor'     => $a->practiceType?->color ?? '#3B82F6',
-            'extendedProps'   => [
-                'status'           => $a->status,
+            'borderColor' => $a->practiceType?->color ?? '#3B82F6',
+            'extendedProps' => [
+                'status' => $a->status,
                 'duration_minutes' => $a->duration_minutes,
-                'notes'            => $a->notes,
-                'client_id'        => $a->client_profile_id,
+                'notes' => $a->notes,
+                'client_id' => $a->client_profile_id,
                 'practice_type_id' => $a->practice_type_id,
                 'assigned_user_id' => $a->assigned_user_id,
-                'practice_id'      => $a->practice_id,
+                'practice_id' => $a->practice_id,
             ],
         ]);
 
@@ -193,7 +198,7 @@ class AppointmentController extends Controller
         $client = $user->clientProfile;
 
         $request->validate([
-            'client_id'        => ['required', 'integer', 'exists:client_profiles,id'],
+            'client_id' => ['required', 'integer', 'exists:client_profiles,id'],
             'practice_type_id' => ['required', 'integer', 'exists:practice_types,id'],
         ]);
 

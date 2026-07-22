@@ -57,7 +57,7 @@ const maxWidthClass = computed(() => ({
 
 <template>
     <Teleport to="body">
-        <div v-if="showSlot" class="fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4 sm:px-0">
+        <div v-if="showSlot" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
             <!-- Backdrop -->
             <transition
                 enter-active-class="ease-out duration-300"
@@ -67,7 +67,7 @@ const maxWidthClass = computed(() => ({
                 leave-from-class="opacity-100"
                 leave-to-class="opacity-0"
             >
-                <div v-show="show" class="fixed inset-0 bg-gray-500/75 dark:bg-black/75" @click="close" />
+                <div v-show="show" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm" @click="close" />
             </transition>
 
             <!-- Card -->
@@ -81,7 +81,9 @@ const maxWidthClass = computed(() => ({
             >
                 <div
                     v-show="show"
-                    class="relative z-10 w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl transform transition-all sm:mx-auto"
+                    role="dialog"
+                    aria-modal="true"
+                    class="relative z-10 w-full overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface shadow-2xl shadow-slate-950/25 transform transition-all sm:mx-auto"
                     :class="maxWidthClass"
                 >
                     <slot v-if="showSlot" />

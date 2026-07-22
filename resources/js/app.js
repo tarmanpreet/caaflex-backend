@@ -1,7 +1,7 @@
 import './bootstrap';
-import '../css/app.css';
 import '@vueform/multiselect/themes/default.css';
 import 'vue-toastification/dist/index.css';
+import '../css/app.css';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
@@ -35,6 +35,6 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#2563EB',
     },
 });

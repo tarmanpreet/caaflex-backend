@@ -5,17 +5,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
-import SortableTable from '@/Components/SortableTable.vue';
 import IconButton from '@/Components/IconButton.vue';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
-
-const columns = [
-    { key: 'name', label: 'Nome' },
-    { key: 'city', label: 'Città' },
-    { key: 'province', label: 'Prov.' },
-    { key: 'phone', label: 'Telefono', sortable: false },
-    { key: 'is_active', label: 'Stato' },
-];
+import { BuildingOffice2Icon, ChevronRightIcon, PencilSquareIcon, TrashIcon, UsersIcon, UserGroupIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     branches: Array,
@@ -115,64 +106,48 @@ const deleteBranch = () => {
                     </Link>
                 </div>
 
-                <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                    <div class="overflow-x-auto">
-                        <SortableTable
-                            :columns="columns"
-                            :rows="branches"
-                            :controlled="true"
-                            :sort-key="sortKey"
-                            :sort-dir="sortDir"
-                            empty-message="Nessuna filiale trovata."
-                            @sort="onSort"
-                        >
-                            <template #cell-name="{ row }">
-                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ row.name }}</span>
-                            </template>
-                            <template #cell-city="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ row.city }}</span>
-                            </template>
-                            <template #cell-province="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ row.province }}</span>
-                            </template>
-                            <template #cell-phone="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ row.phone || '—' }}</span>
-                            </template>
-                            <template #cell-is_active="{ row }">
-                                <span
-                                    :class="row.is_active
-                                        ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                        : 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                    "
-                                >
-                                    {{ row.is_active ? 'Attiva' : 'Inattiva' }}
-                                </span>
-                            </template>
-                            <template #actions="{ row }">
-                                <span class="flex items-center space-x-2">
-                                    <IconButton
-                                        v-if="canEdit"
-                                        :as="Link"
-                                        :href="route('branches.edit', row.id)"
-                                        tooltip="Modifica"
-                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
-                                    >
-                                        <PencilSquareIcon class="w-5 h-5" />
-                                    </IconButton>
-                                    <IconButton
-                                        v-if="canDelete"
-                                        tooltip="Elimina"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                        @click="confirmDelete(row)"
-                                    >
-                                        <TrashIcon class="w-5 h-5" />
-                                    </IconButton>
-                                </span>
-                            </template>
-                        </SortableTable>
+                <div class="mb-5 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-white p-5 dark:border-indigo-900/60 dark:from-indigo-950/40 dark:to-gray-900">
+                    <div class="flex items-start gap-3">
+                        <div class="rounded-xl bg-indigo-600 p-2.5 text-white shadow-sm"><BuildingOffice2Icon class="h-6 w-6" /></div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Struttura gerarchica</h3>
+                            <p class="mt-1 max-w-3xl text-sm leading-6 text-gray-600 dark:text-gray-300">Ogni filiale accede ai propri clienti e pratiche e a quelli delle filiali sottostanti. Non può vedere dati delle filiali superiori o di altri rami.</p>
+                        </div>
                     </div>
                 </div>
+
+                <TransitionGroup name="branch-list" tag="div" class="grid gap-3" aria-live="polite">
+                    <article
+                        v-for="branch in branches"
+                        :key="branch.id"
+                        class="group relative rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none dark:border-gray-700 dark:bg-gray-800 dark:hover:border-indigo-700"
+                        :style="{ marginInlineStart: `${Math.min(branch.depth, 5) * 24}px` }"
+                    >
+                        <div v-if="branch.depth > 0" class="absolute -start-4 top-1/2 hidden h-px w-4 bg-gray-300 sm:block dark:bg-gray-600" aria-hidden="true"></div>
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <ChevronRightIcon v-if="branch.depth > 0" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h3 class="truncate font-semibold text-gray-900 dark:text-white">{{ branch.name }}</h3>
+                                        <span v-if="branch.is_main" class="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">Principale</span>
+                                        <span :class="branch.is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'" class="rounded-full px-2.5 py-1 text-xs font-medium">{{ branch.is_active ? 'Attiva' : 'Inattiva' }}</span>
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">{{ branch.hierarchy_path }}</p>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ branch.city }} ({{ branch.province }}) · {{ branch.phone || 'Telefono non indicato' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 px-2.5 py-2 text-xs text-gray-600 dark:bg-gray-900/60 dark:text-gray-300"><UserGroupIcon class="h-4 w-4" />{{ branch.clients_count }} clienti</span>
+                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 px-2.5 py-2 text-xs text-gray-600 dark:bg-gray-900/60 dark:text-gray-300"><UsersIcon class="h-4 w-4" />{{ branch.employees_count }} utenti</span>
+                                <IconButton v-if="canEdit" :as="Link" :href="route('branches.edit', branch.id)" tooltip="Modifica" class="min-h-[44px] min-w-[44px] text-indigo-600 dark:text-indigo-400"><PencilSquareIcon class="h-5 w-5" /></IconButton>
+                                <IconButton v-if="canDelete && !branch.is_main && branch.children_count === 0" tooltip="Elimina" class="min-h-[44px] min-w-[44px] text-red-600 dark:text-red-400" @click="confirmDelete(branch)"><TrashIcon class="h-5 w-5" /></IconButton>
+                            </div>
+                        </div>
+                    </article>
+                </TransitionGroup>
+
+                <div v-if="branches.length === 0" class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">Nessuna filiale trovata.</div>
             </div>
         </div>
 
@@ -201,3 +176,23 @@ const deleteBranch = () => {
         </ConfirmationModal>
     </AppLayout>
 </template>
+
+<style scoped>
+.branch-list-enter-active,
+.branch-list-leave-active {
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.branch-list-enter-from,
+.branch-list-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .branch-list-enter-active,
+    .branch-list-leave-active {
+        transition: none;
+    }
+}
+</style>

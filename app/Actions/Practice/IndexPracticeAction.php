@@ -2,6 +2,7 @@
 
 namespace App\Actions\Practice;
 
+use App\Models\Branch;
 use App\Models\Practice;
 use App\Models\User;
 use App\Traits\Sortable;
@@ -56,12 +57,12 @@ class IndexPracticeAction
     {
         $query = Practice::query();
 
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
+
         if ($user->hasRole('employee') && ! $user->hasRole('admin') && ! $user->hasRole('superadmin')) {
             $query->whereHas('assignedUsers', fn ($q) => $q->where('users.id', $user->id));
-            $branchIds = $user->branches()->pluck('branches.id');
-            $query->where(function ($q) use ($branchIds) {
-                $q->whereNull('branch_id')->orWhereIn('branch_id', $branchIds);
-            });
         }
 
         return $query;

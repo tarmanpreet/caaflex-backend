@@ -2,6 +2,19 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 
+const semanticColor = (variable) => ({ opacityValue }) => {
+    if (opacityValue === undefined) {
+        return `var(${variable})`;
+    }
+
+    const numericOpacity = Number(opacityValue);
+    const percentage = Number.isFinite(numericOpacity)
+        ? `${numericOpacity * 100}%`
+        : `calc(${opacityValue} * 100%)`;
+
+    return `color-mix(in srgb, var(${variable}) ${percentage}, transparent)`;
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: 'class',
@@ -16,41 +29,43 @@ export default {
     theme: {
         extend: {
             colors: {
-                background: 'var(--color-background)',
-                surface: 'var(--color-surface)',
-                'surface-container-lowest': 'var(--color-surface-container-lowest)',
-                'surface-container-low': 'var(--color-surface-container-low)',
-                'surface-container': 'var(--color-surface-container)',
-                'surface-container-high': 'var(--color-surface-container-high)',
-                'surface-container-highest': 'var(--color-surface-container-highest)',
-                'inverse-surface': 'var(--color-inverse-surface)',
-                'on-surface': 'var(--color-on-surface)',
-                'on-surface-variant': 'var(--color-on-surface-variant)',
-                primary: 'var(--color-primary)',
-                'primary-dim': 'var(--color-primary-dim)',
-                'on-primary': 'var(--color-on-primary)',
-                'primary-container': 'var(--color-primary-container)',
-                'on-primary-container': 'var(--color-on-primary-container)',
-                secondary: 'var(--color-secondary)',
-                'secondary-container': 'var(--color-secondary-container)',
-                'on-secondary-container': 'var(--color-on-secondary-container)',
-                tertiary: 'var(--color-tertiary)',
-                'tertiary-container': 'var(--color-tertiary-container)',
-                'tertiary-fixed-dim': 'var(--color-tertiary-fixed-dim)',
-                'on-tertiary-container': 'var(--color-on-tertiary-container)',
-                error: 'var(--color-error)',
-                'on-error': 'var(--color-on-error)',
-                'error-container': 'var(--color-error-container)',
-                'on-error-container': 'var(--color-on-error-container)',
-                outline: 'var(--color-outline)',
-                'outline-variant': 'var(--color-outline-variant)',
+                background: semanticColor('--color-background'),
+                surface: semanticColor('--color-surface'),
+                'surface-container-lowest': semanticColor('--color-surface-container-lowest'),
+                'surface-container-low': semanticColor('--color-surface-container-low'),
+                'surface-container': semanticColor('--color-surface-container'),
+                'surface-container-high': semanticColor('--color-surface-container-high'),
+                'surface-container-highest': semanticColor('--color-surface-container-highest'),
+                'inverse-surface': semanticColor('--color-inverse-surface'),
+                'on-surface': semanticColor('--color-on-surface'),
+                'on-surface-variant': semanticColor('--color-on-surface-variant'),
+                primary: semanticColor('--color-primary'),
+                'primary-dim': semanticColor('--color-primary-dim'),
+                'on-primary': semanticColor('--color-on-primary'),
+                'primary-container': semanticColor('--color-primary-container'),
+                'on-primary-container': semanticColor('--color-on-primary-container'),
+                secondary: semanticColor('--color-secondary'),
+                'secondary-container': semanticColor('--color-secondary-container'),
+                'on-secondary-container': semanticColor('--color-on-secondary-container'),
+                tertiary: semanticColor('--color-tertiary'),
+                'tertiary-container': semanticColor('--color-tertiary-container'),
+                'tertiary-fixed-dim': semanticColor('--color-tertiary-fixed-dim'),
+                'on-tertiary-container': semanticColor('--color-on-tertiary-container'),
+                error: semanticColor('--color-error'),
+                'on-error': semanticColor('--color-on-error'),
+                'error-container': semanticColor('--color-error-container'),
+                'on-error-container': semanticColor('--color-on-error-container'),
+                outline: semanticColor('--color-outline'),
+                'outline-variant': semanticColor('--color-outline-variant'),
             },
             borderRadius: {
-                "DEFAULT": "0.125rem",
-                "lg": "0.25rem",
-                "xl": "0.5rem",
-                "full": "0.75rem",
-                "md": "0.375rem"
+                DEFAULT: '0.625rem',
+                md: '0.75rem',
+                lg: '0.875rem',
+                xl: '1rem',
+                '2xl': '1.25rem',
+                '3xl': '1.5rem',
+                full: '9999px',
             },
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],

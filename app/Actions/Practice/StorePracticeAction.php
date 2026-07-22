@@ -2,6 +2,7 @@
 
 namespace App\Actions\Practice;
 
+use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeStatusLog;
 use Illuminate\Support\Arr;
@@ -10,9 +11,11 @@ class StorePracticeAction
 {
     public function execute(array $data, int $createdBy): Practice
     {
+        $data['branch_id'] = ClientProfile::query()->findOrFail($data['client_profile_id'])->branch_id;
+
         $practice = Practice::create(
             Arr::except($data, ['user_ids']) + [
-                'status'     => $data['status'] ?? 'nuova',
+                'status' => $data['status'] ?? 'nuova',
                 'created_by' => $createdBy,
             ]
         );
@@ -21,9 +24,9 @@ class StorePracticeAction
 
         PracticeStatusLog::create([
             'practice_id' => $practice->id,
-            'user_id'     => $createdBy,
-            'old_status'  => null,
-            'new_status'  => $practice->status,
+            'user_id' => $createdBy,
+            'old_status' => null,
+            'new_status' => $practice->status,
         ]);
 
         return $practice;

@@ -8,18 +8,20 @@ use App\Http\Requests\UpdateBranchRequest;
 use App\Models\Branch;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class BranchController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Branch::class);
 
         return response()->json([
             'data' => Branch::with('employees')
-                ->select('id', 'name', 'address', 'city', 'province', 'postal_code', 'phone', 'vat_number', 'is_active')
+                ->whereIn('id', $request->user()->accessibleBranchIds())
+                ->select('id', 'parent_id', 'name', 'address', 'city', 'province', 'postal_code', 'phone', 'vat_number', 'is_active')
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -28,6 +30,8 @@ class BranchController extends Controller
     public function show(Branch $branch): JsonResponse
     {
         $this->authorize('viewAny', Branch::class);
+
+        abort_unless(request()->user()->canAccessBranchId($branch->id), 403);
 
         return response()->json([
             'data' => $branch->load('employees'),
@@ -72,11 +76,12 @@ class BranchController extends Controller
     /**
      * Get active branches for dropdowns (no employees relation).
      */
-    public function active(): JsonResponse
+    public function active(Request $request): JsonResponse
     {
         return response()->json([
             'data' => Branch::active()
-                ->select('id', 'name', 'address', 'city', 'province', 'postal_code', 'phone')
+                ->whereIn('id', $request->user()->accessibleBranchIds())
+                ->select('id', 'parent_id', 'name', 'address', 'city', 'province', 'postal_code', 'phone')
                 ->orderBy('name')
                 ->get(),
         ]);

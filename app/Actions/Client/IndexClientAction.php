@@ -2,7 +2,9 @@
 
 namespace App\Actions\Client;
 
+use App\Models\Branch;
 use App\Models\ClientProfile;
+use App\Models\User;
 use App\Traits\Sortable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -21,9 +23,17 @@ class IndexClientAction
         'city' => 'city',
     ];
 
-    public function execute(Request $request): LengthAwarePaginator
+    public function execute(Request $request, User $user): LengthAwarePaginator
     {
         $query = ClientProfile::query();
+
+        if (Branch::query()->exists()) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
+
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', (int) $request->branch_id);
+        }
 
         if ($request->search) {
             $search = '%'.$request->search.'%';
@@ -46,6 +56,6 @@ class IndexClientAction
             $query->orderBy('first_name');
         }
 
-        return $query->with('user')->paginate(20)->withQueryString();
+        return $query->with(['user', 'branch:id,name'])->paginate(20)->withQueryString();
     }
 }

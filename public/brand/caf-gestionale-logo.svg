@@ -1,0 +1,9 @@
+<svg width="430" height="96" viewBox="0 0 430 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="88" height="88" rx="24" fill="#2563EB" />
+    <path d="M27 28H48V48H69M48 48V68H69" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="27" cy="28" r="7" fill="white" />
+    <circle cx="69" cy="48" r="7" fill="white" />
+    <circle cx="69" cy="68" r="7" fill="white" />
+    <text x="116" y="59" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="-1">CAF</text>
+    <text x="190" y="59" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="500" letter-spacing="-1">Gestionale</text>
+</svg>

@@ -19,7 +19,17 @@ class AppointmentPolicy
 
     public function view(User $user, Appointment $appointment): bool
     {
-        if ($user->hasPermissionTo('appointments.view-any')) return true;
+        if ($user->clientProfile?->id === $appointment->client_profile_id) {
+            return true;
+        }
+
+        if (! $user->canAccessBranchId($appointment->branch_id)) {
+            return false;
+        }
+
+        if ($user->hasPermissionTo('appointments.view-any')) {
+            return true;
+        }
 
         return $user->hasPermissionTo('appointments.view-own') && $appointment->assigned_user_id === $user->id;
     }
@@ -31,12 +41,12 @@ class AppointmentPolicy
 
     public function update(User $user, Appointment $appointment): bool
     {
-        return $user->hasPermissionTo('appointments.update');
+        return $user->canAccessBranchId($appointment->branch_id) && $user->hasPermissionTo('appointments.update');
     }
 
     public function delete(User $user, Appointment $appointment): bool
     {
-        return $user->hasPermissionTo('appointments.delete');
+        return $user->canAccessBranchId($appointment->branch_id) && $user->hasPermissionTo('appointments.delete');
     }
 
     public function assign(User $user): bool

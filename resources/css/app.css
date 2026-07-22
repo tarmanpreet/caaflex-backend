@@ -5,34 +5,34 @@
 @layer base {
   :root {
     color-scheme: light;
-    --color-background: #f4f6f8;
-    --color-surface: #f8f9fa;
+    --color-background: #f6f8fc;
+    --color-surface: #f8fafc;
     --color-surface-container-lowest: #ffffff;
-    --color-surface-container-low: #f1f4f6;
-    --color-surface-container: #eaeff1;
-    --color-surface-container-high: #e3e9ec;
-    --color-surface-container-highest: #dbe4e7;
-    --color-inverse-surface: #1d2629;
-    --color-on-surface: #2b3437;
-    --color-on-surface-variant: #586064;
-    --color-primary: #0056d2;
-    --color-primary-dim: #004bb9;
+    --color-surface-container-low: #f1f5f9;
+    --color-surface-container: #e8eef7;
+    --color-surface-container-high: #e2e8f0;
+    --color-surface-container-highest: #cbd5e1;
+    --color-inverse-surface: #0f172a;
+    --color-on-surface: #0f172a;
+    --color-on-surface-variant: #526079;
+    --color-primary: #2563eb;
+    --color-primary-dim: #1d4ed8;
     --color-on-primary: #ffffff;
-    --color-primary-container: #dae2ff;
-    --color-on-primary-container: #004ab7;
-    --color-secondary: #5f5b71;
-    --color-secondary-container: #e5def9;
-    --color-on-secondary-container: #342f47;
-    --color-tertiary: #735571;
-    --color-tertiary-container: #ffd6f9;
-    --color-tertiary-fixed-dim: #f0b8ec;
-    --color-on-tertiary-container: #5a3f58;
-    --color-error: #9f403d;
-    --color-on-error: #fff7f6;
-    --color-error-container: #fe8983;
-    --color-on-error-container: #752121;
-    --color-outline: #737c7f;
-    --color-outline-variant: #abb3b7;
+    --color-primary-container: #dbeafe;
+    --color-on-primary-container: #1e40af;
+    --color-secondary: #047857;
+    --color-secondary-container: #d1fae5;
+    --color-on-secondary-container: #065f46;
+    --color-tertiary: #7c3aed;
+    --color-tertiary-container: #ede9fe;
+    --color-tertiary-fixed-dim: #c4b5fd;
+    --color-on-tertiary-container: #5b21b6;
+    --color-error: #dc2626;
+    --color-on-error: #ffffff;
+    --color-error-container: #fee2e2;
+    --color-on-error-container: #991b1b;
+    --color-outline: #64748b;
+    --color-outline-variant: #cbd5e1;
 
     /* @vueform/multiselect — map its default-theme CSS vars onto our design
        tokens. The default theme hardcodes #fff backgrounds and leaves the
@@ -40,10 +40,18 @@
        dark the inherited text renders white-on-white (the "blank select"
        bug). These reference the --color-* tokens, which .dark redefines on
        <html>, so the component adapts to light/dark automatically. */
-    --ms-bg: var(--color-surface-container-high);
+    --ms-font-size: 0.875rem;
+    --ms-line-height: 1.25rem;
+    --ms-bg: var(--color-surface-container-lowest);
     --ms-bg-disabled: var(--color-surface-container);
+    --ms-border-width: 1px;
     --ms-border-color: var(--color-outline-variant);
+    --ms-border-width-active: 1px;
     --ms-border-color-active: var(--color-primary);
+    --ms-radius: 0.75rem;
+    --ms-py: 0.625rem;
+    --ms-px: 0.875rem;
+    --ms-ring-width: 3px;
     --ms-ring-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
     --ms-placeholder-color: var(--color-on-surface-variant);
     --ms-caret-color: var(--color-on-surface-variant);
@@ -52,6 +60,12 @@
     --ms-spinner-color: var(--color-primary);
     --ms-dropdown-bg: var(--color-surface-container-lowest);
     --ms-dropdown-border-color: var(--color-outline-variant);
+    --ms-dropdown-radius: 0.75rem;
+    --ms-dropdown-border-width: 1px;
+    --ms-option-font-size: 0.875rem;
+    --ms-option-line-height: 1.25rem;
+    --ms-option-py: 0.625rem;
+    --ms-option-px: 0.875rem;
     --ms-option-color-pointed: var(--color-on-surface);
     --ms-option-bg-pointed: var(--color-surface-container-low);
     --ms-option-color-selected: var(--color-on-primary);
@@ -81,48 +95,300 @@
 
   .dark {
     color-scheme: dark;
-    --color-background: #020617;
-    --color-surface: #111827;
-    --color-surface-container-lowest: #030712;
-    --color-surface-container-low: #1f2937;
-    --color-surface-container: #374151;
-    --color-surface-container-high: #4b5563;
-    --color-surface-container-highest: #6b7280;
-    --color-inverse-surface: #e5e7eb;
-    --color-on-surface: #f9fafb;
-    --color-on-surface-variant: #d1d5db;
-    --color-primary: #818cf8;
-    --color-primary-dim: #6366f1;
-    --color-on-primary: #ffffff;
-    --color-primary-container: #3730a3;
-    --color-on-primary-container: #e0e7ff;
-    --color-secondary: #cbc2db;
-    --color-secondary-container: #4a4458;
-    --color-on-secondary-container: #e8def8;
-    --color-tertiary: #e2bbdd;
-    --color-tertiary-container: #5a3f58;
-    --color-tertiary-fixed-dim: #735571;
-    --color-on-tertiary-container: #ffd6f9;
-    --color-error: #f87171;
-    --color-on-error: #450a0a;
-    --color-error-container: #991b1b;
-    --color-on-error-container: #fecaca;
-    --color-outline: #6b7280;
-    --color-outline-variant: #4b5563;
+    --color-background: #080d18;
+    --color-surface: #0d1422;
+    --color-surface-container-lowest: #111a2b;
+    --color-surface-container-low: #151f32;
+    --color-surface-container: #1a263a;
+    --color-surface-container-high: #223047;
+    --color-surface-container-highest: #2b3a53;
+    --color-inverse-surface: #f4f7fc;
+    --color-on-surface: #f4f7fc;
+    --color-on-surface-variant: #a6b2c6;
+    --color-primary: #79afff;
+    --color-primary-dim: #5693eb;
+    --color-on-primary: #07111f;
+    --color-primary-container: #19365f;
+    --color-on-primary-container: #d7e8ff;
+    --color-secondary: #55d8ad;
+    --color-secondary-container: #123f36;
+    --color-on-secondary-container: #c4f8e6;
+    --color-tertiary: #c3adff;
+    --color-tertiary-container: #3a2d66;
+    --color-tertiary-fixed-dim: #8e72df;
+    --color-on-tertiary-container: #eee8ff;
+    --color-error: #ff8585;
+    --color-on-error: #2b070a;
+    --color-error-container: #5c252a;
+    --color-on-error-container: #ffd9d9;
+    --color-outline: #73829b;
+    --color-outline-variant: #2a3850;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-background font-body text-on-surface;
+  }
+
+  ::selection {
+    @apply bg-primary-container text-on-primary-container;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
 @layer components {
   .app-surface {
-    @apply bg-surface-container-lowest text-on-surface ring-1 ring-outline-variant/10 shadow-[0px_20px_40px_rgba(12,15,16,0.06)];
+    @apply rounded-2xl border border-outline-variant bg-surface-container-lowest text-on-surface shadow-[0_12px_36px_rgba(15,23,42,0.06)];
   }
 
   .app-surface-muted {
-    @apply bg-surface-container-low text-on-surface ring-1 ring-outline-variant/10;
+    @apply rounded-2xl border border-outline-variant bg-surface-container-low text-on-surface;
   }
 
   .app-input {
-    @apply w-full rounded-xl border-0 bg-surface-container-high text-on-surface placeholder:text-on-surface-variant focus:ring-2;
+    @apply min-h-[44px] w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-3.5 py-2.5 text-sm text-on-surface shadow-sm placeholder:text-on-surface-variant transition duration-200 hover:border-outline focus:border-primary focus:ring-2;
     --tw-ring-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  }
+
+  .app-select {
+    @apply min-h-[44px] w-full rounded-xl border border-outline-variant bg-surface-container-lowest py-2.5 pl-3.5 pr-11 text-sm text-on-surface shadow-sm transition duration-200 hover:border-outline focus:border-primary focus:ring-2 disabled:cursor-not-allowed disabled:bg-surface-container-low disabled:opacity-70;
+    --tw-ring-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  }
+
+  .app-card {
+    @apply overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-[0_12px_36px_rgba(15,23,42,0.06)];
+  }
+
+  .app-toolbar {
+    @apply flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .app-icon-button {
+    @apply inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-on-surface-variant transition duration-200 hover:bg-surface-container-low hover:text-primary focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40;
+  }
+
+  .app-shell button,
+  .app-shell a {
+    @apply motion-reduce:transition-none;
+  }
+
+  /* Compatibility layer for legacy pages. It maps old utility colors to the
+     semantic design tokens without changing page behavior or data flow. */
+  .app-shell .bg-white,
+  .dark .app-shell .dark\:bg-gray-800,
+  .dark .app-shell .dark\:bg-gray-900 {
+    background-color: var(--color-surface-container-lowest) !important;
+  }
+
+  .app-shell .bg-gray-50,
+  .app-shell .bg-gray-100,
+  .dark .app-shell .dark\:bg-gray-900\/50 {
+    background-color: var(--color-surface-container-low) !important;
+  }
+
+  .app-shell .text-gray-900,
+  .app-shell .text-gray-800,
+  .dark .app-shell .dark\:text-gray-100,
+  .dark .app-shell .dark\:text-gray-200,
+  .dark .app-shell .dark\:text-gray-300 {
+    color: var(--color-on-surface) !important;
+  }
+
+  .app-shell .text-gray-500,
+  .app-shell .text-gray-600,
+  .app-shell .text-gray-700,
+  .dark .app-shell .dark\:text-gray-400 {
+    color: var(--color-on-surface-variant) !important;
+  }
+
+  .app-shell .border-gray-200,
+  .app-shell .border-gray-300,
+  .dark .app-shell .dark\:border-gray-600,
+  .dark .app-shell .dark\:border-gray-700 {
+    border-color: var(--color-outline-variant) !important;
+  }
+
+  .app-shell .bg-indigo-600,
+  .app-shell .bg-indigo-700 {
+    background-color: var(--color-primary) !important;
+  }
+
+  .app-shell .text-indigo-600,
+  .dark .app-shell .dark\:text-indigo-400 {
+    color: var(--color-primary) !important;
+  }
+
+  .auth-shell .text-gray-900,
+  .dark .auth-shell .dark\:text-gray-100 {
+    color: var(--color-on-surface) !important;
+  }
+
+  .auth-shell .text-gray-600,
+  .dark .auth-shell .dark\:text-gray-400 {
+    color: var(--color-on-surface-variant) !important;
+  }
+
+  .auth-shell a {
+    @apply font-medium text-primary decoration-primary underline-offset-4 transition duration-200 hover:text-primary-dim;
+  }
+
+  .app-shell input:not([type='checkbox']):not([type='radio']):not([type='color']),
+  .app-shell textarea {
+    border-color: var(--color-outline-variant);
+    background-color: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+  }
+
+  .app-shell select,
+  .auth-shell select {
+    min-height: 44px !important;
+    width: 100%;
+    border: 1px solid var(--color-outline-variant) !important;
+    border-radius: 0.75rem !important;
+    background-color: var(--color-surface-container-lowest) !important;
+    background-position: right 0.875rem center !important;
+    background-size: 1rem 1rem !important;
+    padding-block: 0.625rem !important;
+    padding-left: 0.875rem !important;
+    padding-right: 2.75rem !important;
+    color: var(--color-on-surface) !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    box-shadow: 0 1px 2px rgba(8, 13, 24, 0.08) !important;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+  }
+
+  .app-shell select:hover:not(:disabled),
+  .auth-shell select:hover:not(:disabled) {
+    border-color: var(--color-outline) !important;
+  }
+
+  .app-shell select:focus,
+  .auth-shell select:focus {
+    border-color: var(--color-primary) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
+  }
+
+  .app-shell select:disabled,
+  .auth-shell select:disabled {
+    cursor: not-allowed;
+    background-color: var(--color-surface-container-low) !important;
+    opacity: 0.7;
+  }
+
+  .app-shell select option,
+  .auth-shell select option {
+    background-color: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+  }
+
+  .multiselect {
+    min-height: 44px;
+    box-shadow: 0 1px 2px rgba(8, 13, 24, 0.08);
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+  }
+
+  .multiselect:hover:not(.is-disabled):not(.is-active) {
+    border-color: var(--color-outline);
+  }
+
+  .multiselect-dropdown {
+    margin-top: 0.375rem;
+    overflow: hidden;
+    box-shadow: 0 18px 45px rgba(8, 13, 24, 0.22);
+  }
+
+  .multiselect-search,
+  .multiselect-tags-search {
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .app-shell main > .py-12 {
+    padding-block: 0 !important;
+  }
+
+  .app-shell main .max-w-7xl > .mb-6.flex,
+  .app-shell main .max-w-7xl > .mb-5.flex {
+    @apply rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm;
+  }
+
+  .app-shell main .max-w-7xl > .bg-white {
+    @apply rounded-2xl border border-outline-variant shadow-[0_12px_36px_rgba(15,23,42,0.06)];
+  }
+
+  .app-shell input[type='checkbox'],
+  .app-shell input[type='radio'] {
+    accent-color: var(--color-primary);
+  }
+
+  .app-shell .fc {
+    --fc-border-color: var(--color-outline-variant);
+    --fc-page-bg-color: var(--color-surface-container-lowest);
+    --fc-neutral-bg-color: var(--color-surface-container-low);
+    --fc-neutral-text-color: var(--color-on-surface-variant);
+    --fc-button-bg-color: var(--color-primary);
+    --fc-button-border-color: var(--color-primary);
+    --fc-button-hover-bg-color: var(--color-primary-dim);
+    --fc-button-hover-border-color: var(--color-primary-dim);
+    --fc-button-active-bg-color: var(--color-primary-dim);
+    --fc-button-active-border-color: var(--color-primary-dim);
+    --fc-today-bg-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-on-surface);
+  }
+
+  .app-shell .fc .fc-button {
+    @apply min-h-[40px] rounded-lg px-3 text-sm font-semibold shadow-none transition duration-200;
+  }
+
+  .app-shell .fc-theme-standard td,
+  .app-shell .fc-theme-standard th,
+  .app-shell .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--color-outline-variant);
+  }
+
+  .app-shell .fc .fc-col-header-cell,
+  .app-shell .fc .fc-list-day-cushion {
+    background-color: var(--color-surface-container-low);
+  }
+
+  .Vue-Toastification__toast {
+    border-radius: 1rem !important;
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18) !important;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  .Vue-Toastification__toast--success {
+    background-color: #047857 !important;
+  }
+
+  .Vue-Toastification__toast--error {
+    background-color: #b91c1c !important;
+  }
+
+  .app-shell .shadow-xl,
+  .app-shell .shadow-2xl {
+    --tw-shadow: 0 16px 40px rgba(15, 23, 42, 0.09);
+    --tw-shadow-colored: 0 16px 40px var(--tw-shadow-color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
