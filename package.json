@@ -29,6 +29,8 @@
         "@fullcalendar/vue3": "^6.1.20",
         "@heroicons/vue": "^2.2.0",
         "@vueform/multiselect": "^2.6.11",
+        "laravel-echo": "^2.4.0",
+        "pusher-js": "^8.5.0",
         "vue-cal": "^4.10.2",
         "vue-toastification": "^2.0.0-rc.5"
     }

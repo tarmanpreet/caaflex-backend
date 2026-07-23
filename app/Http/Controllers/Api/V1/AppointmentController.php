@@ -89,7 +89,7 @@ class AppointmentController extends Controller
         ], 201);
     }
 
-    public function destroy(Appointment $appointment): JsonResponse
+    public function destroy(Appointment $appointment, UpdateAppointmentAction $action): JsonResponse
     {
         $client = auth()->user()->clientProfile;
 
@@ -101,7 +101,7 @@ class AppointmentController extends Controller
             return response()->json(['message' => 'Impossibile cancellare un appuntamento completato.'], 422);
         }
 
-        $appointment->update(['status' => 'cancellato']);
+        $action->execute(['status' => 'cancellato'], $appointment, request()->user()->id);
 
         return response()->json(['message' => 'Appuntamento cancellato.']);
     }
@@ -127,7 +127,7 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function reschedule(Request $request, Appointment $appointment): JsonResponse
+    public function reschedule(Request $request, Appointment $appointment, UpdateAppointmentAction $action): JsonResponse
     {
         $this->authorize('update', $appointment);
 
@@ -136,7 +136,11 @@ class AppointmentController extends Controller
             'duration_minutes' => ['required', 'integer', 'min:5'],
         ]);
 
-        $appointment->update($request->only('scheduled_at', 'duration_minutes'));
+        $appointment = $action->execute(
+            $request->only('scheduled_at', 'duration_minutes'),
+            $appointment,
+            $request->user()->id,
+        );
 
         return response()->json([
             'message' => 'Appuntamento riprogrammato.',

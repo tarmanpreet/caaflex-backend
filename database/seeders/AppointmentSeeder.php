@@ -50,12 +50,12 @@ class AppointmentSeeder extends Seeder
             foreach ($slots as $slot) {
                 UserAvailability::updateOrCreate(
                     [
-                        'user_id'     => $employee->id,
+                        'user_id' => $employee->id,
                         'day_of_week' => $slot['day_of_week'],
                     ],
                     [
                         'time_from' => $slot['time_from'],
-                        'time_to'   => $slot['time_to'],
+                        'time_to' => $slot['time_to'],
                     ]
                 );
             }
@@ -64,23 +64,24 @@ class AppointmentSeeder extends Seeder
 
     private function seedAppointments(): void
     {
-        $admin         = User::where('email', env('SEED_ADMIN_EMAIL', 'admin@email.com'))->first();
-        $clients       = ClientProfile::all();
-        $employees     = User::role('employee')->get();
+        $admin = User::where('email', env('SEED_ADMIN_EMAIL', 'admin@email.com'))->first();
+        $clients = ClientProfile::all();
+        $employees = User::role('employee')->get();
         $practiceTypes = PracticeType::all();
 
         if ($clients->isEmpty() || $employees->isEmpty() || $practiceTypes->isEmpty()) {
             $this->command->warn('Skipping appointments: missing clients, employees, or practice types.');
+
             return;
         }
 
         $typeMap = [
             '730 - Dichiarazione dei Redditi' => '730',
-            'ISEE - Attestazione'             => 'ISEE',
-            'Successione'                     => 'SUCCESSIONE',
-            'IMU/TASI'                        => 'IMU_TASI',
-            'RED - Redditi Pensionati'        => 'RED_INPS',
-            'Bonus Edilizi'                   => 'BONUS_AGEVOLAZIONI',
+            'ISEE - Attestazione' => 'ISEE',
+            'Successione' => 'SUCCESSIONE',
+            'IMU/TASI' => 'IMU_TASI',
+            'RED - Redditi Pensionati' => 'RED_INPS',
+            'Bonus Edilizi' => 'BONUS_AGEVOLAZIONI',
         ];
 
         $notes = [
@@ -120,30 +121,31 @@ class AppointmentSeeder extends Seeder
 
         foreach ($appointments as $i => $data) {
             $practiceType = $practiceTypes[$i % $practiceTypes->count()];
-            $client       = $clients[$i % $clients->count()];
-            $employee     = $employees[$i % $employees->count()];
-            $scheduledAt  = Carbon::now()->addDays($data['days'])->setTimeFromTimeString($data['hour']);
+            $client = $clients[$i % $clients->count()];
+            $employee = $employees[$i % $employees->count()];
+            $scheduledAt = Carbon::now()->addDays($data['days'])->setTimeFromTimeString($data['hour']);
 
             $appointment = Appointment::create([
                 'client_profile_id' => $client->id,
-                'assigned_user_id'  => $employee->id,
-                'practice_type_id'  => $practiceType->id,
-                'scheduled_at'      => $scheduledAt,
-                'duration_minutes'  => $practiceType->duration_minutes,
-                'status'            => $data['status'],
-                'notes'             => $notes[$i % count($notes)],
-                'created_by'        => $admin->id,
+                'assigned_user_id' => $employee->id,
+                'practice_type_id' => $practiceType->id,
+                'scheduled_at' => $scheduledAt,
+                'duration_minutes' => $practiceType->duration_minutes,
+                'status' => $data['status'],
+                'notes' => $notes[$i % count($notes)],
+                'created_by' => $admin->id,
             ]);
 
             if ($data['status'] === 'confermato') {
                 $practiceTypeName = $typeMap[$practiceType->name] ?? 'ALTRO';
 
                 $practice = Practice::create([
+                    'tracking_code' => Practice::uniqueTrackingCode(),
                     'client_profile_id' => $client->id,
-                    'type'              => $practiceTypeName,
-                    'practice_type_id'  => $practiceType->id,
-                    'status'            => 'in_lavorazione',
-                    'created_by'        => $admin->id,
+                    'type' => $practiceTypeName,
+                    'practice_type_id' => $practiceType->id,
+                    'status' => 'in_lavorazione',
+                    'created_by' => $admin->id,
                 ]);
 
                 $appointment->update(['practice_id' => $practice->id]);

@@ -4,11 +4,13 @@ namespace App\Actions\Appointment;
 
 use App\Models\Appointment;
 use App\Models\AutoConfirmSlot;
+use App\Services\NotificationManager;
 
 class StoreAppointmentAction
 {
     public function __construct(
         protected ConfirmAppointmentAction $confirmAction,
+        protected NotificationManager $notifications,
     ) {}
 
     public function execute(array $data, int $createdBy): Appointment
@@ -25,7 +27,22 @@ class StoreAppointmentAction
             $this->confirmAction->execute($appointment, $createdBy);
         }
 
-        return $appointment->refresh();
+        $appointment->refresh()->load(['client.user', 'assignedUser', 'practiceType']);
+        $recipients = collect([$appointment->assignedUser, $appointment->client?->user])->filter();
+        $clientName = trim($appointment->client->first_name.' '.$appointment->client->last_name);
+
+        $this->notifications->send(
+            $recipients,
+            'appointments.created',
+            'appointments',
+            $status === 'confermato' ? 'Appuntamento confermato' : 'Nuovo appuntamento',
+            "È stato creato un appuntamento per {$clientName}.",
+            $appointment,
+            route('appointments.show', $appointment, false),
+            $createdBy,
+        );
+
+        return $appointment;
     }
 
     protected function determineStatus(array $data): string

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Practice;
 use App\Models\ClientProfile;
+use App\Models\Practice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,6 +19,7 @@ class PracticeFactory extends Factory
     public function definition(): array
     {
         return [
+            'tracking_code' => fn (): string => Practice::uniqueTrackingCode(),
             'client_profile_id' => ClientProfile::factory(),
             'type' => fake()->randomElement(Practice::TYPES),
             'status' => fake()->randomElement(Practice::STATUSES),

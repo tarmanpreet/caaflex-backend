@@ -137,7 +137,7 @@ class PracticeController extends Controller
             ->with('success', 'Practice deleted.');
     }
 
-    public function assignUsers(Request $request, Practice $practice)
+    public function assignUsers(Request $request, Practice $practice, UpdatePracticeAction $action)
     {
         $this->authorize('assign', $practice);
 
@@ -146,7 +146,11 @@ class PracticeController extends Controller
             'user_ids.*' => ['exists:users,id'],
         ]);
 
-        $practice->assignedUsers()->sync($request->user_ids);
+        $action->execute(
+            ['user_ids' => $request->input('user_ids')],
+            $practice,
+            $request->user()->id,
+        );
 
         return redirect()->back()
             ->with('success', 'Users assigned successfully.');

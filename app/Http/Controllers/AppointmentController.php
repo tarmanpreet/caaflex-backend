@@ -214,7 +214,7 @@ class AppointmentController extends Controller
         return response()->json($practices);
     }
 
-    public function reschedule(Request $request, Appointment $appointment)
+    public function reschedule(Request $request, Appointment $appointment, UpdateAppointmentAction $action)
     {
         $this->authorize('update', $appointment);
 
@@ -223,7 +223,11 @@ class AppointmentController extends Controller
             'duration_minutes' => ['required', 'integer', 'min:5'],
         ]);
 
-        $appointment->update($request->only('scheduled_at', 'duration_minutes'));
+        $action->execute(
+            $request->only('scheduled_at', 'duration_minutes'),
+            $appointment,
+            $request->user()->id,
+        );
 
         return response()->json(['ok' => true]);
     }

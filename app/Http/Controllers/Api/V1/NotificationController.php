@@ -3,96 +3,42 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ListNotificationsRequest;
+use App\Services\NotificationFeedService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Carbon;
 
 class NotificationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(ListNotificationsRequest $request, NotificationFeedService $feed): JsonResponse
     {
-        $notifications = auth()->user()
-            ->notifications()
-            ->latest()
-            ->get()
-            ->map(fn (DatabaseNotification $notification) => $this->transformNotification($notification));
-
-        return response()->json(['data' => $notifications]);
+        return response()->json($feed->paginate(
+            $request->user(),
+            $request->validated('section'),
+            $request->unreadFilter(),
+            (int) ($request->validated('per_page') ?? 20),
+        ));
     }
 
     public function unreadCount(): JsonResponse
     {
-        return response()->json([
-            'data' => [
-                'unread_count' => auth()->user()->unreadNotifications()->count(),
-            ],
-        ]);
+        return response()->json(['data' => ['unread_count' => request()->user()->unreadNotifications()->count()]]);
     }
 
-    public function markAsRead(string $notification): JsonResponse
+    public function markAsRead(string $notification, NotificationFeedService $feed): JsonResponse
     {
-        $record = $this->findUserNotification($notification);
+        $record = request()->user()->notifications()->whereKey($notification)->firstOrFail();
         $record->markAsRead();
 
         return response()->json([
             'message' => 'Notifica segnata come letta.',
-            'data' => $this->transformNotification($record->fresh()),
+            'data' => $feed->transform($record->fresh()),
         ]);
     }
 
     public function markAllAsRead(): JsonResponse
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        request()->user()->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->json(['message' => 'Notifiche segnate come lette.']);
-    }
-
-    private function findUserNotification(string $notificationId): DatabaseNotification
-    {
-        return auth()->user()
-            ->notifications()
-            ->whereKey($notificationId)
-            ->firstOrFail();
-    }
-
-    private function transformNotification(DatabaseNotification $notification): array
-    {
-        $title = data_get($notification->data, 'title')
-            ?? $this->defaultTitle($notification);
-
-        $body = data_get($notification->data, 'body')
-            ?? $this->defaultBody($notification);
-
-        return [
-            'id' => $notification->id,
-            'title' => $title,
-            'body' => $body,
-            'read_at' => optional($notification->read_at)?->toIso8601String(),
-            'created_at' => optional($notification->created_at)?->toIso8601String(),
-        ];
-    }
-
-    private function defaultTitle(DatabaseNotification $notification): string
-    {
-        if ($notification->type === 'App\\Notifications\\DeadlineReminderNotification') {
-            return 'Promemoria scadenza';
-        }
-
-        return 'Nuova notifica';
-    }
-
-    private function defaultBody(DatabaseNotification $notification): string
-    {
-        if ($notification->type === 'App\\Notifications\\DeadlineReminderNotification') {
-            $deadlineAt = data_get($notification->data, 'deadline_at');
-            $formatted = $deadlineAt ? Carbon::parse($deadlineAt)->format('d/m H:i') : null;
-            $title = data_get($notification->data, 'title', 'Scadenza');
-
-            return $formatted
-                ? sprintf('%s entro il %s', $title, $formatted)
-                : (string) $title;
-        }
-
-        return 'Hai ricevuto una nuova notifica.';
     }
 }

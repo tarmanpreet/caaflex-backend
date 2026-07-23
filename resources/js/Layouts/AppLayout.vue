@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import { useDarkMode } from '@/Composables/useDarkMode.js';
@@ -145,6 +146,8 @@ const navItems = computed(() => {
                             </div>
 
                             <div class="ml-auto flex items-center gap-2 sm:gap-3">
+                                <NotificationBell v-if="$page.props.auth.user" :user="$page.props.auth.user" :realtime="$page.props.realtime" />
+
                                 <button type="button" @click="toggleDark" class="app-icon-button hidden sm:inline-flex" :aria-label="isDark ? 'Attiva modalità chiara' : 'Attiva modalità scura'" :title="isDark ? 'Modalità chiara' : 'Modalità scura'">
                                     <SunIcon v-if="isDark" class="h-5 w-5" />
                                     <MoonIcon v-else class="h-5 w-5" />
@@ -173,6 +176,7 @@ const navItems = computed(() => {
                                     <template #content>
                                         <div class="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Account</div>
                                         <DropdownLink :href="route('profile.show')">Profilo</DropdownLink>
+                                        <DropdownLink :href="route('notification-settings.show')">Impostazioni notifiche</DropdownLink>
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">Token API</DropdownLink>
                                         <div class="my-1 border-t border-outline-variant/10" />
                                         <form @submit.prevent="logout">

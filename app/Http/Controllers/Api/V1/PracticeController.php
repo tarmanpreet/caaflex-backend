@@ -21,7 +21,7 @@ class PracticeController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->can('viewAny', Practice::class) && !$user->hasPermissionTo('practices.view-own')) {
+        if (! $user->can('viewAny', Practice::class) && ! $user->hasPermissionTo('practices.view-own')) {
             abort(403);
         }
 
@@ -36,7 +36,7 @@ class PracticeController extends Controller
 
         return response()->json([
             'message' => 'Practice created.',
-            'data'    => $practice->load(['client', 'assignedUsers']),
+            'data' => $practice->load(['client', 'assignedUsers']),
         ], 201);
     }
 
@@ -59,7 +59,7 @@ class PracticeController extends Controller
 
         return response()->json([
             'message' => 'Practice updated.',
-            'data'    => $practice->fresh(['client', 'assignedUsers']),
+            'data' => $practice->fresh(['client', 'assignedUsers']),
         ]);
     }
 
@@ -74,16 +74,16 @@ class PracticeController extends Controller
         ]);
     }
 
-    public function assignUsers(Request $request, Practice $practice): JsonResponse
+    public function assignUsers(Request $request, Practice $practice, UpdatePracticeAction $action): JsonResponse
     {
         $this->authorize('assign', $practice);
 
         $request->validate([
-            'user_ids'   => ['required', 'array'],
+            'user_ids' => ['required', 'array'],
             'user_ids.*' => ['exists:users,id'],
         ]);
 
-        $practice->assignedUsers()->sync($request->user_ids);
+        $action->execute(['user_ids' => $request->input('user_ids')], $practice, $request->user()->id);
 
         return response()->json([
             'message' => 'Users assigned.',

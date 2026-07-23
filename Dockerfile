@@ -53,6 +53,7 @@ RUN apk add --no-cache \
     && docker-php-ext-install \
     pdo_mysql \
     bcmath \
+    pcntl \
     zip \
     intl \
     && apk add --no-cache --virtual .ext-deps $PHPIZE_DEPS linux-headers \

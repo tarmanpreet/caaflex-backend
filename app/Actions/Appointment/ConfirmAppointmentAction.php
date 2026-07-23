@@ -2,6 +2,7 @@
 
 namespace App\Actions\Appointment;
 
+use App\Mail\AppointmentConfirmedMail;
 use App\Models\Appointment;
 use App\Models\Practice;
 use Illuminate\Support\Facades\Mail;
@@ -23,14 +24,14 @@ class ConfirmAppointmentAction
             $appointment->update(['practice_id' => $practice->id]);
         }
 
-        $appointment->loadMissing(['client', 'assignedUser', 'practiceType']);
+        $appointment->loadMissing(['client.user', 'assignedUser', 'practiceType']);
 
         if ($appointment->client->email) {
-            Mail::queue(new \App\Mail\AppointmentConfirmedMail($appointment, 'client'));
+            Mail::queue(new AppointmentConfirmedMail($appointment, 'client'));
         }
 
         if ($appointment->assignedUser) {
-            Mail::queue(new \App\Mail\AppointmentConfirmedMail($appointment, 'user'));
+            Mail::queue(new AppointmentConfirmedMail($appointment, 'user'));
         }
     }
 }

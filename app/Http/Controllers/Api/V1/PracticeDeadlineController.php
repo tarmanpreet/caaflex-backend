@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\PracticeDeadline\StorePracticeDeadlineAction;
+use App\Actions\PracticeDeadline\UpdatePracticeDeadlineAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePracticeDeadlineRequest;
 use App\Http\Requests\UpdatePracticeDeadlineRequest;
-use App\Models\DeadlineReminder;
 use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -29,33 +30,11 @@ class PracticeDeadlineController extends Controller
         ]);
     }
 
-    public function store(StorePracticeDeadlineRequest $request, Practice $practice): JsonResponse
+    public function store(StorePracticeDeadlineRequest $request, Practice $practice, StorePracticeDeadlineAction $action): JsonResponse
     {
         $this->authorize('createDeadline', $practice);
 
-        $data = $request->validated();
-        $data['practice_id'] = $practice->id;
-        $data['created_by'] = $request->user('api')?->id ?? $request->user()->id;
-
-        if (!isset($data['status'])) {
-            $data['status'] = PracticeDeadline::STATUS_PENDING;
-        }
-
-        $deadline = PracticeDeadline::create($data);
-
-        DeadlineReminder::create([
-            'deadline_id' => $deadline->id,
-            'type' => DeadlineReminder::TYPE_EMAIL,
-            'minutes_before' => DeadlineReminder::MINUTES_DAY,
-            'sent' => false,
-        ]);
-
-        DeadlineReminder::create([
-            'deadline_id' => $deadline->id,
-            'type' => DeadlineReminder::TYPE_IN_APP,
-            'minutes_before' => DeadlineReminder::MINUTES_HOUR,
-            'sent' => false,
-        ]);
+        $deadline = $action->execute($request->validated(), $practice, $request->user()->id);
 
         return response()->json([
             'message' => 'Deadline created.',
@@ -72,11 +51,11 @@ class PracticeDeadlineController extends Controller
         ]);
     }
 
-    public function update(UpdatePracticeDeadlineRequest $request, Practice $practice, PracticeDeadline $deadline): JsonResponse
+    public function update(UpdatePracticeDeadlineRequest $request, Practice $practice, PracticeDeadline $deadline, UpdatePracticeDeadlineAction $action): JsonResponse
     {
         $this->authorize('updateDeadline', $practice);
 
-        $deadline->update($request->validated());
+        $action->execute($request->validated(), $practice, $deadline, $request->user()->id);
 
         return response()->json([
             'message' => 'Deadline updated.',

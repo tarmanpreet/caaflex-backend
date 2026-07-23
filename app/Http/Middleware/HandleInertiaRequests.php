@@ -43,6 +43,11 @@ class HandleInertiaRequests extends Middleware
                     'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                 ]) : null,
             ],
+            'realtime' => [
+                'enabled' => config('broadcasting.default') === 'reverb'
+                    && filled(config('broadcasting.connections.reverb.key')),
+                'key' => config('broadcasting.connections.reverb.key'),
+            ],
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -111,6 +112,16 @@ class User extends Authenticatable
     public function assignedAppointments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Appointment::class, 'assigned_user_id');
+    }
+
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(UserNotificationPreference::class);
+    }
+
+    public function notificationReminderPreferences(): HasMany
+    {
+        return $this->hasMany(UserNotificationReminderPreference::class);
     }
 
     public function practiceTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

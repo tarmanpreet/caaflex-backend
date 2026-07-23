@@ -40,6 +40,7 @@ class Practice extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
+        'tracking_code',
         'client_profile_id',
         'procedure_id',
         'type',

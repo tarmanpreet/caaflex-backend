@@ -32,10 +32,10 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         // Practice deadline routes
         Route::get('/practices/{practice}/deadlines', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'index'])->name('practices.deadlines.index');
-        Route::post('/practices/{practice}/deadlines', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'store'])->name('practices.deadlines.store');
-        Route::get('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'show'])->name('practices.deadlines.show');
-        Route::put('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'update'])->name('practices.deadlines.update');
-        Route::delete('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy');
+        Route::post('/practices/{practice}/deadlines', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'store'])->name('practices.deadlines.store')->scopeBindings();
+        Route::get('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'show'])->name('practices.deadlines.show')->scopeBindings();
+        Route::put('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'update'])->name('practices.deadlines.update')->scopeBindings();
+        Route::delete('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy')->scopeBindings();
 
         // Practice document routes
         Route::post('/practices/{practice}/documents', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'store']);
@@ -59,6 +59,8 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::get('/notifications/unread-count', [App\Http\Controllers\Api\V1\NotificationController::class, 'unreadCount']);
         Route::post('/notifications/{notification}/read', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
         Route::post('/notifications/read-all', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAllAsRead']);
+        Route::get('/notification-settings', [App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'show']);
+        Route::put('/notification-settings', [App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'update']);
 
         // Dashboard routes
         Route::get('/dashboard/notices', [App\Http\Controllers\Api\V1\DashboardNoticeController::class, 'index']);
