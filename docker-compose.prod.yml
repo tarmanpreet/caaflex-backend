@@ -1,12 +1,39 @@
 name: caf
 
 services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caf_caddy
+    restart: always
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - ${CADDY_DOMAIN:?CADDY_DOMAIN must be set}
+      - --to
+      - http://app:8080
+      - --header-up
+      - "X-Forwarded-Port: 443"
+      - --access-log
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - caf_network
+
   app:
     image: ${APP_IMAGE:-ghcr.io/tarmanpreet/caaflex-backend:latest}
     container_name: caf_app
     restart: always
-    ports:
-      - "${APP_PORT:-80}:8080"
+    expose:
+      - "8080"
     env_file:
       - path: .env
         required: true
@@ -51,6 +78,8 @@ services:
       - caf_network
 
 volumes:
+  caddy_data:
+  caddy_config:
   app_storage:
   app_bootstrap_cache:
   db_data:
