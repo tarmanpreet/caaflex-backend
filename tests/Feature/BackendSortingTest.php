@@ -64,6 +64,27 @@ class BackendSortingTest extends TestCase
         $this->assertSame('Rossi', $data[0]['last_name']);
     }
 
+    public function test_clients_index_searches_client_notes(): void
+    {
+        ClientProfile::factory()->create([
+            'first_name' => 'Mario',
+            'last_name' => 'Rossi',
+            'notes' => 'Richiamare dopo la consegna del CU.',
+        ]);
+        ClientProfile::factory()->create([
+            'first_name' => 'Luigi',
+            'last_name' => 'Bianchi',
+            'notes' => 'Documentazione completa.',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('clients.index', ['search' => 'consegna del CU']));
+
+        $data = $response->viewData('page')['props']['clients']['data'];
+        $this->assertCount(1, $data);
+        $this->assertSame('Rossi', $data[0]['last_name']);
+    }
+
     public function test_practices_index_sorts_by_id_desc_backend(): void
     {
         $client = ClientProfile::factory()->create();

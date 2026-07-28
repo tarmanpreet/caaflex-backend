@@ -42,7 +42,8 @@ class IndexClientAction
                     ->orWhere('last_name', 'like', $search)
                     ->orWhere('fiscal_code', 'like', $search)
                     ->orWhere('phone', 'like', $search)
-                    ->orWhere('city', 'like', $search);
+                    ->orWhere('city', 'like', $search)
+                    ->orWhere('notes', 'like', $search);
             });
         }
 
