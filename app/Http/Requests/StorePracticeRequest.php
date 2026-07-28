@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Branch;
+use App\Models\Practice;
+use App\Models\PracticeType;
 use App\Models\Procedure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,7 +30,7 @@ class StorePracticeRequest extends FormRequest
 
         return [
             'client_profile_id' => ['required', $clientRule],
-            'type' => ['required', 'in:730,ISEE,IMU_TASI,RED_INPS,SUCCESSIONE,BONUS_AGEVOLAZIONI,ALTRO'],
+            'type' => ['required', 'string', 'max:50'],
             'status' => ['nullable', 'in:nuova,in_lavorazione,in_attesa_documenti,completata,annullata,sospesa'],
             'reference_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'notes' => ['nullable', 'string'],
@@ -68,6 +70,25 @@ class StorePracticeRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             $procedureId = $this->procedure_id;
             $practiceTypeId = $this->practice_type_id;
+            $type = $this->string('type')->toString();
+            $practiceType = PracticeType::query()->where('name', $type)->first();
+
+            if ($practiceType === null && ! in_array($type, Practice::TYPES, true)) {
+                $validator->errors()->add('type', 'The selected practice type is invalid.');
+
+                return;
+            }
+
+            if ($practiceType !== null && ! $practiceTypeId) {
+                $practiceTypeId = $practiceType->id;
+                $this->merge(['practice_type_id' => $practiceTypeId]);
+            }
+
+            if ($practiceType !== null && $practiceTypeId && $practiceType->id !== (int) $practiceTypeId) {
+                $validator->errors()->add('practice_type_id', 'The practice_type_id does not match the selected type.');
+
+                return;
+            }
 
             if ($procedureId) {
                 $procedure = Procedure::find($procedureId);

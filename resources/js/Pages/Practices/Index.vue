@@ -13,6 +13,7 @@ const props = defineProps({
     practices: Object,
     filters: Object,
     summary: Object,
+    practiceTypes: Array,
 });
 
 const columns = [
@@ -29,6 +30,7 @@ const search = ref(props.filters?.search ?? '');
 const sortKey = ref(props.filters?.sort ?? 'id');
 const sortDir = ref(props.filters?.direction ?? 'desc');
 const statusFilter = ref(props.filters?.status ?? '');
+const practiceTypeFilter = ref(props.filters?.practice_type_id ?? '');
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 
 const performSearch = () => {
@@ -37,6 +39,7 @@ const performSearch = () => {
         sort: sortKey.value,
         direction: sortDir.value,
         status: statusFilter.value,
+        practice_type_id: practiceTypeFilter.value,
     }, { preserveState: true, replace: true });
 };
 
@@ -48,6 +51,7 @@ const onSort = ({ key, dir }) => {
         sort: key,
         direction: dir,
         status: statusFilter.value,
+        practice_type_id: practiceTypeFilter.value,
     }, { preserveState: true, replace: true });
 };
 
@@ -149,6 +153,16 @@ const statCards = computed(() => [
                                 <option value="completata">Completata</option>
                                 <option value="annullata">Annullata</option>
                                 <option value="sospesa">Sospesa</option>
+                            </select>
+                            <select
+                                v-model="practiceTypeFilter"
+                                class="h-11 rounded-2xl border-0 bg-surface-container-high px-4 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
+                                @change="performSearch"
+                            >
+                                <option value="">Tutti i tipi</option>
+                                <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.id">
+                                    {{ practiceType.name }}
+                                </option>
                             </select>
                             <button @click="performSearch" class="rounded-2xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest">Cerca</button>
                         </div>

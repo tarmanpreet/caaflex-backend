@@ -93,6 +93,10 @@ class IndexPracticeAction
             $query->where('type', $request->type);
         }
 
+        if ($request->filled('practice_type_id')) {
+            $query->where('practice_type_id', $request->integer('practice_type_id'));
+        }
+
         if ($request->filled('reference_year')) {
             $query->where('reference_year', (int) $request->reference_year);
         }

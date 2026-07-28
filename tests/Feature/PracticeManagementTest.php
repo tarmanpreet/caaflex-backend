@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ClientProfile;
 use App\Models\Practice;
+use App\Models\PracticeType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,6 +63,34 @@ class PracticeManagementTest extends TestCase
             );
     }
 
+    public function test_admin_can_filter_practices_by_configured_type(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $selectedType = PracticeType::factory()->create(['name' => 'ISEE universitario']);
+        $otherType = PracticeType::factory()->create(['name' => 'Dichiarazione IMU']);
+        $selectedPractice = Practice::factory()->create([
+            'type' => 'ALTRO',
+            'practice_type_id' => $selectedType->id,
+        ]);
+        Practice::factory()->create([
+            'type' => 'ALTRO',
+            'practice_type_id' => $otherType->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/practices?practice_type_id='.$selectedType->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Practices/Index')
+                ->where('filters.practice_type_id', (string) $selectedType->id)
+                ->has('practiceTypes', 2)
+                ->has('practices.data', 1)
+                ->where('practices.data.0.id', $selectedPractice->id)
+            );
+    }
+
     public function test_employee_sees_only_assigned_practices(): void
     {
         $employee = User::factory()->create();
@@ -117,6 +146,28 @@ class PracticeManagementTest extends TestCase
             'type' => '730',
             'status' => 'nuova',
             'created_by' => $admin->id,
+        ]);
+    }
+
+    public function test_admin_can_create_practice_with_a_configured_practice_type(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $client = ClientProfile::factory()->create();
+        $practiceType = PracticeType::factory()->create(['name' => 'Dichiarazione IMU personalizzata']);
+
+        $this->actingAs($admin)
+            ->post('/practices', [
+                'client_profile_id' => $client->id,
+                'type' => $practiceType->name,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('practices', [
+            'client_profile_id' => $client->id,
+            'type' => $practiceType->name,
+            'practice_type_id' => $practiceType->id,
         ]);
     }
 

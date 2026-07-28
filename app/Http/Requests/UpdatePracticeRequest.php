@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Practice;
+use App\Models\PracticeType;
 use App\Models\Procedure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -22,7 +24,7 @@ class UpdatePracticeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['nullable', 'in:730,ISEE,IMU_TASI,RED_INPS,SUCCESSIONE,BONUS_AGEVOLAZIONI,ALTRO'],
+            'type' => ['nullable', 'string', 'max:50'],
             'status' => ['nullable', 'in:nuova,in_lavorazione,in_attesa_documenti,completata,annullata,sospesa'],
             'reference_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'notes' => ['nullable', 'string'],
@@ -63,6 +65,27 @@ class UpdatePracticeRequest extends FormRequest
             $procedureId = $this->procedure_id;
             $practiceTypeId = $this->practice_type_id;
             $practice = $this->route('practice');
+            $type = $this->string('type')->toString();
+            $practiceType = filled($type)
+                ? PracticeType::query()->where('name', $type)->first()
+                : null;
+
+            if (filled($type) && $practiceType === null && ! in_array($type, Practice::TYPES, true)) {
+                $validator->errors()->add('type', 'The selected practice type is invalid.');
+
+                return;
+            }
+
+            if ($practiceType !== null && ! $practiceTypeId) {
+                $practiceTypeId = $practiceType->id;
+                $this->merge(['practice_type_id' => $practiceTypeId]);
+            }
+
+            if ($practiceType !== null && $practiceTypeId && $practiceType->id !== (int) $practiceTypeId) {
+                $validator->errors()->add('practice_type_id', 'The practice_type_id does not match the selected type.');
+
+                return;
+            }
 
             if ($this->has('branch_id') && $practice?->client?->branch_id !== null && (int) $this->branch_id !== $practice->client->branch_id) {
                 $validator->errors()->add('branch_id', 'La filiale della pratica deve coincidere con quella del cliente.');

@@ -58,7 +58,6 @@ const canUpdateDeadline = computed(() => page.props.auth.user?.permissions?.incl
 const canDeleteDeadline = computed(() => page.props.auth.user?.permissions?.includes('practice-deadlines.delete'));
 
 // Constants
-const TYPES = ['730', 'ISEE', 'IMU_TASI', 'RED_INPS', 'SUCCESSIONE', 'BONUS_AGEVOLAZIONI', 'ALTRO'];
 const STATUSES = ['nuova', 'in_lavorazione', 'in_attesa_documenti', 'completata', 'annullata', 'sospesa'];
 
 // Edit Logic
@@ -119,13 +118,10 @@ watch(editMode, (newEditMode) => {
     }
 });
 
-// Create a map of practice type short codes to IDs for filtering
-// PracticeType.name follows pattern "730 - Dichiarazione dei Redditi", so we extract the short code
 const practiceTypeIdMap = computed(() => {
     const map = {};
     props.practiceTypes?.forEach(pt => {
-        const shortCode = pt.name.split(' - ')[0];
-        map[shortCode] = pt.id;
+        map[pt.name] = pt.id;
     });
     return map;
 });
@@ -423,7 +419,8 @@ const completionPercentage = computed(() => {
                             <div>
                                 <InputLabel for="edit-type" value="Tipo" />
                                 <select id="edit-type" v-model="editForm.type" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25">
-                                    <option v-for="t in TYPES" :key="t" :value="t">{{ t }}</option>
+                                    <option v-if="editForm.type && !(practiceTypes ?? []).some((practiceType) => practiceType.name === editForm.type)" :value="editForm.type">{{ editForm.type }}</option>
+                                    <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.name">{{ practiceType.name }}</option>
                                 </select>
                                 <InputError :message="editForm.errors.type" class="mt-1" />
                             </div>

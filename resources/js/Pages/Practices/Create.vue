@@ -22,7 +22,6 @@ const props = defineProps({
 
 const toast = useToast();
 
-const TYPES = ['730', 'ISEE', 'IMU_TASI', 'RED_INPS', 'SUCCESSIONE', 'BONUS_AGEVOLAZIONI', 'ALTRO'];
 const STATUSES = ['nuova', 'in_lavorazione', 'in_attesa_documenti', 'completata', 'annullata', 'sospesa'];
 
 const formatStatus = (status) => {
@@ -58,9 +57,8 @@ const {
 
 const practiceTypeIdMap = computed(() => {
     const map = {};
-    props.practiceTypes.forEach(pt => {
-        const shortCode = pt.name.split(' - ')[0];
-        map[shortCode] = pt.id;
+    (props.practiceTypes ?? []).forEach((practiceType) => {
+        map[practiceType.name] = practiceType.id;
     });
     return map;
 });
@@ -174,7 +172,9 @@ const steps = [
                                         required
                                     >
                                         <option value="" disabled>Seleziona tipo...</option>
-                                        <option v-for="t in TYPES" :key="t" :value="t">{{ t }}</option>
+                                        <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.name">
+                                            {{ practiceType.name }}
+                                        </option>
                                     </select>
                                     <InputError :message="form.errors.type" class="mt-2" />
                                 </div>
