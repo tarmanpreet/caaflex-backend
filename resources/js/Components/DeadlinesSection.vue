@@ -91,6 +91,7 @@ const editForm = useForm({
     title: '',
     notes: '',
     deadline_at: '',
+    status: 'pending',
     priority: 3,
     user_id: null,
 });
@@ -177,13 +178,13 @@ const deleteDeadline = () => {
 };
 
 // ── Quick Status Update ───────────────────────────────────────────────────────────
-const statusUpdateForm = useForm({});
+const statusUpdateForm = useForm({ status: '' });
 const updatingStatusId = ref(null);
 
 const updateStatus = (deadline, newStatus) => {
     updatingStatusId.value = deadline.id;
+    statusUpdateForm.status = newStatus;
     statusUpdateForm.put(route('practices.deadlines.update', [props.practiceId, deadline.id]), {
-        data: { status: newStatus },
         preserveScroll: true,
         onSuccess: () => {
             updatingStatusId.value = null;
@@ -224,6 +225,7 @@ const openEditModal = (deadline) => {
     editForm.title = deadline.title || '';
     editForm.notes = deadline.notes || '';
     editForm.deadline_at = deadlineAt;
+    editForm.status = deadline.status || 'pending';
     editForm.priority = deadline.priority || 3;
     editForm.user_id = deadline.user_id || null;
     editForm.clearErrors();
@@ -536,6 +538,21 @@ const closeDeleteModal = () => {
                             class="app-input mt-1 block w-full rounded-lg"
                         />
                         <InputError :message="editForm.errors.deadline_at" class="mt-1" />
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <InputLabel for="edit_deadline_status" value="Stato" />
+                        <select
+                            id="edit_deadline_status"
+                            v-model="editForm.status"
+                            class="app-input mt-1 block w-full rounded-lg"
+                        >
+                            <option v-for="(config, status) in STATUS_CONFIG" :key="status" :value="status">
+                                {{ config.label }}
+                            </option>
+                        </select>
+                        <InputError :message="editForm.errors.status" class="mt-1" />
                     </div>
 
                     <!-- Priority -->

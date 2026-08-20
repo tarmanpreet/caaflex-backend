@@ -63,6 +63,7 @@ const STATUSES = ['nuova', 'in_lavorazione', 'in_attesa_documenti', 'completata'
 // Edit Logic
 const editMode = ref(false);
 const trackingCodeCopied = ref(false);
+const confirmingCompletion = ref(false);
 
 const copyTrackingCode = async () => {
     if (!props.practice?.tracking_code || !navigator.clipboard) {
@@ -144,14 +145,26 @@ watch(() => editForm.procedure_id, (newProcedureId) => {
     }
 });
 
-const submitEdit = () => {
+const incompleteDeadlines = computed(() => (props.practice?.deadlines ?? []).filter((deadline) => !['completed', 'cancelled'].includes(deadline.status)));
+
+const persistEdit = () => {
     editForm.user_ids = [...selectedUserIds.value];
     editForm.put(route('practices.update', props.practice.id), {
         preserveScroll: true,
         onSuccess: () => {
             editMode.value = false;
+            confirmingCompletion.value = false;
         }
     });
+};
+
+const submitEdit = () => {
+    if (props.practice?.status !== 'completata' && editForm.status === 'completata' && incompleteDeadlines.value.length > 0) {
+        confirmingCompletion.value = true;
+        return;
+    }
+
+    persistEdit();
 };
 
 const cancelEdit = () => {
@@ -844,6 +857,26 @@ const completionPercentage = computed(() => {
                 >
                     Elimina Documento
                 </DangerButton>
+            </template>
+        </ConfirmationModal>
+
+        <ConfirmationModal :show="confirmingCompletion" @close="confirmingCompletion = false">
+            <template #title>
+                Completa pratica
+            </template>
+
+            <template #content>
+                Ci sono {{ incompleteDeadlines.length }} scadenze non completate. Chiudendo la pratica verranno completate anche tutte le scadenze associate ancora aperte.
+            </template>
+
+            <template #footer>
+                <SecondaryButton :disabled="editForm.processing" @click="confirmingCompletion = false">
+                    Torna alla modifica
+                </SecondaryButton>
+
+                <PrimaryButton class="ms-3" :disabled="editForm.processing" @click="persistEdit">
+                    Completa pratica e scadenze
+                </PrimaryButton>
             </template>
         </ConfirmationModal>
 

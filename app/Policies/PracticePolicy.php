@@ -68,6 +68,12 @@ class PracticePolicy
                 ($user->hasPermissionTo('practices.view-own') && $practice->assignedUsers()->where('users.id', $user->id)->exists()));
     }
 
+    public function viewAnyDeadline(User $user): bool
+    {
+        return $user->hasPermissionTo('practice-deadlines.view')
+            && ($user->hasPermissionTo('practices.view-any') || $user->hasPermissionTo('practices.view-own'));
+    }
+
     public function createDeadline(User $user, Practice $practice): bool
     {
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.create') &&

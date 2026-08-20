@@ -3,10 +3,12 @@
 namespace App\Actions\Practice;
 
 use App\Models\Practice;
+use App\Models\PracticeDeadline;
 use App\Models\PracticeStatusLog;
 use App\Models\User;
 use App\Services\NotificationManager;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class UpdatePracticeAction
 {
@@ -17,29 +19,36 @@ class UpdatePracticeAction
         $oldStatus = $practice->status;
         $oldAssignedUserIds = $practice->assignedUsers()->pluck('users.id')->map(fn ($id): int => (int) $id);
 
-        $updateData = Arr::except($data, ['user_ids']);
+        DB::transaction(function () use ($allData, $data, $oldStatus, $practice, $userId): void {
+            $updateData = Arr::except($data, ['user_ids']);
 
-        // Preserve branch_id even if null (validation removes nullable fields)
-        if (array_key_exists('branch_id', $allData)) {
-            $updateData['branch_id'] = $allData['branch_id'];
-        }
+            if (array_key_exists('branch_id', $allData)) {
+                $updateData['branch_id'] = $allData['branch_id'];
+            }
 
-        if (! empty($updateData)) {
-            $practice->update($updateData);
-        }
+            if (! empty($updateData)) {
+                $practice->update($updateData);
+            }
 
-        if ($oldStatus !== $practice->status) {
-            PracticeStatusLog::create([
-                'practice_id' => $practice->id,
-                'user_id' => $userId,
-                'old_status' => $oldStatus,
-                'new_status' => $practice->status,
-            ]);
-        }
+            if ($oldStatus !== $practice->status) {
+                PracticeStatusLog::create([
+                    'practice_id' => $practice->id,
+                    'user_id' => $userId,
+                    'old_status' => $oldStatus,
+                    'new_status' => $practice->status,
+                ]);
+            }
 
-        if (array_key_exists('user_ids', $data)) {
-            $practice->assignedUsers()->sync($data['user_ids']);
-        }
+            if (array_key_exists('user_ids', $data)) {
+                $practice->assignedUsers()->sync($data['user_ids']);
+            }
+
+            if ($oldStatus !== 'completata' && $practice->status === 'completata') {
+                $practice->deadlines()
+                    ->whereNotIn('status', [PracticeDeadline::STATUS_COMPLETED, PracticeDeadline::STATUS_CANCELLED])
+                    ->update(['status' => PracticeDeadline::STATUS_COMPLETED]);
+            }
+        });
 
         $practice->refresh()->load(['assignedUsers', 'client.user']);
         $newAssignedUserIds = $practice->assignedUsers->pluck('id')->map(fn ($id): int => (int) $id);

@@ -19,6 +19,10 @@ const toneMap = {
     confermato: 'bg-primary-container/80 text-on-primary-container',
     completato: 'bg-secondary-container text-on-secondary-container',
     cancellato: 'bg-surface-container-high text-on-surface-variant',
+    pending: 'bg-surface-container-high text-on-surface-variant',
+    in_progress: 'bg-primary/10 text-primary',
+    completed: 'bg-secondary-container text-on-secondary-container',
+    cancelled: 'bg-surface-container-high text-on-surface-variant',
 };
 
 const sizeMap = {

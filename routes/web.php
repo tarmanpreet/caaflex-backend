@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\PracticeDeadlineController;
+use App\Http\Controllers\PracticeDeadlineIndexController;
 use App\Http\Controllers\PracticeDocumentController;
 use App\Http\Controllers\PracticeNoteController;
 use App\Http\Controllers\PracticeTypeController;
@@ -59,6 +60,7 @@ Route::middleware([
     Route::get('/appointments-practices', [AppointmentController::class, 'practicesForModal'])->name('appointments.practicesForModal');
     Route::get('/appointments-calendar', [AppointmentController::class, 'calendarEvents'])->name('appointments.calendarEvents');
     Route::resource('practices', PracticeController::class)->except(['edit']);
+    Route::get('/deadlines', PracticeDeadlineIndexController::class)->name('deadlines.index');
     Route::post('/practices/{practice}/assign', [PracticeController::class, 'assignUsers'])->name('practices.assign');
 
     Route::resource('practice-types', PracticeTypeController::class)->except(['show']);

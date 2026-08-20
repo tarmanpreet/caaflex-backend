@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ClientProfile;
 use App\Models\Practice;
+use App\Models\PracticeDeadline;
 use App\Models\PracticeType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -256,6 +257,50 @@ class PracticeManagementTest extends TestCase
             'old_status' => 'nuova',
             'new_status' => 'in_lavorazione',
         ]);
+    }
+
+    public function test_completing_practice_completes_all_open_deadlines(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create(['status' => 'in_lavorazione']);
+        $pending = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+        $inProgress = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_IN_PROGRESS,
+        ]);
+        $cancelled = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_CANCELLED,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('practices.update', $practice), ['status' => 'completata'])
+            ->assertRedirect(route('practices.show', $practice));
+
+        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $pending->fresh()->status);
+        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $inProgress->fresh()->status);
+        $this->assertSame(PracticeDeadline::STATUS_CANCELLED, $cancelled->fresh()->status);
+    }
+
+    public function test_updating_practice_without_completing_it_keeps_deadlines_open(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create(['status' => 'nuova']);
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('practices.update', $practice), ['status' => 'in_lavorazione'])
+            ->assertRedirect(route('practices.show', $practice));
+
+        $this->assertSame(PracticeDeadline::STATUS_PENDING, $deadline->fresh()->status);
     }
 
     public function test_admin_can_assign_users_on_update(): void

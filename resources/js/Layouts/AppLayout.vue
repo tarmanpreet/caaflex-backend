@@ -16,6 +16,7 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     ClipboardDocumentListIcon,
+    ClockIcon,
     Cog6ToothIcon,
     FolderOpenIcon,
     MoonIcon,
@@ -43,6 +44,7 @@ const roles = computed(() => page.props.auth.user?.roles || []);
 const isCliente = computed(() => roles.value.includes('cliente'));
 const isAdmin = computed(() => roles.value.includes('admin') || roles.value.includes('superadmin'));
 const canCreatePractice = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
+const canViewDeadlines = computed(() => page.props.auth.user?.permissions?.includes('practice-deadlines.view'));
 
 const navItems = computed(() => {
     page.url;
@@ -51,6 +53,7 @@ const navItems = computed(() => {
         { name: 'Dashboard', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
         { name: 'Clienti', icon: UserGroupIcon, route: route('clients.index'), active: route().current('clients.*'), show: !isCliente.value },
         { name: 'Pratiche', icon: FolderOpenIcon, route: route('practices.index'), active: route().current('practices.*'), show: !isCliente.value },
+        { name: 'Scadenze', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },
         { name: 'Tipi pratica', icon: TagIcon, route: route('practice-types.index'), active: route().current('practice-types.*'), show: isAdmin.value },
         { name: 'Procedure', icon: ClipboardDocumentListIcon, route: route('procedures.index'), active: route().current('procedures.*'), show: isAdmin.value },
         { name: 'Appuntamenti', icon: CalendarDaysIcon, route: route('appointments.index'), active: route().current('appointments.*'), show: !isCliente.value },
