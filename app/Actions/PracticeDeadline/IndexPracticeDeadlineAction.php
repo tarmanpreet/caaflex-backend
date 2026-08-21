@@ -31,7 +31,22 @@ class IndexPracticeDeadlineAction
         $this->applySorting($query, $sort, $this->sortableColumns);
 
         return $query
-            ->with(['practice.client', 'practice.assignedUsers:id,name', 'assignee:id,name'])
+            ->select([
+                'id',
+                'practice_id',
+                'user_id',
+                'title',
+                'notes',
+                'deadline_at',
+                'status',
+                'priority',
+            ])
+            ->with([
+                'practice:id,client_profile_id,branch_id,type',
+                'practice.client:id,first_name,last_name',
+                'practice.assignedUsers:id,name',
+                'assignee:id,name',
+            ])
             ->paginate(20)
             ->withQueryString()
             ->through(function (PracticeDeadline $deadline) use ($user): PracticeDeadline {

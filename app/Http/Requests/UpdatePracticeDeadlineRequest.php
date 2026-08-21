@@ -21,11 +21,12 @@ class UpdatePracticeDeadlineRequest extends FormRequest
         $practiceId = $this->route('practice')->id;
 
         return [
-            'title' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
-            'deadline_at' => ['nullable', 'date'],
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'notes' => ['sometimes', 'nullable', 'string'],
+            'deadline_at' => ['sometimes', 'required', 'date'],
             'status' => [
-                'nullable',
+                'sometimes',
+                'required',
                 Rule::in([
                     PracticeDeadline::STATUS_PENDING,
                     PracticeDeadline::STATUS_IN_PROGRESS,
@@ -33,8 +34,9 @@ class UpdatePracticeDeadlineRequest extends FormRequest
                     PracticeDeadline::STATUS_CANCELLED,
                 ]),
             ],
-            'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'priority' => ['sometimes', 'required', 'integer', 'min:1', 'max:4'],
             'user_id' => [
+                'sometimes',
                 'nullable',
                 'exists:users,id',
                 Rule::exists('practice_user', 'user_id')->where('practice_id', $practiceId),

@@ -1,4 +1,5 @@
 <script setup>
+import { getCurrentInstance } from 'vue';
 import Modal from './Modal.vue';
 
 const emit = defineEmits(['close']);
@@ -21,6 +22,10 @@ defineProps({
 const close = () => {
     emit('close');
 };
+
+const componentId = getCurrentInstance()?.uid;
+const titleId = `dialog-modal-title-${componentId}`;
+const contentId = `dialog-modal-content-${componentId}`;
 </script>
 
 <template>
@@ -28,14 +33,16 @@ const close = () => {
         :show="show"
         :max-width="maxWidth"
         :closeable="closeable"
+        :labelled-by="titleId"
+        :described-by="contentId"
         @close="close"
     >
         <div class="px-6 py-6">
-            <div class="font-headline text-xl font-bold text-on-surface">
+            <div :id="titleId" class="font-headline text-xl font-bold text-on-surface">
                 <slot name="title" />
             </div>
 
-            <div class="mt-3 text-sm leading-6 text-on-surface-variant">
+            <div :id="contentId" class="mt-3 text-sm leading-6 text-on-surface-variant">
                 <slot name="content" />
             </div>
         </div>

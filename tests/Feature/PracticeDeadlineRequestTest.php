@@ -14,15 +14,18 @@ class PracticeDeadlineRequestTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $assignedUser;
+
     protected User $unassignedUser;
+
     protected Practice $practice;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        
+
         $this->admin = User::factory()->create();
         $this->admin->assignRole('admin');
 
@@ -38,11 +41,12 @@ class PracticeDeadlineRequestTest extends TestCase
 
     protected function createStoreRequest(): \App\Http\Requests\StorePracticeDeadlineRequest
     {
-        $request = new \App\Http\Requests\StorePracticeDeadlineRequest();
-        
+        $request = new \App\Http\Requests\StorePracticeDeadlineRequest;
+
         $request->setRouteResolver(function () {
             $route = $this->createMock(\Illuminate\Routing\Route::class);
             $route->method('parameter')->with('practice')->willReturn($this->practice);
+
             return $route;
         });
 
@@ -62,7 +66,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertFalse($validator->fails(), $validator->errors()->toJson());
     }
 
@@ -72,7 +76,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('title', $validator->errors()->toArray());
         $this->assertArrayHasKey('deadline_at', $validator->errors()->toArray());
@@ -87,7 +91,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('deadline_at', $validator->errors()->toArray());
     }
@@ -102,7 +106,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('user_id', $validator->errors()->toArray());
     }
@@ -117,7 +121,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertFalse($validator->fails(), $validator->errors()->toJson());
     }
 
@@ -131,7 +135,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('status', $validator->errors()->toArray());
     }
@@ -146,7 +150,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('priority', $validator->errors()->toArray());
     }
@@ -161,7 +165,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('priority', $validator->errors()->toArray());
     }
@@ -175,7 +179,7 @@ class PracticeDeadlineRequestTest extends TestCase
 
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertTrue($validator->fails());
         $this->assertArrayHasKey('title', $validator->errors()->toArray());
     }
@@ -198,24 +202,44 @@ class PracticeDeadlineRequestTest extends TestCase
 
             $request = $this->createStoreRequest($data);
             $validator = Validator::make($data, $request->rules());
-            
-            $this->assertFalse($validator->fails(), "Status {$status} should be valid: " . $validator->errors()->toJson());
+
+            $this->assertFalse($validator->fails(), "Status {$status} should be valid: ".$validator->errors()->toJson());
         }
     }
 
-    public function test_update_request_all_fields_nullable(): void
+    public function test_update_request_allows_omitted_fields(): void
     {
-        $request = new \App\Http\Requests\UpdatePracticeDeadlineRequest();
-        
+        $request = new \App\Http\Requests\UpdatePracticeDeadlineRequest;
+
         $request->setRouteResolver(function () {
             $route = $this->createMock(\Illuminate\Routing\Route::class);
             $route->method('parameter')->with('practice')->willReturn($this->practice);
+
             return $route;
         });
 
         $data = [];
         $validator = Validator::make($data, $request->rules());
-        
+
         $this->assertFalse($validator->fails(), $validator->errors()->toJson());
+    }
+
+    public function test_update_request_rejects_null_for_required_fields(): void
+    {
+        $request = new \App\Http\Requests\UpdatePracticeDeadlineRequest;
+
+        $request->setRouteResolver(function () {
+            $route = $this->createMock(\Illuminate\Routing\Route::class);
+            $route->method('parameter')->with('practice')->willReturn($this->practice);
+
+            return $route;
+        });
+
+        foreach (['title', 'deadline_at', 'status', 'priority'] as $field) {
+            $validator = Validator::make([$field => null], $request->rules());
+
+            $this->assertTrue($validator->fails(), "{$field} should not accept null.");
+            $this->assertArrayHasKey($field, $validator->errors()->toArray());
+        }
     }
 }

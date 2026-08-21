@@ -1,4 +1,5 @@
 <script setup>
+import { getCurrentInstance } from 'vue';
 import Modal from './Modal.vue';
 
 const emit = defineEmits(['close']);
@@ -17,6 +18,10 @@ defineProps({
         default: true,
     },
 });
+
+const componentId = getCurrentInstance()?.uid;
+const titleId = `confirmation-modal-title-${componentId}`;
+const contentId = `confirmation-modal-content-${componentId}`;
 </script>
 
 <template>
@@ -24,13 +29,15 @@ defineProps({
         :show="show"
         :max-width="maxWidth"
         :closeable="closeable"
+        :labelled-by="titleId"
+        :described-by="contentId"
         @close="emit('close')"
     >
         <div class="bg-surface-container-lowest px-6 pb-5 pt-6 text-on-surface">
-            <h3 class="mb-3 font-headline text-xl font-bold text-on-surface">
+            <h3 :id="titleId" class="mb-3 font-headline text-xl font-bold text-on-surface">
                 <slot name="title" />
             </h3>
-            <div class="text-sm leading-6 text-on-surface-variant">
+            <div :id="contentId" class="text-sm leading-6 text-on-surface-variant">
                 <slot name="content" />
             </div>
         </div>

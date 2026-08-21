@@ -28,7 +28,7 @@ class PracticePolicy
     public function update(User $user, Practice $practice): bool
     {
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practices.update') &&
-               ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
+               $this->isAdminOrAssigned($user, $practice);
     }
 
     public function delete(User $user, Practice $practice): bool
@@ -77,17 +77,30 @@ class PracticePolicy
     public function createDeadline(User $user, Practice $practice): bool
     {
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.create') &&
-               ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
+               $this->isAdminOrAssigned($user, $practice);
     }
 
     public function updateDeadline(User $user, Practice $practice): bool
     {
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.update') &&
-               ($user->hasRole('admin') || $practice->assignedUsers()->where('users.id', $user->id)->exists());
+               $this->isAdminOrAssigned($user, $practice);
     }
 
     public function deleteDeadline(User $user, Practice $practice): bool
     {
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.delete') && $user->hasRole('admin');
+    }
+
+    private function isAdminOrAssigned(User $user, Practice $practice): bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        if ($practice->relationLoaded('assignedUsers')) {
+            return $practice->assignedUsers->contains('id', $user->id);
+        }
+
+        return $practice->assignedUsers()->where('users.id', $user->id)->exists();
     }
 }

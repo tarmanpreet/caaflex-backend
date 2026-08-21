@@ -4,8 +4,10 @@ namespace Tests\Unit;
 
 use App\Models\Practice;
 use App\Models\User;
+use App\Policies\PracticePolicy;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
@@ -14,6 +16,7 @@ class PracticePolicyTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $employee;
 
     protected function setUp(): void
@@ -91,6 +94,26 @@ class PracticePolicyTest extends TestCase
         $practice = Practice::factory()->create();
 
         $this->assertTrue(Gate::forUser($this->employee)->denies('update', $practice));
+    }
+
+    public function test_deadline_policy_uses_preloaded_assignments_without_additional_queries(): void
+    {
+        $practice = Practice::factory()->create();
+        $practice->assignedUsers()->attach($this->employee->id);
+        $practice->load('assignedUsers');
+
+        $this->employee->canAccessBranchId($practice->branch_id);
+        $this->employee->hasPermissionTo('practice-deadlines.update');
+        $this->employee->hasRole('admin');
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        $this->assertTrue((new PracticePolicy)->updateDeadline($this->employee, $practice));
+        $assignmentQueries = collect(DB::getQueryLog())
+            ->filter(fn (array $query): bool => str_contains($query['query'], 'practice_user'));
+
+        $this->assertCount(0, $assignmentQueries);
     }
 
     public function test_admin_can_delete_practice(): void

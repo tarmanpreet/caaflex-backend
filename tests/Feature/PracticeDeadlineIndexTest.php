@@ -51,6 +51,8 @@ class PracticeDeadlineIndexTest extends TestCase
                 ->where('summary.completed', 1)
                 ->where('deadlines.data.0.can_update', true)
                 ->has('deadlines.data.0.practice.assigned_users', 1)
+                ->missing('deadlines.data.0.practice.notes')
+                ->missing('deadlines.data.0.practice.client.email')
             );
     }
 
@@ -160,5 +162,80 @@ class PracticeDeadlineIndexTest extends TestCase
         $this->assertSame(PracticeDeadline::STATUS_IN_PROGRESS, $deadline->status);
         $this->assertSame(PracticeDeadline::PRIORITY_HIGH, $deadline->priority);
         $this->assertSame($assignee->id, $deadline->user_id);
+    }
+
+    public function test_deadline_update_rejects_null_required_fields_and_keeps_record_unchanged(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'title' => 'Scadenza originale',
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'priority' => PracticeDeadline::PRIORITY_MEDIUM,
+        ]);
+        $requiredFields = ['title', 'deadline_at', 'status', 'priority'];
+        $originalAttributes = collect($requiredFields)
+            ->mapWithKeys(fn (string $field): array => [$field => $deadline->getRawOriginal($field)])
+            ->all();
+        $validPayload = [
+            'title' => $deadline->title,
+            'deadline_at' => $deadline->deadline_at->toDateTimeString(),
+            'status' => $deadline->status,
+            'priority' => $deadline->priority,
+        ];
+
+        foreach ($requiredFields as $field) {
+            $this->actingAs($admin)
+                ->from(route('deadlines.index'))
+                ->put(route('practices.deadlines.update', [$practice, $deadline]), [
+                    ...$validPayload,
+                    $field => null,
+                ])
+                ->assertRedirect(route('deadlines.index'))
+                ->assertSessionHasErrors($field);
+
+            $freshDeadline = $deadline->fresh();
+            $freshAttributes = collect($requiredFields)
+                ->mapWithKeys(fn (string $requiredField): array => [$requiredField => $freshDeadline->getRawOriginal($requiredField)])
+                ->all();
+
+            $this->assertSame($originalAttributes, $freshAttributes);
+        }
+    }
+
+    public function test_deadline_update_returns_not_found_for_a_different_practice(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $otherPractice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create(['practice_id' => $otherPractice->id]);
+
+        $this->actingAs($admin)
+            ->put(route('practices.deadlines.update', [$practice, $deadline]), [
+                'title' => 'Tentativo non valido',
+            ])
+            ->assertNotFound();
+
+        $this->assertNotSame('Tentativo non valido', $deadline->fresh()->title);
+    }
+
+    public function test_deadline_update_is_forbidden_when_policy_denies_it(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $employee->givePermissionTo('practices.view-any');
+        $practice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create(['practice_id' => $practice->id]);
+
+        $this->actingAs($employee)
+            ->put(route('practices.deadlines.update', [$practice, $deadline]), [
+                'title' => 'Tentativo non autorizzato',
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSame('Tentativo non autorizzato', $deadline->fresh()->title);
     }
 }
