@@ -26,6 +26,8 @@ class PracticeDeadlineIndexTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
         $practice = Practice::factory()->create();
+        $assignee = User::factory()->create();
+        $practice->assignedUsers()->attach($assignee->id, ['assigned_at' => now()]);
 
         PracticeDeadline::factory()->create([
             'practice_id' => $practice->id,
@@ -47,6 +49,8 @@ class PracticeDeadlineIndexTest extends TestCase
                 ->where('summary.open', 1)
                 ->where('summary.overdue', 1)
                 ->where('summary.completed', 1)
+                ->where('deadlines.data.0.can_update', true)
+                ->has('deadlines.data.0.practice.assigned_users', 1)
             );
     }
 
@@ -67,7 +71,26 @@ class PracticeDeadlineIndexTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->has('deadlines.data', 1)
                 ->where('deadlines.data.0.id', $visibleDeadline->id)
+                ->where('deadlines.data.0.can_update', true)
                 ->where('summary.total', 1)
+            );
+    }
+
+    public function test_deadline_update_action_is_hidden_when_policy_denies_update(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $employee->givePermissionTo('practices.view-any');
+        $practice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create(['practice_id' => $practice->id]);
+
+        $this->actingAs($employee)
+            ->get(route('deadlines.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('deadlines.data', 1)
+                ->where('deadlines.data.0.id', $deadline->id)
+                ->where('deadlines.data.0.can_update', false)
             );
     }
 
@@ -105,22 +128,37 @@ class PracticeDeadlineIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_deadline_status_can_be_changed_from_web_form(): void
+    public function test_deadline_can_be_fully_updated_from_index_form(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
         $practice = Practice::factory()->create();
+        $assignee = User::factory()->create();
+        $practice->assignedUsers()->attach($assignee->id, ['assigned_at' => now()]);
         $deadline = PracticeDeadline::factory()->create([
             'practice_id' => $practice->id,
             'status' => PracticeDeadline::STATUS_PENDING,
         ]);
+        $newDeadlineAt = now()->addWeek()->startOfMinute();
 
         $this->actingAs($admin)
             ->put(route('practices.deadlines.update', [$practice, $deadline]), [
+                'title' => 'Documenti dichiarazione aggiornati',
+                'notes' => 'Verificare la documentazione ricevuta.',
+                'deadline_at' => $newDeadlineAt->toDateTimeString(),
                 'status' => PracticeDeadline::STATUS_IN_PROGRESS,
+                'priority' => PracticeDeadline::PRIORITY_HIGH,
+                'user_id' => $assignee->id,
             ])
             ->assertRedirect();
 
-        $this->assertSame(PracticeDeadline::STATUS_IN_PROGRESS, $deadline->fresh()->status);
+        $deadline->refresh();
+
+        $this->assertSame('Documenti dichiarazione aggiornati', $deadline->title);
+        $this->assertSame('Verificare la documentazione ricevuta.', $deadline->notes);
+        $this->assertTrue($deadline->deadline_at->equalTo($newDeadlineAt));
+        $this->assertSame(PracticeDeadline::STATUS_IN_PROGRESS, $deadline->status);
+        $this->assertSame(PracticeDeadline::PRIORITY_HIGH, $deadline->priority);
+        $this->assertSame($assignee->id, $deadline->user_id);
     }
 }

@@ -31,9 +31,14 @@ class IndexPracticeDeadlineAction
         $this->applySorting($query, $sort, $this->sortableColumns);
 
         return $query
-            ->with(['practice.client', 'assignee:id,name'])
+            ->with(['practice.client', 'practice.assignedUsers:id,name', 'assignee:id,name'])
             ->paginate(20)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(function (PracticeDeadline $deadline) use ($user): PracticeDeadline {
+                $deadline->setAttribute('can_update', $user->can('updateDeadline', $deadline->practice));
+
+                return $deadline;
+            });
     }
 
     /** @return array{total: int, open: int, overdue: int, completed: int} */
