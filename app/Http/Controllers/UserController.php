@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\User\CreateUserAction;
+use App\Actions\User\DeleteManagedUserAction;
 use App\Actions\User\UpdateUserAction;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -13,7 +14,6 @@ use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -105,7 +105,11 @@ class UserController extends Controller
         }
         $closedPractices = $closedQuery->orderByDesc('updated_at')->paginate(10, ['*'], 'closed_page')->withQueryString();
 
-        $roles = Role::where('guard_name', 'web')->pluck('name');
+        $roles = collect($request->user()->assignableRoles())
+            ->push($user->roles->first()?->name)
+            ->filter()
+            ->unique()
+            ->values();
         $allPracticeTypes = PracticeType::orderBy('name')->get(['id', 'name', 'color']);
         $branches = Branch::active()->whereIn('id', $request->user()->accessibleBranchIds())->select('id', 'name', 'city', 'province')->orderBy('name')->get();
 
@@ -138,5 +142,15 @@ class UserController extends Controller
 
         return redirect()->route('users.show', $user)
             ->with('success', $user->is_active ? 'Utente attivato.' : 'Utente disattivato.');
+    }
+
+    public function destroy(User $user, Request $request, DeleteManagedUserAction $action)
+    {
+        abort_if($request->user()->is($user) || $user->hasRole('superadmin'), 403);
+        $this->authorize('delete', $user);
+
+        $action->execute($user);
+
+        return redirect()->route('users.index')->with('success', 'Utente eliminato.');
     }
 }

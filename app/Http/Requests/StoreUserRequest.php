@@ -26,7 +26,7 @@ class StoreUserRequest extends FormRequest
             'practice_type_ids' => ['nullable', 'array'],
             'practice_type_ids.*' => ['integer', 'exists:practice_types,id'],
             'branch_ids' => ['nullable', 'array'],
-            'branch_ids.*' => ['integer', 'exists:branches,id'],
+            'branch_ids.*' => ['integer', Rule::in($this->user()->accessibleBranchIds()->all())],
         ];
     }
 }

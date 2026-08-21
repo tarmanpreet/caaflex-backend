@@ -158,7 +158,20 @@ const deleteBranch = () => {
             </template>
 
             <template #content>
-                Sei sicuro di voler eliminare questa filiale? L'azione non può essere annullata.
+                <div class="space-y-3 text-sm text-on-surface-variant">
+                    <p>
+                        Sei sicuro di voler eliminare <strong class="text-on-surface">{{ branchToDelete?.name }}</strong>?
+                    </p>
+                    <p>
+                        Clienti, pratiche, appuntamenti e utenti assegnati verranno trasferiti automaticamente alla sede padre. L'azione non può essere annullata.
+                    </p>
+                    <div class="flex flex-wrap gap-2" aria-label="Dati che verranno trasferiti">
+                        <span class="rounded-lg bg-surface-container-high px-2.5 py-1.5 text-xs">{{ branchToDelete?.clients_count ?? 0 }} clienti</span>
+                        <span class="rounded-lg bg-surface-container-high px-2.5 py-1.5 text-xs">{{ branchToDelete?.practices_count ?? 0 }} pratiche</span>
+                        <span class="rounded-lg bg-surface-container-high px-2.5 py-1.5 text-xs">{{ branchToDelete?.appointments_count ?? 0 }} appuntamenti</span>
+                        <span class="rounded-lg bg-surface-container-high px-2.5 py-1.5 text-xs">{{ branchToDelete?.employees_count ?? 0 }} utenti</span>
+                    </div>
+                </div>
             </template>
 
             <template #footer>

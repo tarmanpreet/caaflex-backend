@@ -23,11 +23,29 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
-        return $user->hasPermissionTo('users.update');
+        return $user->hasPermissionTo('users.update')
+            && ! $model->hasRole('superadmin')
+            && (! $model->hasRole('admin') || $user->hasPermissionTo('admins.create'));
     }
 
     public function toggleActive(User $user, User $model): bool
     {
-        return $user->id !== $model->id && $user->hasPermissionTo('users.update');
+        return $user->id !== $model->id
+            && $user->hasPermissionTo('users.update')
+            && ! $model->hasRole('superadmin')
+            && (! $model->hasRole('admin') || $user->hasPermissionTo('admins.create'));
+    }
+
+    public function delete(User $user, User $model): bool
+    {
+        if ($user->id === $model->id || ! $user->hasPermissionTo('users.delete')) {
+            return false;
+        }
+
+        if ($model->hasAnyRole(['superadmin', 'cliente'])) {
+            return false;
+        }
+
+        return ! $model->hasRole('admin') || $user->hasPermissionTo('admins.delete');
     }
 }

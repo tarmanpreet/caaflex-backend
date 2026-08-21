@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Appointment;
 use App\Models\Branch;
+use App\Models\ClientProfile;
+use App\Models\Practice;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -108,6 +111,51 @@ class BranchManagementTest extends TestCase
         $response->assertRedirect(route('branches.index'));
         $this->assertDatabaseHas('branches', ['id' => $branch1->id]);
         $this->assertDatabaseMissing('branches', ['id' => $branch2->id]);
+    }
+
+    public function test_deleting_secondary_branch_moves_associated_data_and_users_to_parent(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $parent = Branch::factory()->create();
+        $secondary = Branch::factory()->create(['parent_id' => $parent->id]);
+        $admin->branches()->attach($parent);
+
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $secondary->employees()->attach($employee);
+
+        $client = ClientProfile::factory()->create(['branch_id' => $secondary->id]);
+        $practice = Practice::factory()->create(['branch_id' => $secondary->id]);
+        $appointment = Appointment::factory()->create(['branch_id' => $secondary->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('branches.destroy', $secondary))
+            ->assertRedirect(route('branches.index'));
+
+        $this->assertModelMissing($secondary);
+        $this->assertDatabaseHas('client_profiles', ['id' => $client->id, 'branch_id' => $parent->id]);
+        $this->assertDatabaseHas('practices', ['id' => $practice->id, 'branch_id' => $parent->id]);
+        $this->assertDatabaseHas('appointments', ['id' => $appointment->id, 'branch_id' => $parent->id]);
+        $this->assertDatabaseHas('branch_user', ['branch_id' => $parent->id, 'user_id' => $employee->id]);
+    }
+
+    public function test_cannot_delete_secondary_branch_with_children(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $parent = Branch::factory()->create();
+        $secondary = Branch::factory()->create(['parent_id' => $parent->id]);
+        Branch::factory()->create(['parent_id' => $secondary->id]);
+        $admin->branches()->attach($parent);
+
+        $this->actingAs($admin)
+            ->delete(route('branches.destroy', $secondary))
+            ->assertForbidden();
+
+        $this->assertModelExists($secondary);
     }
 
     public function test_branch_has_employees_relationship(): void

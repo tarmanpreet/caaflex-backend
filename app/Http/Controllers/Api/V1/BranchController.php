@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Branch\DeleteBranchAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBranchRequest;
 use App\Http\Requests\UpdateBranchRequest;
@@ -62,14 +63,14 @@ class BranchController extends Controller
         ]);
     }
 
-    public function destroy(Branch $branch): JsonResponse
+    public function destroy(Branch $branch, DeleteBranchAction $action): JsonResponse
     {
         $this->authorize('delete', $branch);
 
-        $branch->delete();
+        $action->execute($branch);
 
         return response()->json([
-            'message' => 'Filiale eliminata.',
+            'message' => 'Sede secondaria eliminata. I dati associati sono stati trasferiti alla sede padre.',
         ]);
     }
 

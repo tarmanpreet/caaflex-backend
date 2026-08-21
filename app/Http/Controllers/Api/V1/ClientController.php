@@ -37,7 +37,7 @@ class ClientController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $like = '%'.$q.'%';
 
-        $paginator = ClientProfile::select('id', 'first_name', 'last_name', 'branch_id')
+        $paginator = ClientProfile::select('id', 'first_name', 'last_name', 'date_of_birth', 'branch_id')
             ->when(Branch::query()->exists(), fn ($query) => $query->whereIn('branch_id', $request->user()->accessibleBranchIds()))
             ->with('branch:id,name')
             ->when($q, function ($query) use ($like) {
@@ -54,7 +54,7 @@ class ClientController extends Controller
         return response()->json([
             'results' => collect($paginator->items())->map(fn ($c) => [
                 'value' => $c->id,
-                'label' => $c->last_name.' '.$c->first_name.($c->branch ? ' · '.$c->branch->name : ''),
+                'label' => $c->last_name.' '.$c->first_name.' · nato/a il '.$c->date_of_birth->format('d/m/Y').($c->branch ? ' · '.$c->branch->name : ''),
             ]),
             'hasMore' => $paginator->hasMorePages(),
         ]);

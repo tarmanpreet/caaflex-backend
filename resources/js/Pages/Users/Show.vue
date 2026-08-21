@@ -9,6 +9,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import Multiselect from '@vueform/multiselect';
 
@@ -32,9 +33,24 @@ const props = defineProps({
 const page = usePage();
 
 // Permissions
-const canUpdate = computed(() => page.props.auth.user?.permissions?.includes('users.update'));
 const isSelf = computed(() => page.props.auth.user?.id === props.user?.id);
 const userRole = computed(() => props.user?.roles?.[0]?.name ?? '');
+const canUpdate = computed(() => {
+    const permissions = page.props.auth.user?.permissions ?? [];
+
+    if (!permissions.includes('users.update') || userRole.value === 'superadmin') return false;
+    if (userRole.value === 'admin') return permissions.includes('admins.create');
+
+    return true;
+});
+const canDelete = computed(() => {
+    const permissions = page.props.auth.user?.permissions ?? [];
+
+    if (isSelf.value || ['superadmin', 'cliente'].includes(userRole.value)) return false;
+    if (userRole.value === 'admin') return permissions.includes('admins.delete');
+
+    return permissions.includes('users.delete');
+});
 const isViewerAdmin = computed(() => {
     const roles = page.props.auth.user?.roles ?? [];
     return roles.includes('admin') || roles.includes('superadmin');
@@ -59,6 +75,16 @@ const submitEdit = () => {
 // Toggle active
 const toggleActive = () => {
     router.post(route('users.toggle-active', props.user.id), {}, { preserveScroll: true });
+};
+
+const confirmingUserDelete = ref(false);
+
+const deleteUser = () => {
+    router.delete(route('users.destroy', props.user.id), {
+        onFinish: () => {
+            confirmingUserDelete.value = false;
+        },
+    });
 };
 
 // Practices search
@@ -144,6 +170,9 @@ const statusBadgeClass = (status) => {
                                     Attiva Utente
                                 </PrimaryButton>
                             </template>
+                            <DangerButton v-if="canDelete" @click="confirmingUserDelete = true">
+                                Elimina Utente
+                            </DangerButton>
                         </div>
                     </div>
                     <form @submit.prevent="submitEdit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -365,6 +394,25 @@ const statusBadgeClass = (status) => {
 
             </div>
         </div>
+
+        <ConfirmationModal :show="confirmingUserDelete" @close="confirmingUserDelete = false">
+            <template #title>Elimina Utente</template>
+
+            <template #content>
+                <div class="space-y-3 text-sm text-on-surface-variant">
+                    <p>
+                        Stai per eliminare definitivamente <strong class="text-on-surface">{{ user?.name }}</strong> ({{ user?.email }}).
+                    </p>
+                    <p>
+                        L'utente verrà rimosso dalle pratiche, dalle sedi e dagli appuntamenti assegnati. I dati storici resteranno conservati senza l'assegnazione dell'utente.
+                    </p>
+                </div>
+            </template>
+
+            <template #footer>
+                <SecondaryButton @click="confirmingUserDelete = false">Annulla</SecondaryButton>
+                <DangerButton class="ms-3" @click="deleteUser">Elimina definitivamente</DangerButton>
+            </template>
+        </ConfirmationModal>
     </AppLayout>
 </template>
-

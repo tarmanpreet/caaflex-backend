@@ -26,11 +26,8 @@ class BranchPolicy
     {
         return $user->hasPermissionTo('branches.delete')
             && $user->canAccessBranchId($branch->id)
+            && $user->canAccessBranchId($branch->parent_id)
             && $branch->parent_id !== null
-            && ! $branch->children()->exists()
-            && ! $branch->clients()->exists()
-            && ! $branch->practices()->exists()
-            && ! $branch->appointments()->exists()
-            && ! $branch->employees()->exists();
+            && ! $branch->children()->exists();
     }
 }

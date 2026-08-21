@@ -74,7 +74,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         // User routes (explicit routes before apiResource to avoid parameter conflicts)
         Route::get('/users/available', [App\Http\Controllers\Api\V1\AppointmentController::class, 'availableUsers']);
         Route::apiResource('/users', App\Http\Controllers\Api\V1\UserController::class)
-            ->only(['index', 'show', 'store', 'update']);
+            ->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::post('/users/{user}/toggle-active', [App\Http\Controllers\Api\V1\UserController::class, 'toggleActive']);
 
         // User availability routes

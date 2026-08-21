@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\User\CreateUserAction;
+use App\Actions\User\DeleteManagedUserAction;
+use App\Actions\User\UpdateUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Actions\User\CreateUserAction;
-use App\Actions\User\UpdateUserAction;
-use App\Models\User;
 use App\Models\PracticeType;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -47,12 +47,12 @@ class UserController extends Controller
 
         $query = User::with('roles')->withCount([
             'assignedPractices',
-            'assignedPractices as open_practices_count' => fn($q) => $q->whereNotIn('status', ['completata', 'annullata']),
+            'assignedPractices as open_practices_count' => fn ($q) => $q->whereNotIn('status', ['completata', 'annullata']),
         ])->whereDoesntHave('roles', fn ($q) => $q->where('name', 'cliente'));
 
         if ($request->search) {
-            $search = '%' . $request->search . '%';
-            $query->where(fn($q) => $q->where('name', 'like', $search)->orWhere('email', 'like', $search));
+            $search = '%'.$request->search.'%';
+            $query->where(fn ($q) => $q->where('name', 'like', $search)->orWhere('email', 'like', $search));
         }
 
         $users = $query->orderBy('name')->paginate(20)->withQueryString();
@@ -72,32 +72,36 @@ class UserController extends Controller
         $closedStatuses = ['completata', 'annullata'];
 
         $activeSearch = $request->active_search;
-        $activeQuery  = $user->assignedPractices()->with('client')->whereNotIn('status', $closedStatuses);
+        $activeQuery = $user->assignedPractices()->with('client')->whereNotIn('status', $closedStatuses);
         if ($activeSearch) {
-            $s = '%' . $activeSearch . '%';
-            $activeQuery->where(fn($q) => $q->where('type', 'like', $s)->orWhere('status', 'like', $s));
+            $s = '%'.$activeSearch.'%';
+            $activeQuery->where(fn ($q) => $q->where('type', 'like', $s)->orWhere('status', 'like', $s));
         }
         $activePractices = $activeQuery->orderByDesc('updated_at')->paginate(10, ['*'], 'active_page')->withQueryString();
 
         $closedSearch = $request->closed_search;
-        $closedQuery  = $user->assignedPractices()->with('client')->whereIn('status', $closedStatuses);
+        $closedQuery = $user->assignedPractices()->with('client')->whereIn('status', $closedStatuses);
         if ($closedSearch) {
-            $s = '%' . $closedSearch . '%';
-            $closedQuery->where(fn($q) => $q->where('type', 'like', $s)->orWhere('status', 'like', $s));
+            $s = '%'.$closedSearch.'%';
+            $closedQuery->where(fn ($q) => $q->where('type', 'like', $s)->orWhere('status', 'like', $s));
         }
         $closedPractices = $closedQuery->orderByDesc('updated_at')->paginate(10, ['*'], 'closed_page')->withQueryString();
 
-        $roles            = Role::where('guard_name', 'web')->pluck('name');
+        $roles = collect($request->user()->assignableRoles())
+            ->push($user->roles->first()?->name)
+            ->filter()
+            ->unique()
+            ->values();
         $allPracticeTypes = PracticeType::orderBy('name')->get(['id', 'name', 'color']);
 
         return response()->json([
             'data' => [
-                'user'             => $user,
-                'activePractices'  => $activePractices,
-                'closedPractices'  => $closedPractices,
-                'availableRoles'   => $roles,
+                'user' => $user,
+                'activePractices' => $activePractices,
+                'closedPractices' => $closedPractices,
+                'availableRoles' => $roles,
                 'allPracticeTypes' => $allPracticeTypes,
-                'practiceFilters'  => [
+                'practiceFilters' => [
                     'active_search' => $activeSearch,
                     'closed_search' => $closedSearch,
                 ],
@@ -108,14 +112,26 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): JsonResponse
     {
         $action->execute($request->validated(), $user);
+
         return response()->json(['message' => 'Utente aggiornato.', 'data' => $user]);
     }
 
     public function toggleActive(User $user): JsonResponse
     {
         $this->authorize('toggleActive', $user);
-        $user->update(['is_active' => !$user->is_active]);
+        $user->update(['is_active' => ! $user->is_active]);
         $message = $user->is_active ? 'Utente attivato.' : 'Utente disattivato.';
+
         return response()->json(['message' => $message, 'data' => $user]);
+    }
+
+    public function destroy(User $user, Request $request, DeleteManagedUserAction $action): JsonResponse
+    {
+        abort_if($request->user()->is($user) || $user->hasRole('superadmin'), 403);
+        $this->authorize('delete', $user);
+
+        $action->execute($user);
+
+        return response()->json(['message' => 'Utente eliminato.']);
     }
 }

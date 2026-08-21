@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Branch\DeleteBranchAction;
 use App\Http\Requests\StoreBranchRequest;
 use App\Http\Requests\UpdateBranchRequest;
 use App\Models\Branch;
@@ -30,7 +31,7 @@ class BranchController extends Controller
         $query = Branch::query()
             ->whereIn('id', $request->user()->accessibleBranchIds())
             ->with('parent:id,name')
-            ->withCount(['children', 'employees', 'clients', 'practices']);
+            ->withCount(['children', 'employees', 'clients', 'practices', 'appointments']);
 
         if ($request->search) {
             $search = '%'.$request->search.'%';
@@ -127,13 +128,13 @@ class BranchController extends Controller
             ->with('success', 'Filiale aggiornata.');
     }
 
-    public function destroy(Branch $branch)
+    public function destroy(Branch $branch, DeleteBranchAction $action)
     {
         $this->authorize('delete', $branch);
 
-        $branch->delete();
+        $action->execute($branch);
 
         return redirect()->route('branches.index')
-            ->with('success', 'Filiale eliminata.');
+            ->with('success', 'Sede secondaria eliminata. I dati associati sono stati trasferiti alla sede padre.');
     }
 }

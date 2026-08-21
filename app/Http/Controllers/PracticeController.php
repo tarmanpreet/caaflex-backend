@@ -8,7 +8,6 @@ use App\Actions\Practice\UpdatePracticeAction;
 use App\Http\Requests\StorePracticeRequest;
 use App\Http\Requests\UpdatePracticeRequest;
 use App\Models\Branch;
-use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
@@ -58,18 +57,12 @@ class PracticeController extends Controller
         $this->authorize('create', Practice::class);
 
         $branchIds = request()->user()->accessibleBranchIds();
-        $clients = ClientProfile::select('id', 'first_name', 'last_name', 'branch_id')
-            ->when(Branch::query()->exists(), fn ($query) => $query->whereIn('branch_id', $branchIds))
-            ->orderBy('last_name')
-            ->get();
-
         $users = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'employee']))
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
         return Inertia::render('Practices/Create', [
-            'clients' => $clients,
             'users' => $users,
             'procedures' => Procedure::orderBy('name')->get(),
             'practiceTypes' => PracticeType::orderBy('name')->get(),

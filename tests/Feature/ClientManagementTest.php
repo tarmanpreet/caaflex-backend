@@ -169,6 +169,48 @@ class ClientManagementTest extends TestCase
             );
     }
 
+    public function test_client_search_endpoints_distinguish_homonyms_by_date_of_birth(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $firstClient = ClientProfile::factory()->create([
+            'first_name' => 'Mario',
+            'last_name' => 'Rossi',
+            'date_of_birth' => '1980-04-12',
+        ]);
+        $secondClient = ClientProfile::factory()->create([
+            'first_name' => 'Mario',
+            'last_name' => 'Rossi',
+            'date_of_birth' => '1992-11-03',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('clients.search', ['q' => 'Rossi']));
+
+        $response->assertOk()
+            ->assertJsonFragment([
+                'value' => $firstClient->id,
+                'label' => 'Rossi Mario · nato/a il 12/04/1980',
+            ])
+            ->assertJsonFragment([
+                'value' => $secondClient->id,
+                'label' => 'Rossi Mario · nato/a il 03/11/1992',
+            ]);
+
+        $this->actingAs($admin, 'api')
+            ->getJson('/api/v1/clients/search?q=Rossi')
+            ->assertOk()
+            ->assertJsonFragment([
+                'value' => $firstClient->id,
+                'label' => 'Rossi Mario · nato/a il 12/04/1980',
+            ])
+            ->assertJsonFragment([
+                'value' => $secondClient->id,
+                'label' => 'Rossi Mario · nato/a il 03/11/1992',
+            ]);
+    }
+
     public function test_admin_can_access_edit_form(): void
     {
         $admin = User::factory()->create();
