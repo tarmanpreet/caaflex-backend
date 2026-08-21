@@ -10,6 +10,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DocumentExpirationModal from '@/Components/DocumentExpirationModal.vue';
+import DocumentExpiryBadge from '@/Components/DocumentExpiryBadge.vue';
 import Multiselect from '@vueform/multiselect';
 import SortableTable from '@/Components/SortableTable.vue';
 import DeadlinesSection from '@/Components/DeadlinesSection.vue';
@@ -233,6 +235,7 @@ const stagedFiles = ref([]);
 const docForm = useForm({
     files: [],
     descriptions: [],
+    expires_on: [],
 });
 
 const formatFileSize = (bytes) => {
@@ -242,7 +245,7 @@ const formatFileSize = (bytes) => {
 
 const addFiles = (fileList) => {
     for (const file of fileList) {
-        stagedFiles.value.push({ file, description: '' });
+        stagedFiles.value.push({ file, description: '', expires_on: '' });
     }
 };
 
@@ -269,6 +272,7 @@ const removeFile = (index) => {
 const submitUpload = () => {
     docForm.files = stagedFiles.value.map(f => f.file);
     docForm.descriptions = stagedFiles.value.map(f => f.description);
+    docForm.expires_on = stagedFiles.value.map(f => f.expires_on);
     docForm.post(route('practices.documents.store', props.practice.id), {
         forceFormData: true,
         preserveScroll: true,
@@ -278,6 +282,11 @@ const submitUpload = () => {
         },
     });
 };
+
+const editingDocumentExpiration = ref(null);
+const documentExpirationUpdateUrl = computed(() => editingDocumentExpiration.value
+    ? route('practices.documents.expiration.update', [props.practice.id, editingDocumentExpiration.value.id])
+    : null);
 
 // Document Deletion Logic
 const confirmingDocDelete = ref(false);
@@ -627,13 +636,22 @@ const completionPercentage = computed(() => {
                                     <div v-else class="rounded-2xl bg-surface-container-low p-5 ring-1 ring-outline-variant/10">
                                         <h4 class="text-sm font-semibold text-on-surface mb-4">File selezionati</h4>
                                         <div class="space-y-3">
-                                            <div v-for="(item, index) in stagedFiles" :key="index" class="grid gap-3 rounded-xl bg-surface-container-lowest p-4 ring-1 ring-outline-variant/10 md:grid-cols-[1fr_220px_auto] md:items-center">
+                                            <div v-for="(item, index) in stagedFiles" :key="index" class="grid gap-3 rounded-xl bg-surface-container-lowest p-4 ring-1 ring-outline-variant/10 lg:grid-cols-[minmax(0,1fr)_minmax(180px,220px)_180px_auto] lg:items-end">
                                                 <div>
                                                     <p class="text-sm font-semibold text-on-surface">{{ item.file.name }}</p>
                                                     <p class="mt-1 text-xs text-on-surface-variant">{{ formatFileSize(item.file.size) }}</p>
                                                 </div>
-                                                <input v-model="item.description" type="text" placeholder="Descrizione..." class="w-full rounded-xl border-0 bg-surface-container-high text-sm focus:ring-2 focus:ring-primary/25">
-                                                <button @click="removeFile(index)" type="button" class="rounded-xl bg-error-container/20 px-4 py-2 text-sm font-semibold text-error hover:bg-error-container/30 transition-colors">
+                                                <div>
+                                                    <label :for="`practice-document-description-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Descrizione</label>
+                                                    <input :id="`practice-document-description-${index}`" v-model="item.description" type="text" placeholder="Descrizione opzionale" class="min-h-[44px] w-full rounded-xl border-0 bg-surface-container-high text-sm focus:ring-2 focus:ring-primary/25">
+                                                    <InputError :message="docForm.errors[`descriptions.${index}`]" class="mt-1" />
+                                                </div>
+                                                <div>
+                                                    <label :for="`practice-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Scadenza</label>
+                                                    <input :id="`practice-document-expiration-${index}`" v-model="item.expires_on" type="date" class="app-input block min-h-[44px] w-full rounded-xl">
+                                                    <InputError :message="docForm.errors[`expires_on.${index}`]" class="mt-1" />
+                                                </div>
+                                                <button @click="removeFile(index)" type="button" class="min-h-[44px] rounded-xl bg-error-container/20 px-4 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-container/30">
                                                     Rimuovi
                                                 </button>
                                             </div>
@@ -656,13 +674,14 @@ const completionPercentage = computed(() => {
                                             <tr>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nome</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Descrizione</th>
+                                                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Scadenza</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Data</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-outline-variant/10">
                                             <tr v-if="!practice.documents?.length" class="group hover:bg-surface-container-low transition-colors">
-                                                <td colspan="4" class="px-6 py-8 text-center text-on-surface-variant text-sm">
+                                                <td colspan="5" class="px-6 py-8 text-center text-on-surface-variant text-sm">
                                                     Nessun documento caricato.
                                                 </td>
                                             </tr>
@@ -682,14 +701,20 @@ const completionPercentage = computed(() => {
                                                     <span class="text-xs font-medium px-2 py-1 bg-surface-container-high rounded text-on-surface-variant">{{ doc.description || '-' }}</span>
                                                 </td>
                                                 <td class="px-6 py-4">
+                                                    <DocumentExpiryBadge :expires-on="doc.expires_on" />
+                                                </td>
+                                                <td class="px-6 py-4">
                                                     <p class="text-sm text-on-surface">{{ formatDate(doc.created_at) }}</p>
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
                                                     <div class="flex items-center justify-end space-x-2">
-                                                        <a :href="route('practices.documents.download', [practice.id, doc.id])" class="p-2 text-on-surface-variant hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+                                                        <button v-if="canUploadDocument" type="button" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Modifica scadenza documento" @click="editingDocumentExpiration = doc">
+                                                            <CalendarDaysIcon class="h-5 w-5" />
+                                                        </button>
+                                                        <a :href="route('practices.documents.download', [practice.id, doc.id])" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" :aria-label="`Scarica ${doc.original_name}`">
                                                             <DocumentArrowDownIcon class="h-5 w-5" />
                                                         </a>
-                                                        <button v-if="canDeleteDocument" @click="confirmDocDelete(doc)" class="p-2 text-on-surface-variant hover:text-error transition-colors hover:bg-error/5 rounded-lg">
+                                                        <button v-if="canDeleteDocument" @click="confirmDocDelete(doc)" class="min-h-[44px] rounded-lg px-3 text-on-surface-variant transition-colors hover:bg-error/5 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">
                                                             Elimina
                                                         </button>
                                                     </div>
@@ -836,6 +861,13 @@ const completionPercentage = computed(() => {
         </section>
 
         <!-- Document Deletion Confirmation Modal -->
+        <DocumentExpirationModal
+            :show="Boolean(editingDocumentExpiration)"
+            :document="editingDocumentExpiration"
+            :update-url="documentExpirationUpdateUrl"
+            @close="editingDocumentExpiration = null"
+        />
+
         <ConfirmationModal :show="confirmingDocDelete" @close="confirmingDocDelete = false">
             <template #title>
                 Elimina Documento

@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\PracticeDocument;
 use App\Models\Practice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,10 +21,11 @@ class PracticeDocumentFactory extends Factory
         return [
             'practice_id' => Practice::factory(),
             'uploaded_by' => User::factory(),
-            'original_name' => fake()->word() . '.pdf',
-            'disk_path' => 'practice-documents/1/' . fake()->uuid() . '.pdf',
+            'original_name' => fake()->word().'.pdf',
+            'disk_path' => 'practice-documents/1/'.fake()->uuid().'.pdf',
             'mime_type' => 'application/pdf',
             'file_size' => fake()->numberBetween(1000, 5000000),
+            'expires_on' => null,
         ];
     }
 }

@@ -2,23 +2,27 @@
 
 namespace App\Http\Requests;
 
-use App\Models\ClientProfile;
+use App\Models\Practice;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreClientDocumentRequest extends FormRequest
+class StorePracticeDocumentRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
-        /** @var ClientProfile $client */
-        $client = $this->route('client');
+        /** @var Practice $practice */
+        $practice = $this->route('practice');
 
-        return $this->user()->can('uploadDocument', $client);
+        return $this->user()->can('uploadDocument', $practice);
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

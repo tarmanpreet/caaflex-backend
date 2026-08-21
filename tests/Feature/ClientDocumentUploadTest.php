@@ -39,6 +39,7 @@ class ClientDocumentUploadTest extends TestCase
             ->post('/clients/'.$client->id.'/documents', [
                 'files' => [$file],
                 'descriptions' => ['Test document'],
+                'expires_on' => ['2027-04-30'],
             ]);
 
         $response->assertRedirect();
@@ -51,7 +52,109 @@ class ClientDocumentUploadTest extends TestCase
             'original_name' => 'document.pdf',
             'mime_type' => 'application/pdf',
             'description' => 'Test document',
+            'expires_on' => '2027-04-30',
         ]);
+    }
+
+    public function test_employee_can_upload_multiple_documents_with_independent_expirations(): void
+    {
+        Storage::fake('local');
+
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $client = ClientProfile::factory()->create();
+        $firstFile = UploadedFile::fake()->create('first.pdf', 100, 'application/pdf');
+        $secondFile = UploadedFile::fake()->create('second.pdf', 100, 'application/pdf');
+
+        $this->actingAs($employee)
+            ->post(route('clients.documents.store', $client), [
+                'files' => [$firstFile, $secondFile],
+                'descriptions' => ['Primo', 'Secondo'],
+                'expires_on' => ['2027-01-15', null],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('client_documents', [
+            'original_name' => 'first.pdf',
+            'expires_on' => '2027-01-15',
+        ]);
+        $this->assertDatabaseHas('client_documents', [
+            'original_name' => 'second.pdf',
+            'expires_on' => null,
+        ]);
+    }
+
+    public function test_invalid_expiration_rejects_upload_without_storing_file(): void
+    {
+        Storage::fake('local');
+
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $client = ClientProfile::factory()->create();
+        $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+        $this->actingAs($employee)
+            ->post(route('clients.documents.store', $client), [
+                'files' => [$file],
+                'expires_on' => ['not-a-date'],
+            ])
+            ->assertSessionHasErrors('expires_on.0');
+
+        $this->assertDatabaseCount('client_documents', 0);
+        Storage::disk('local')->assertMissing("client-documents/{$client->id}/".$file->hashName());
+    }
+
+    public function test_employee_can_update_and_clear_document_expiration(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $client = ClientProfile::factory()->create();
+        $document = ClientDocument::factory()->create(['client_profile_id' => $client->id]);
+
+        $this->actingAs($employee)
+            ->patch(route('clients.documents.expiration.update', [$client, $document]), [
+                'expires_on' => '2027-05-20',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('client_documents', [
+            'id' => $document->id,
+            'expires_on' => '2027-05-20',
+        ]);
+
+        $this->actingAs($employee)
+            ->patch(route('clients.documents.expiration.update', [$client, $document]), [
+                'expires_on' => null,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('client_documents', [
+            'id' => $document->id,
+            'expires_on' => null,
+        ]);
+    }
+
+    public function test_document_routes_reject_a_document_from_another_client(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create();
+        $otherClient = ClientProfile::factory()->create();
+        $document = ClientDocument::factory()->create(['client_profile_id' => $otherClient->id]);
+
+        $this->actingAs($admin)
+            ->patch(route('clients.documents.expiration.update', [$client, $document]), [
+                'expires_on' => '2027-05-20',
+            ])
+            ->assertNotFound();
+
+        $this->actingAs($admin)
+            ->delete(route('clients.documents.destroy', [$client, $document]))
+            ->assertNotFound();
+
+        $this->assertModelExists($document);
     }
 
     public function test_employee_cannot_delete_document(): void

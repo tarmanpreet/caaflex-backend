@@ -80,9 +80,10 @@ Route::middleware([
     Route::post('/auto-confirm-slots', [AutoConfirmSlotController::class, 'store'])->name('auto-confirm-slots.store');
     Route::delete('/auto-confirm-slots/{slot}', [AutoConfirmSlotController::class, 'destroy'])->name('auto-confirm-slots.destroy');
 
-    Route::post('/practices/{practice}/documents', [PracticeDocumentController::class, 'store'])->name('practices.documents.store');
-    Route::get('/practices/{practice}/documents/{document}/download', [PracticeDocumentController::class, 'download'])->name('practices.documents.download');
-    Route::delete('/practices/{practice}/documents/{document}', [PracticeDocumentController::class, 'destroy'])->name('practices.documents.destroy');
+    Route::post('/practices/{practice}/documents', [PracticeDocumentController::class, 'store'])->name('practices.documents.store')->scopeBindings();
+    Route::patch('/practices/{practice}/documents/{document}/expiration', [PracticeDocumentController::class, 'updateExpiration'])->name('practices.documents.expiration.update')->scopeBindings();
+    Route::get('/practices/{practice}/documents/{document}/download', [PracticeDocumentController::class, 'download'])->name('practices.documents.download')->scopeBindings();
+    Route::delete('/practices/{practice}/documents/{document}', [PracticeDocumentController::class, 'destroy'])->name('practices.documents.destroy')->scopeBindings();
 
     Route::post('/practices/{practice}/notes', [PracticeNoteController::class, 'store'])->name('practices.notes.store');
 
@@ -90,7 +91,8 @@ Route::middleware([
     Route::put('/practices/{practice}/deadlines/{deadline}', [PracticeDeadlineController::class, 'update'])->name('practices.deadlines.update')->scopeBindings();
     Route::delete('/practices/{practice}/deadlines/{deadline}', [PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy')->scopeBindings();
 
-    Route::post('/clients/{client}/documents', [ClientDocumentController::class, 'store'])->name('clients.documents.store');
-    Route::get('/clients/{client}/documents/{document}/download', [ClientDocumentController::class, 'download'])->name('clients.documents.download');
-    Route::delete('/clients/{client}/documents/{document}', [ClientDocumentController::class, 'destroy'])->name('clients.documents.destroy');
+    Route::post('/clients/{client}/documents', [ClientDocumentController::class, 'store'])->name('clients.documents.store')->scopeBindings();
+    Route::patch('/clients/{client}/documents/{document}/expiration', [ClientDocumentController::class, 'updateExpiration'])->name('clients.documents.expiration.update')->scopeBindings();
+    Route::get('/clients/{client}/documents/{document}/download', [ClientDocumentController::class, 'download'])->name('clients.documents.download')->scopeBindings();
+    Route::delete('/clients/{client}/documents/{document}', [ClientDocumentController::class, 'destroy'])->name('clients.documents.destroy')->scopeBindings();
 });

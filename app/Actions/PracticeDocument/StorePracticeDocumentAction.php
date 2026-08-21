@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Actions\Client;
+namespace App\Actions\PracticeDocument;
 
-use App\Models\ClientDocument;
-use App\Models\ClientProfile;
+use App\Models\Practice;
+use App\Models\PracticeDocument;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 
-class StoreClientDocumentAction
+class StorePracticeDocumentAction
 {
-    /** @return Collection<int, ClientDocument> */
-    public function execute(array $files, array $descriptions, array $expiresOn, int $uploadedBy, ClientProfile $client): Collection
+    /** @return Collection<int, PracticeDocument> */
+    public function execute(array $files, array $descriptions, array $expiresOn, int $uploadedBy, Practice $practice): Collection
     {
         $created = collect();
 
         foreach ($files as $index => $file) {
             /** @var UploadedFile $file */
-            $path = $file->store("client-documents/{$client->id}", 'local');
+            $path = $file->store("practice-documents/{$practice->id}", 'local');
 
-            $created->push(ClientDocument::create([
-                'client_profile_id' => $client->id,
+            $created->push(PracticeDocument::create([
+                'practice_id' => $practice->id,
                 'uploaded_by' => $uploadedBy,
                 'original_name' => $file->getClientOriginalName(),
                 'disk_path' => $path,

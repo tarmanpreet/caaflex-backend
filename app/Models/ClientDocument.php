@@ -23,7 +23,15 @@ class ClientDocument extends Model
         'mime_type',
         'file_size',
         'description',
+        'expires_on',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'expires_on' => 'date',
+        ];
+    }
 
     /**
      * Get the client profile that owns this document.

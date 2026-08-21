@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Practice;
+use App\Models\PracticeDocument;
 use App\Models\User;
 
 class PracticePolicy
@@ -46,14 +47,18 @@ class PracticePolicy
         return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.upload');
     }
 
-    public function downloadDocument(User $user, Practice $practice): bool
+    public function downloadDocument(User $user, Practice $practice, ?PracticeDocument $document = null): bool
     {
-        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.download');
+        return $user->canAccessBranchId($practice->branch_id)
+            && $user->hasPermissionTo('practice-documents.download')
+            && ($document === null || $document->practice_id === $practice->id);
     }
 
-    public function deleteDocument(User $user, Practice $practice): bool
+    public function deleteDocument(User $user, Practice $practice, ?PracticeDocument $document = null): bool
     {
-        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-documents.delete');
+        return $user->canAccessBranchId($practice->branch_id)
+            && $user->hasPermissionTo('practice-documents.delete')
+            && ($document === null || $document->practice_id === $practice->id);
     }
 
     public function createNote(User $user, Practice $practice): bool

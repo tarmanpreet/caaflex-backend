@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Client\StoreClientDocumentAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClientDocumentRequest;
+use App\Http\Requests\UpdateClientDocumentExpirationRequest;
 use App\Models\ClientDocument;
 use App\Models\ClientProfile;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,6 +21,7 @@ class ClientDocumentController extends Controller
         $created = $action->execute(
             $request->file('files'),
             $request->input('descriptions', []),
+            $request->input('expires_on', []),
             $request->user()->id,
             $client
         );
@@ -30,11 +32,21 @@ class ClientDocumentController extends Controller
         ], 201);
     }
 
+    public function updateExpiration(UpdateClientDocumentExpirationRequest $request, ClientProfile $client, ClientDocument $document): JsonResponse
+    {
+        $document->update($request->validated());
+
+        return response()->json([
+            'message' => 'Document expiration updated.',
+            'data' => $document->fresh(),
+        ]);
+    }
+
     public function download(ClientProfile $client, ClientDocument $document)
     {
         $this->authorize('downloadDocument', [$client, $document]);
 
-        return response()->download(storage_path('app/' . $document->disk_path), $document->original_name);
+        return response()->download(storage_path('app/'.$document->disk_path), $document->original_name);
     }
 
     public function destroy(ClientProfile $client, ClientDocument $document): JsonResponse

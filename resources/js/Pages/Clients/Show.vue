@@ -10,11 +10,15 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import DocumentExpirationModal from '@/Components/DocumentExpirationModal.vue';
+import DocumentExpiryBadge from '@/Components/DocumentExpiryBadge.vue';
 import SortableTable from '@/Components/SortableTable.vue';
+import { CalendarDaysIcon } from '@heroicons/vue/24/outline';
 
 const documentColumns = [
     { key: 'original_name', label: 'Filename', sortable: true },
     { key: 'description', label: 'Description', sortable: true },
+    { key: 'expires_on', label: 'Scadenza', sortable: true },
     { key: 'created_at', label: 'Uploaded', sortable: true },
     { key: 'uploaded_by', label: 'Uploaded By', sortable: false },
 ];
@@ -88,6 +92,7 @@ const stagedFiles = ref([]);
 const form = useForm({
     files: [],
     descriptions: [],
+    expires_on: [],
 });
 
 const formatFileSize = (bytes) => {
@@ -97,7 +102,7 @@ const formatFileSize = (bytes) => {
 
 const addFiles = (fileList) => {
     for (const file of fileList) {
-        stagedFiles.value.push({ file, description: '' });
+        stagedFiles.value.push({ file, description: '', expires_on: '' });
     }
 };
 
@@ -122,6 +127,7 @@ const removeFile = (index) => {
 const submitUpload = () => {
     form.files = stagedFiles.value.map(f => f.file);
     form.descriptions = stagedFiles.value.map(f => f.description);
+    form.expires_on = stagedFiles.value.map(f => f.expires_on);
     form.post(route('clients.documents.store', props.client.id), {
         forceFormData: true,
         preserveScroll: true,
@@ -131,6 +137,11 @@ const submitUpload = () => {
         },
     });
 };
+
+const editingDocumentExpiration = ref(null);
+const documentExpirationUpdateUrl = computed(() => editingDocumentExpiration.value
+    ? route('clients.documents.expiration.update', [props.client.id, editingDocumentExpiration.value.id])
+    : null);
 
 // Delete Logic
 const confirmingDocDelete = ref(false);
@@ -427,20 +438,28 @@ const statusBadgeClass = (status) => {
                         <div v-else class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">File selezionati</h4>
                             <div class="space-y-3 mb-4">
-                                <div v-for="(item, index) in stagedFiles" :key="index" class="flex items-center gap-3 bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-                                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                                <div v-for="(item, index) in stagedFiles" :key="index" class="grid gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-4 shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(180px,220px)_180px_auto] lg:items-end">
+                                    <div class="min-w-0">
                                         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.file.name }}</p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(item.file.size) }}</p>
                                     </div>
-                                    <div class="flex-1">
+                                    <div>
+                                        <label :for="`client-document-description-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Descrizione</label>
                                         <input
+                                            :id="`client-document-description-${index}`"
                                             type="text"
                                             v-model="item.description"
-                                            placeholder="Descrizione..."
-                                            class="w-full text-sm py-1 px-2 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 !shadow-none"
+                                            placeholder="Descrizione opzionale"
+                                            class="app-input min-h-[44px] w-full rounded-xl text-sm"
                                         />
+                                        <InputError :message="form.errors[`descriptions.${index}`]" class="mt-1" />
                                     </div>
-                                    <button @click="removeFile(index)" type="button" class="text-gray-400 hover:text-red-500 p-1 flex-shrink-0">
+                                    <div>
+                                        <label :for="`client-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Scadenza</label>
+                                        <input :id="`client-document-expiration-${index}`" v-model="item.expires_on" type="date" class="app-input min-h-[44px] w-full rounded-xl text-sm">
+                                        <InputError :message="form.errors[`expires_on.${index}`]" class="mt-1" />
+                                    </div>
+                                    <button @click="removeFile(index)" type="button" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-error-container/20 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30" :aria-label="`Rimuovi ${item.file.name}`">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
@@ -467,12 +486,21 @@ const statusBadgeClass = (status) => {
                             <template #cell-created_at="{ row }">
                                 {{ formatDate(row.created_at) }}
                             </template>
+                            <template #cell-expires_on="{ row }">
+                                <DocumentExpiryBadge :expires-on="row.expires_on" />
+                            </template>
                             <template #cell-uploaded_by="{ row }">
                                 {{ row.uploaded_by?.name || 'Unknown' }}
                             </template>
                             <template #actions="{ row }">
-                                <a :href="route('clients.documents.download', [client.id, row.id])" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 inline-block mr-4">Download</a>
-                                <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 inline-block">Delete</button>
+                                <div class="flex items-center justify-end gap-2">
+                                    <button v-if="canUploadDocument" type="button" class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" @click="editingDocumentExpiration = row">
+                                        <CalendarDaysIcon class="h-4 w-4" />
+                                        Scadenza
+                                    </button>
+                                    <a :href="route('clients.documents.download', [client.id, row.id])" class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">Download</a>
+                                    <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Delete</button>
+                                </div>
                             </template>
                         </SortableTable>
                     </div>
@@ -551,6 +579,13 @@ const statusBadgeClass = (status) => {
 
             </div>
         </div>
+
+        <DocumentExpirationModal
+            :show="Boolean(editingDocumentExpiration)"
+            :document="editingDocumentExpiration"
+            :update-url="documentExpirationUpdateUrl"
+            @close="editingDocumentExpiration = null"
+        />
 
         <!-- Document Deletion Confirmation Modal -->
         <ConfirmationModal :show="confirmingDocDelete" @close="confirmingDocDelete = false">

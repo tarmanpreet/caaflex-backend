@@ -27,9 +27,10 @@ class PracticeDocumentTest extends TestCase
 
         // Register routes for testing (actual routes defined in Task 10)
         Route::middleware('web')->prefix('api/v1')->group(function () {
-            Route::post('/practices/{practice}/documents', [PracticeDocumentController::class, 'store']);
-            Route::get('/practices/{practice}/documents/{document}/download', [PracticeDocumentController::class, 'download']);
-            Route::delete('/practices/{practice}/documents/{document}', [PracticeDocumentController::class, 'destroy']);
+            Route::post('/practices/{practice}/documents', [PracticeDocumentController::class, 'store'])->scopeBindings();
+            Route::patch('/practices/{practice}/documents/{document}/expiration', [PracticeDocumentController::class, 'updateExpiration'])->scopeBindings();
+            Route::get('/practices/{practice}/documents/{document}/download', [PracticeDocumentController::class, 'download'])->scopeBindings();
+            Route::delete('/practices/{practice}/documents/{document}', [PracticeDocumentController::class, 'destroy'])->scopeBindings();
         });
     }
 
@@ -47,6 +48,7 @@ class PracticeDocumentTest extends TestCase
         $response = $this->actingAs($admin)
             ->postJson('/api/v1/practices/'.$practice->id.'/documents', [
                 'files' => [$file],
+                'expires_on' => ['2027-06-30'],
             ]);
 
         $response->assertStatus(201)
@@ -59,7 +61,96 @@ class PracticeDocumentTest extends TestCase
             'uploaded_by' => $admin->id,
             'original_name' => 'test.pdf',
             'mime_type' => 'application/pdf',
+            'expires_on' => '2027-06-30',
         ]);
+    }
+
+    public function test_admin_can_upload_document_with_expiration_from_web_page(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $file = UploadedFile::fake()->create('web-document.pdf', 100, 'application/pdf');
+
+        $this->actingAs($admin)
+            ->post(route('practices.documents.store', $practice), [
+                'files' => [$file],
+                'descriptions' => ['Documento web'],
+                'expires_on' => ['2027-09-30'],
+            ])
+            ->assertRedirect();
+
+        Storage::disk('local')->assertExists("practice-documents/{$practice->id}/".$file->hashName());
+        $this->assertDatabaseHas('practice_documents', [
+            'practice_id' => $practice->id,
+            'original_name' => 'web-document.pdf',
+            'description' => 'Documento web',
+            'expires_on' => '2027-09-30',
+        ]);
+    }
+
+    public function test_admin_can_update_and_clear_document_expiration(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $document = PracticeDocument::factory()->create(['practice_id' => $practice->id]);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/v1/practices/{$practice->id}/documents/{$document->id}/expiration", [
+                'expires_on' => '2027-06-30',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.expires_on', '2027-06-30T00:00:00.000000Z');
+
+        $this->actingAs($admin)
+            ->patchJson("/api/v1/practices/{$practice->id}/documents/{$document->id}/expiration", [
+                'expires_on' => null,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.expires_on', null);
+    }
+
+    public function test_invalid_expiration_is_rejected(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $document = PracticeDocument::factory()->create(['practice_id' => $practice->id]);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/v1/practices/{$practice->id}/documents/{$document->id}/expiration", [
+                'expires_on' => 'tomorrow-ish',
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('expires_on');
+
+        $this->assertNull($document->fresh()->expires_on);
+    }
+
+    public function test_document_routes_reject_a_document_from_another_practice(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create();
+        $otherPractice = Practice::factory()->create();
+        $document = PracticeDocument::factory()->create(['practice_id' => $otherPractice->id]);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/v1/practices/{$practice->id}/documents/{$document->id}/expiration", [
+                'expires_on' => '2027-06-30',
+            ])
+            ->assertNotFound();
+
+        $this->actingAs($admin)
+            ->deleteJson("/api/v1/practices/{$practice->id}/documents/{$document->id}")
+            ->assertNotFound();
+
+        $this->assertModelExists($document);
     }
 
     public function test_employee_can_upload_document(): void

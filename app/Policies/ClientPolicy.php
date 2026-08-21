@@ -65,11 +65,14 @@ class ClientPolicy
     public function downloadDocument(User $user, ClientProfile $clientProfile, ClientDocument $document): bool
     {
         return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('documents.download') &&
+               $document->client_profile_id === $clientProfile->id &&
                ($user->hasRole('superadmin') || $user->hasRole('admin') || $user->hasRole('employee') || $document->clientProfile->user_id === $user->id);
     }
 
     public function deleteDocument(User $user, ClientProfile $clientProfile, ClientDocument $document): bool
     {
-        return $user->canAccessBranchId($clientProfile->branch_id) && $user->hasPermissionTo('documents.delete');
+        return $user->canAccessBranchId($clientProfile->branch_id)
+            && $user->hasPermissionTo('documents.delete')
+            && $document->client_profile_id === $clientProfile->id;
     }
 }

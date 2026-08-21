@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\ClientDocument;
 use App\Models\ClientProfile;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -62,5 +61,16 @@ class ClientDocumentTest extends TestCase
         ]);
 
         $this->assertNull($document->uploaded_by);
+    }
+
+    public function test_expiration_is_optional_and_cast_as_a_date(): void
+    {
+        $documentWithoutExpiration = ClientDocument::factory()->create();
+        $expiringDocument = ClientDocument::factory()->create([
+            'expires_on' => '2027-04-30',
+        ]);
+
+        $this->assertNull($documentWithoutExpiration->expires_on);
+        $this->assertSame('2027-04-30', $expiringDocument->expires_on->toDateString());
     }
 }

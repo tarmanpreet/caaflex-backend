@@ -18,9 +18,10 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::post('/clients/{client}/invite-user', [App\Http\Controllers\Api\V1\ClientController::class, 'inviteUser']);
 
         // Client document routes
-        Route::post('/clients/{client}/documents', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'store']);
-        Route::get('/clients/{client}/documents/{document}/download', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'download']);
-        Route::delete('/clients/{client}/documents/{document}', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'destroy']);
+        Route::post('/clients/{client}/documents', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'store'])->scopeBindings();
+        Route::patch('/clients/{client}/documents/{document}/expiration', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'updateExpiration'])->scopeBindings();
+        Route::get('/clients/{client}/documents/{document}/download', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'download'])->scopeBindings();
+        Route::delete('/clients/{client}/documents/{document}', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'destroy'])->scopeBindings();
 
         // Practice routes
         Route::apiResource('/practices', App\Http\Controllers\Api\V1\PracticeController::class);
@@ -38,9 +39,10 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::delete('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy')->scopeBindings();
 
         // Practice document routes
-        Route::post('/practices/{practice}/documents', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'store']);
-        Route::get('/practices/{practice}/documents/{document}/download', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'download']);
-        Route::delete('/practices/{practice}/documents/{document}', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'destroy']);
+        Route::post('/practices/{practice}/documents', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'store'])->scopeBindings();
+        Route::patch('/practices/{practice}/documents/{document}/expiration', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'updateExpiration'])->scopeBindings();
+        Route::get('/practices/{practice}/documents/{document}/download', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'download'])->scopeBindings();
+        Route::delete('/practices/{practice}/documents/{document}', [App\Http\Controllers\Api\V1\PracticeDocumentController::class, 'destroy'])->scopeBindings();
 
         // Procedure routes
         Route::apiResource('/procedures', App\Http\Controllers\Api\V1\ProcedureController::class);
