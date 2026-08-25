@@ -404,7 +404,7 @@ async function selectMiniDate(day) {
         </template>
 
         <div class="py-8">
-            <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+            <div class="w-full">
                 <!-- Bento Grid Layout -->
                 <div class="grid grid-cols-12 gap-6 items-start">
                     <!-- Left Sidebar: Mini Calendar & Filters -->

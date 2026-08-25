@@ -5,7 +5,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import IconButton from '@/Components/IconButton.vue';
 import Pagination from '@/Components/Pagination.vue';
-import { EyeIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
+import { EyeIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
 
 const columns = [
     { key: 'name', label: 'Nome' },
@@ -52,45 +53,39 @@ const roleBadgeClass = (role) => {
 <template>
     <AppLayout title="Utenti">
         <template #header>
-            <div class="flex items-center justify-between flex-wrap gap-3">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    Gestione Utenti
-                </h2>
-                <Link
-                    v-if="canCreateUser"
-                    :href="route('users.create')"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                >
-                    <PlusIcon class="w-4 h-4" />
-                    Nuovo Utente
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Amministrazione / Utenti</p>
+                    <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione utenti</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Consulta utenti, ruoli, stato e carico delle pratiche aperte.</p>
+                </div>
+                <Link v-if="canCreateUser" :href="route('users.create')" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
+                    <PlusIcon class="h-5 w-5" />
+                    Nuovo utente
                 </Link>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-                <!-- Top bar -->
-                <div class="mb-6 flex items-center space-x-2 w-full max-w-md">
+        <UiSectionCard title="Archivio utenti" eyebrow="Vista operativa" :padded="false">
+            <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative min-w-0 flex-1 sm:max-w-xl">
+                        <label for="user-search" class="sr-only">Cerca utenti</label>
+                        <MagnifyingGlassIcon class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                     <input
-                        type="text"
+                        id="user-search"
                         v-model="search"
+                        type="search"
                         @keyup.enter="performSearch"
-                        placeholder="Cerca per nome o email..."
-                        class="border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
-                    />
-                    <button
-                        @click="performSearch"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        placeholder="Cerca per nome o email…"
+                        class="h-11 w-full rounded-xl border-0 bg-surface-container-high pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
                     >
-                        Cerca
-                    </button>
+                    </div>
+                    <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
                 </div>
+            </div>
 
-                <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                    <div class="overflow-x-auto">
-                        <SortableTable
+            <SortableTable
                             :columns="columns"
                             :rows="users.data"
                             :controlled="true"
@@ -100,7 +95,7 @@ const roleBadgeClass = (role) => {
                             @sort="onSort"
                         >
                             <template #cell-name="{ row }">
-                                <Link :href="route('users.show', row.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 font-medium text-sm">
+                                <Link :href="route('users.show', row.id)" class="text-sm font-semibold text-primary transition hover:text-primary-dim">
                                     {{ row.name }}
                                 </Link>
                             </template>
@@ -115,7 +110,7 @@ const roleBadgeClass = (role) => {
                                 <span v-if="!row.roles || row.roles.length === 0" class="text-xs text-gray-400">—</span>
                             </template>
                             <template #cell-open_practices_count="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">
+                                <span class="text-on-surface-variant">
                                     {{ row.open_practices_count ?? 0 }}
                                 </span>
                             </template>
@@ -125,20 +120,15 @@ const roleBadgeClass = (role) => {
                                 </span>
                             </template>
                             <template #actions="{ row }">
-                                <IconButton :as="Link" :href="route('users.show', row.id)" tooltip="Dettaglio" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+                                <IconButton :as="Link" :href="route('users.show', row.id)" tooltip="Dettaglio" class="rounded-xl bg-surface-container-low p-2 text-primary transition hover:bg-primary-container">
                                     <EyeIcon class="w-5 h-5" />
                                 </IconButton>
                             </template>
-                        </SortableTable>
-                    </div>
-                </div>
+            </SortableTable>
 
-                <!-- Pagination -->
-                <div v-if="users.links && users.links.length > 3" class="mt-4">
+                <div v-if="users.links && users.links.length > 3" class="flex justify-end p-5">
                     <Pagination :links="users.links" />
                 </div>
-
-            </div>
-        </div>
+        </UiSectionCard>
     </AppLayout>
 </template>

@@ -7,7 +7,8 @@ import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import IconButton from '@/Components/IconButton.vue';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
+import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 
 const columns = [
     { key: 'name', label: 'Nome' },
@@ -84,44 +85,39 @@ const deleteProcedure = () => {
 <template>
     <AppLayout title="Procedure">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                Procedure
-            </h2>
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Configurazione / Procedure</p>
+                    <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Procedure</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Configura procedure, note predefinite e tempistiche delle scadenze.</p>
+                </div>
+                <Link v-if="canCreate" :href="route('procedures.create')" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
+                    <PlusIcon class="h-5 w-5" />
+                    Nuova procedura
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Top bar -->
-                <div class="mb-6 flex justify-between items-center">
-                    <div class="flex items-center space-x-2 w-full max-w-md">
+        <UiSectionCard title="Archivio procedure" eyebrow="Vista operativa" :padded="false">
+            <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative min-w-0 flex-1 sm:max-w-xl">
+                        <label for="procedure-search" class="sr-only">Cerca procedure</label>
+                        <MagnifyingGlassIcon class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                         <input
-                            type="text"
+                            id="procedure-search"
                             v-model="search"
+                            type="search"
                             @keyup.enter="performSearch"
-                            placeholder="Cerca procedura..."
-                            class="border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
-                        />
-                        <button
-                            @click="performSearch"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                            placeholder="Cerca procedura…"
+                            class="h-11 w-full rounded-xl border-0 bg-surface-container-high pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
                         >
-                            Cerca
-                        </button>
                     </div>
-
-                    <Link
-                        v-if="canCreate"
-                        :href="route('procedures.create')"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                    >
-                        Nuova Procedura
-                    </Link>
+                    <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
                 </div>
+            </div>
 
-                <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                    <div class="overflow-x-auto">
-                        <SortableTable
+            <SortableTable
                             :columns="columns"
                             :rows="procedures"
                             :controlled="true"
@@ -131,43 +127,40 @@ const deleteProcedure = () => {
                             @sort="onSort"
                         >
                             <template #cell-name="{ row }">
-                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ row.name }}</span>
+                                <span class="font-medium text-on-surface">{{ row.name }}</span>
                             </template>
                             <template #cell-procedure_type_id="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ getProcedureTypeName(row.procedure_type_id) }}</span>
+                                <span class="text-on-surface-variant">{{ getProcedureTypeName(row.procedure_type_id) }}</span>
                             </template>
                             <template #cell-default_notes="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ row.default_notes || '—' }}</span>
+                                <span class="text-on-surface-variant">{{ row.default_notes || '—' }}</span>
                             </template>
                             <template #cell-deadline_days="{ row }">
-                                <span class="text-gray-500 dark:text-gray-400">{{ row.deadline_days ? row.deadline_days + ' giorni' : '—' }}</span>
+                                <span class="text-on-surface-variant">{{ row.deadline_days ? row.deadline_days + ' giorni' : '—' }}</span>
                             </template>
                             <template #actions="{ row }">
-                                <span class="flex items-center space-x-2">
+                                <span class="flex items-center justify-end gap-2">
                                     <IconButton
                                         v-if="canEdit"
                                         :as="Link"
                                         :href="route('procedures.edit', row.id)"
                                         tooltip="Modifica"
-                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                        class="rounded-xl bg-primary-container p-2 text-on-primary-container transition hover:bg-primary/15"
                                     >
                                         <PencilSquareIcon class="w-5 h-5" />
                                     </IconButton>
                                     <IconButton
                                         v-if="canDelete"
                                         tooltip="Elimina"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                        class="rounded-xl bg-error-container/30 p-2 text-error transition hover:bg-error-container/50"
                                         @click="confirmDelete(row)"
                                     >
                                         <TrashIcon class="w-5 h-5" />
                                     </IconButton>
                                 </span>
                             </template>
-                        </SortableTable>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </SortableTable>
+        </UiSectionCard>
 
         <!-- Delete Confirmation Modal -->
         <ConfirmationModal :show="confirmingDelete" @close="confirmingDelete = false">

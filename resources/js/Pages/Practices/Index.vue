@@ -7,7 +7,7 @@ import Pagination from '@/Components/Pagination.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import UiStatusBadge from '@/Components/ui/UiStatusBadge.vue';
-import { EyeIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { AdjustmentsHorizontalIcon, ChevronDownIcon, EyeIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     practices: Object,
@@ -31,6 +31,7 @@ const sortKey = ref(props.filters?.sort ?? 'id');
 const sortDir = ref(props.filters?.direction ?? 'desc');
 const statusFilter = ref(props.filters?.status ?? '');
 const practiceTypeFilter = ref(props.filters?.practice_type_id ?? '');
+const showAdvancedFilters = ref(Boolean(statusFilter.value || practiceTypeFilter.value));
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 
 const performSearch = () => {
@@ -60,7 +61,16 @@ const filterByStatus = (status) => {
     performSearch();
 };
 
-const activeStatus = computed(() => props.filters?.status ?? '');
+const resetFilters = () => {
+    search.value = '';
+    statusFilter.value = '';
+    practiceTypeFilter.value = '';
+    showAdvancedFilters.value = false;
+    performSearch();
+};
+
+const activeFilterCount = computed(() => [search.value, statusFilter.value, practiceTypeFilter.value].filter(Boolean).length);
+const activeStatus = computed(() => statusFilter.value);
 
 const formatStatus = (status) => status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
 
@@ -127,23 +137,38 @@ const statCards = computed(() => [
                 </div>
             </section>
 
-            <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-                <UiSectionCard title="Archivio pratiche" eyebrow="Ricerca e tabella" :padded="false">
-                    <template #actions>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="relative min-w-[260px] flex-1">
+            <UiSectionCard title="Archivio pratiche" eyebrow="Vista operativa" :padded="false">
+                <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
+                    <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                        <div class="relative min-w-0 flex-1 xl:max-w-sm">
+                            <label for="practice-search" class="sr-only">Cerca pratiche</label>
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                                 <input
+                                    id="practice-search"
                                     v-model="search"
-                                    type="text"
-                                    placeholder="Cerca pratiche..."
-                                    class="h-11 w-full rounded-2xl border-0 bg-surface-container-high pl-11 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
+                                    type="search"
+                                    placeholder="Cerca pratiche…"
+                                    class="h-11 w-full rounded-xl border-0 bg-surface-container-high pl-11 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
                                     @keyup.enter="performSearch"
                                 >
-                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <button type="button" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" :aria-expanded="showAdvancedFilters" aria-controls="advanced-practice-filters" @click="showAdvancedFilters = !showAdvancedFilters">
+                                <AdjustmentsHorizontalIcon class="h-5 w-5" />
+                                Filtri
+                                <span v-if="activeFilterCount" class="rounded-md bg-primary px-2 py-0.5 text-xs text-on-primary">{{ activeFilterCount }}</span>
+                                <ChevronDownIcon :class="['h-4 w-4 transition-transform', showAdvancedFilters ? 'rotate-180' : '']" />
+                            </button>
+                            <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-on-primary transition hover:bg-primary-dim" @click="performSearch">Cerca</button>
+                        </div>
+                    </div>
+                    <div v-show="showAdvancedFilters" id="advanced-practice-filters" class="mt-3 grid gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
+                        <div>
+                            <label for="practice-status-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Stato</label>
                             <select
+                                id="practice-status-filter"
                                 v-model="statusFilter"
-                                class="h-11 rounded-2xl border-0 bg-surface-container-high px-4 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
+                                class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                                 @change="performSearch"
                             >
                                 <option value="">Tutti gli stati</option>
@@ -154,9 +179,13 @@ const statCards = computed(() => [
                                 <option value="annullata">Annullata</option>
                                 <option value="sospesa">Sospesa</option>
                             </select>
+                        </div>
+                        <div>
+                            <label for="practice-type-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Tipo pratica</label>
                             <select
+                                id="practice-type-filter"
                                 v-model="practiceTypeFilter"
-                                class="h-11 rounded-2xl border-0 bg-surface-container-high px-4 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
+                                class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                                 @change="performSearch"
                             >
                                 <option value="">Tutti i tipi</option>
@@ -164,9 +193,13 @@ const statCards = computed(() => [
                                     {{ practiceType.name }}
                                 </option>
                             </select>
-                            <button @click="performSearch" class="rounded-2xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest">Cerca</button>
                         </div>
-                    </template>
+                        <button type="button" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface disabled:pointer-events-none disabled:opacity-40" :disabled="!activeFilterCount" @click="resetFilters">
+                            <XMarkIcon class="h-5 w-5" />
+                            Azzera
+                        </button>
+                    </div>
+                </div>
 
                     <SortableTable
                         :columns="columns"
@@ -214,30 +247,7 @@ const statCards = computed(() => [
                     <div v-if="practices.links && practices.links.length > 3" class="p-6 pt-0 flex justify-end">
                         <Pagination :links="practices.links" />
                     </div>
-                </UiSectionCard>
-
-                <div class="space-y-6">
-                    <UiSectionCard title="Insight sistema" eyebrow="Priorità studio">
-                        <div class="rounded-[1.5rem] bg-tertiary-container p-5 text-on-tertiary-container">
-                            <p class="text-[10px] font-semibold uppercase tracking-[0.2em]">Alert operativo</p>
-                            <p class="mt-3 font-headline text-2xl font-extrabold">{{ summary.pending }}</p>
-                            <p class="mt-2 text-sm opacity-80">Pratiche attualmente in attesa di documentazione cliente.</p>
-                        </div>
-                        <div class="mt-4 rounded-[1.5rem] bg-primary/5 p-5 text-sm text-on-surface-variant ring-1 ring-primary/10">
-                            Nessun contratto API è stato toccato: il redesign resta confinato alla web UI.
-                        </div>
-                    </UiSectionCard>
-
-                    <UiSectionCard title="Filtri rapidi" eyebrow="Lettura guidata">
-                        <div class="flex flex-wrap gap-2">
-                            <span class="rounded-full bg-primary-container px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-on-primary-container">Tutte</span>
-                            <span class="rounded-full bg-surface-container-high px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">In lavorazione</span>
-                            <span class="rounded-full bg-surface-container-high px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">Documenti</span>
-                            <span class="rounded-full bg-surface-container-high px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">Completate</span>
-                        </div>
-                    </UiSectionCard>
-                </div>
-            </div>
+            </UiSectionCard>
         </div>
     </AppLayout>
 </template>

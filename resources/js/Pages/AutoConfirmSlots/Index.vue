@@ -76,7 +76,7 @@ const deleteSlot = () => {
         </template>
 
         <div class="py-8">
-            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="w-full space-y-6">
 
                 <!-- Current Slots -->
                 <div class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-outline-variant/10 p-6">

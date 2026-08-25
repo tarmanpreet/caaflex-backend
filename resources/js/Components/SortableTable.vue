@@ -149,7 +149,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                     <th
                         v-if="slots.actions"
                         scope="col"
-                        class="whitespace-nowrap px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant"
+                        class="sticky right-0 z-20 min-w-[112px] whitespace-nowrap border-l border-outline-variant/35 bg-surface-container-low px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]"
                     >
                         Azioni
                     </th>
@@ -186,7 +186,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                         </slot>
                     </td>
 
-                    <td v-if="slots.actions" class="px-5 py-4 text-right align-middle">
+                    <td v-if="slots.actions" class="sticky right-0 z-10 min-w-[112px] border-l border-outline-variant/25 bg-inherit px-5 py-4 text-right align-middle shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">
                         <slot name="actions" :row="row" />
                     </td>
                 </tr>

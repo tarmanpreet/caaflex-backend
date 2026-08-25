@@ -37,7 +37,7 @@ const submitForm = () => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="w-full">
                 <FormSection @submitted="submitForm">
                     <template #title>Nuovo Tipo Pratica</template>
                     <template #description>Crea un nuovo tipo di pratica con nome, durata e colore.</template>

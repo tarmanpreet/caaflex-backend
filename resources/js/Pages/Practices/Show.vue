@@ -676,7 +676,7 @@ const completionPercentage = computed(() => {
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Descrizione</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Scadenza</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Data</th>
-                                                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Azioni</th>
+                                                <th class="sticky right-0 z-20 min-w-[176px] border-l border-outline-variant/20 bg-surface-container-low px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-on-surface-variant shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-outline-variant/10">
@@ -685,7 +685,7 @@ const completionPercentage = computed(() => {
                                                     Nessun documento caricato.
                                                 </td>
                                             </tr>
-                                            <tr v-for="doc in practice.documents" :key="doc.id" class="group hover:bg-surface-container-low transition-colors">
+                                            <tr v-for="doc in practice.documents" :key="doc.id" class="group bg-surface-container-lowest transition-colors hover:bg-surface-container-low">
                                                 <td class="px-6 py-4">
                                                     <div class="flex items-center">
                                                         <div class="w-10 h-10 rounded-lg bg-error-container/10 flex items-center justify-center mr-3">
@@ -706,7 +706,7 @@ const completionPercentage = computed(() => {
                                                 <td class="px-6 py-4">
                                                     <p class="text-sm text-on-surface">{{ formatDate(doc.created_at) }}</p>
                                                 </td>
-                                                <td class="px-6 py-4 text-right">
+                                                <td class="sticky right-0 z-10 min-w-[176px] border-l border-outline-variant/10 bg-inherit px-6 py-4 text-right shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">
                                                     <div class="flex items-center justify-end space-x-2">
                                                         <button v-if="canUploadDocument" type="button" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Modifica scadenza documento" @click="editingDocumentExpiration = doc">
                                                             <CalendarDaysIcon class="h-5 w-5" />

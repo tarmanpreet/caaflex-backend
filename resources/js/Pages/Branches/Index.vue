@@ -69,7 +69,7 @@ const deleteBranch = () => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="w-full">
                 <!-- Top bar -->
                 <div class="mb-6 flex justify-between items-center flex-wrap gap-3">
                     <div class="flex items-center space-x-2 w-full max-w-md">
