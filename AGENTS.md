@@ -1,4 +1,9 @@
 <laravel-boost-guidelines>
+
+## Local Runtime
+
+- This project runs in Docker. Run PHP, Artisan, Composer, Node, and application tests inside the appropriate Docker Compose service instead of relying on host-installed runtimes.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines

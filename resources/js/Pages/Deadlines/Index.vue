@@ -195,7 +195,7 @@ const updateDeadline = () => {
     <AppLayout title="Scadenze">
         <template #header>
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Workspace / Scadenze</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Scadenze</p>
                 <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione scadenze</h1>
                 <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Controlla e aggiorna tutte le attività collegate alle pratiche da un’unica vista.</p>
             </div>

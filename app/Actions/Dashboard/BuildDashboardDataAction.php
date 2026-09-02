@@ -2,6 +2,7 @@
 
 namespace App\Actions\Dashboard;
 
+use App\Actions\PracticeDeadline\ScopeVisiblePracticeDeadlineAction;
 use App\Models\Appointment;
 use App\Models\Branch;
 use App\Models\Practice;
@@ -15,28 +16,30 @@ use Illuminate\Support\Collection;
 
 class BuildDashboardDataAction
 {
+    public function __construct(private ScopeVisiblePracticeDeadlineAction $visibleDeadlines) {}
+
     public function execute(User $user): array
     {
         $practiceIds = $this->scopedPracticeQuery($user)->pluck('practices.id');
+        $deadlineQuery = $this->visibleDeadlines->execute($user);
 
         return [
-            'stats' => $this->buildStats($user, $practiceIds),
-            'deadlines' => $this->buildDeadlines($practiceIds),
+            'stats' => $this->buildStats($user, $practiceIds, clone $deadlineQuery),
+            'deadlines' => $this->buildDeadlines($user, clone $deadlineQuery),
             'activities' => $this->buildActivities($practiceIds),
             'practices' => $this->buildPractices($practiceIds),
-            'efficiency' => $this->buildEfficiency($practiceIds),
+            'efficiency' => $this->buildEfficiency(clone $deadlineQuery),
         ];
     }
 
-    private function buildStats(User $user, Collection $practiceIds): array
+    private function buildStats(User $user, Collection $practiceIds, Builder $deadlineQuery): array
     {
         $activePracticeCount = Practice::query()
             ->whereIn('id', $practiceIds)
             ->whereIn('status', ['in_lavorazione', 'in_attesa_documenti'])
             ->count();
 
-        $openDeadlineCount = PracticeDeadline::query()
-            ->whereIn('practice_id', $practiceIds)
+        $openDeadlineCount = $deadlineQuery
             ->whereIn('status', [
                 PracticeDeadline::STATUS_PENDING,
                 PracticeDeadline::STATUS_IN_PROGRESS,
@@ -70,14 +73,18 @@ class BuildDashboardDataAction
         ];
     }
 
-    private function buildDeadlines(Collection $practiceIds): array
+    private function buildDeadlines(User $user, Builder $query): array
     {
-        return PracticeDeadline::query()
-            ->whereIn('practice_id', $practiceIds)
-            ->whereIn('status', [
-                PracticeDeadline::STATUS_PENDING,
-                PracticeDeadline::STATUS_IN_PROGRESS,
-            ])
+        $query->whereIn('status', [
+            PracticeDeadline::STATUS_PENDING,
+            PracticeDeadline::STATUS_IN_PROGRESS,
+        ]);
+
+        if (! $user->hasPermissionTo('practices.view-any')) {
+            $query->orderByRaw('case when user_id = ? then 0 else 1 end', [$user->id]);
+        }
+
+        return $query
             ->with([
                 'practice:id,client_profile_id,type,status',
                 'practice.client:id,first_name,last_name',
@@ -211,13 +218,12 @@ class BuildDashboardDataAction
             ->all();
     }
 
-    private function buildEfficiency(Collection $practiceIds): array
+    private function buildEfficiency(Builder $deadlineQuery): array
     {
         $windowStart = now()->subDays(7);
         $windowEnd = now();
 
-        $baseQuery = PracticeDeadline::query()
-            ->whereIn('practice_id', $practiceIds)
+        $baseQuery = $deadlineQuery
             ->whereBetween('deadline_at', [$windowStart, $windowEnd])
             ->where('status', '!=', PracticeDeadline::STATUS_CANCELLED);
 

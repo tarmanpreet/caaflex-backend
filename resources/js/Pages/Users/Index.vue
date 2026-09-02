@@ -6,6 +6,7 @@ import SortableTable from '@/Components/SortableTable.vue';
 import IconButton from '@/Components/IconButton.vue';
 import Pagination from '@/Components/Pagination.vue';
 import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
+import { roleLabel } from '@/utils/roles.js';
 import { EyeIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
 
 const columns = [
@@ -105,7 +106,7 @@ const roleBadgeClass = (role) => {
                                     :key="role.id"
                                     :class="['px-2 py-1 rounded-full text-xs font-semibold mr-1', roleBadgeClass(role.name)]"
                                 >
-                                    {{ role.name }}
+                                    {{ roleLabel(role.name) }}
                                 </span>
                                 <span v-if="!row.roles || row.roles.length === 0" class="text-xs text-gray-400">—</span>
                             </template>

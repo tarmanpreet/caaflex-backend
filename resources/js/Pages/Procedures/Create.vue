@@ -70,7 +70,7 @@ const submitForm = () => {
 
                         <!-- Note Default -->
                         <div class="col-span-6">
-                            <InputLabel for="default_notes" value="Note Default" />
+                            <InputLabel for="default_notes" value="Note predefinite" />
                             <textarea
                                 id="default_notes"
                                 v-model="form.default_notes"

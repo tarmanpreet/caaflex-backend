@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Branch;
 use App\Models\ClientProfile;
 use App\Models\Practice;
+use App\Models\PracticeType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -208,6 +209,49 @@ class BranchManagementTest extends TestCase
             );
     }
 
+    public function test_practice_rejects_an_assignee_from_an_inaccessible_branch(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practiceBranch = Branch::factory()->create();
+        $otherBranch = Branch::factory()->create();
+        $client = ClientProfile::factory()->create(['branch_id' => $practiceBranch->id]);
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $employee->branches()->attach($otherBranch);
+
+        $this->actingAs($admin)
+            ->post(route('practices.store'), [
+                'client_profile_id' => $client->id,
+                'type' => 'ISEE',
+                'user_ids' => [$employee->id],
+            ])
+            ->assertSessionHasErrors('user_ids');
+    }
+
+    public function test_appointment_rejects_an_assignee_from_an_inaccessible_branch(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $appointmentBranch = Branch::factory()->create();
+        $otherBranch = Branch::factory()->create();
+        $client = ClientProfile::factory()->create(['branch_id' => $appointmentBranch->id]);
+        $practiceType = PracticeType::factory()->create();
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $employee->branches()->attach($otherBranch);
+
+        $this->actingAs($admin)
+            ->post(route('appointments.store'), [
+                'client_profile_id' => $client->id,
+                'practice_type_id' => $practiceType->id,
+                'assigned_user_id' => $employee->id,
+                'scheduled_at' => now()->addDay(),
+                'duration_minutes' => 30,
+            ])
+            ->assertSessionHasErrors('assigned_user_id');
+    }
+
     public function test_branch_full_address(): void
     {
         $branch = Branch::factory()->create([
@@ -293,9 +337,7 @@ class BranchManagementTest extends TestCase
 
     public function test_update_appointment_action_preserves_null_branch_id(): void
     {
-        $action = new \App\Actions\Appointment\UpdateAppointmentAction(
-            new \App\Actions\Appointment\ConfirmAppointmentAction
-        );
+        $action = app(\App\Actions\Appointment\UpdateAppointmentAction::class);
 
         $client = \App\Models\ClientProfile::factory()->create();
         $practiceType = \App\Models\PracticeType::factory()->create();
@@ -317,7 +359,7 @@ class BranchManagementTest extends TestCase
 
     public function test_update_practice_action_preserves_null_branch_id(): void
     {
-        $action = new \App\Actions\Practice\UpdatePracticeAction;
+        $action = app(\App\Actions\Practice\UpdatePracticeAction::class);
 
         $client = \App\Models\ClientProfile::factory()->create();
         $branch = Branch::factory()->create();
@@ -337,9 +379,7 @@ class BranchManagementTest extends TestCase
 
     public function test_update_appointment_action_changes_branch_id(): void
     {
-        $action = new \App\Actions\Appointment\UpdateAppointmentAction(
-            new \App\Actions\Appointment\ConfirmAppointmentAction
-        );
+        $action = app(\App\Actions\Appointment\UpdateAppointmentAction::class);
 
         $client = \App\Models\ClientProfile::factory()->create();
         $practiceType = \App\Models\PracticeType::factory()->create();
@@ -361,7 +401,7 @@ class BranchManagementTest extends TestCase
 
     public function test_update_practice_action_changes_branch_id(): void
     {
-        $action = new \App\Actions\Practice\UpdatePracticeAction;
+        $action = app(\App\Actions\Practice\UpdatePracticeAction::class);
 
         $client = \App\Models\ClientProfile::factory()->create();
         $branch2 = Branch::factory()->create();

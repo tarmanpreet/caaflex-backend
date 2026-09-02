@@ -87,7 +87,7 @@ const statCards = computed(() => [
         <template #header>
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Workspace / Pratiche</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Pratiche</p>
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione pratiche</h1>
                     <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Elenco riallineato al template editoriale con header, insight rapidi e tabella premium.</p>
                 </div>

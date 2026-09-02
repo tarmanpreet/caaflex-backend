@@ -13,7 +13,7 @@ import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@her
 const columns = [
     { key: 'name', label: 'Nome' },
     { key: 'procedure_type_id', label: 'Tipo Pratica' },
-    { key: 'default_notes', label: 'Note Default', sortable: false },
+    { key: 'default_notes', label: 'Note predefinite', sortable: false },
     { key: 'deadline_days', label: 'Giorni alla Scadenza' },
 ];
 

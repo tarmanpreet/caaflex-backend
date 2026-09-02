@@ -3,9 +3,11 @@
 namespace App\Http\Requests;
 
 use App\Models\Branch;
+use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -107,6 +109,18 @@ class StorePracticeRequest extends FormRequest
                         'The practice_type_id does not match the procedure\'s type.'
                     );
                 }
+            }
+
+            $branchId = ClientProfile::query()
+                ->whereKey($this->integer('client_profile_id'))
+                ->value('branch_id');
+            $hasInaccessibleAssignee = User::query()
+                ->whereKey($this->input('user_ids', []))
+                ->get()
+                ->contains(fn (User $user): bool => ! $user->canAccessBranchId($branchId));
+
+            if ($hasInaccessibleAssignee) {
+                $validator->errors()->add('user_ids', 'Uno o più utenti assegnati non possono accedere alla filiale della pratica.');
             }
         });
     }

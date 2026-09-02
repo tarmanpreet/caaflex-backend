@@ -11,9 +11,12 @@ class ConfirmAppointmentAction
 {
     public function execute(Appointment $appointment, int $userId): void
     {
+        $appointment->loadMissing(['client.user', 'assignedUser', 'practiceType']);
+
         if ($appointment->practice_id === null && $appointment->practice_type_id !== null) {
             $practice = Practice::create([
                 'client_profile_id' => $appointment->client_profile_id,
+                'branch_id' => $appointment->branch_id ?? $appointment->client?->branch_id,
                 'type' => $appointment->practiceType->name,
                 'practice_type_id' => $appointment->practice_type_id,
                 'status' => 'nuova',
@@ -21,10 +24,13 @@ class ConfirmAppointmentAction
                 'created_by' => $userId,
                 'notes' => 'Pratica creata automaticamente dalla conferma appuntamento #'.$appointment->id,
             ]);
+
+            if ($appointment->assigned_user_id !== null) {
+                $practice->assignedUsers()->syncWithoutDetaching([$appointment->assigned_user_id]);
+            }
+
             $appointment->update(['practice_id' => $practice->id]);
         }
-
-        $appointment->loadMissing(['client.user', 'assignedUser', 'practiceType']);
 
         if ($appointment->client->email) {
             Mail::queue(new AppointmentConfirmedMail($appointment, 'client'));

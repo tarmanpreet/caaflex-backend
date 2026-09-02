@@ -4,6 +4,7 @@ namespace App\Actions\Appointment;
 
 use App\Models\Appointment;
 use App\Models\AutoConfirmSlot;
+use App\Models\ClientProfile;
 use App\Services\NotificationManager;
 
 class StoreAppointmentAction
@@ -15,6 +16,12 @@ class StoreAppointmentAction
 
     public function execute(array $data, int $createdBy): Appointment
     {
+        if (! isset($data['branch_id'])) {
+            $data['branch_id'] = ClientProfile::query()
+                ->whereKey($data['client_profile_id'])
+                ->value('branch_id');
+        }
+
         $status = $this->determineStatus($data);
 
         $appointment = Appointment::create(array_merge($data, [

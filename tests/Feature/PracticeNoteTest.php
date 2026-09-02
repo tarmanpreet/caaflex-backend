@@ -44,7 +44,7 @@ class PracticeNoteTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJson([
-                'message' => 'Note added.',
+                'message' => 'Nota aggiunta.',
             ]);
 
         $this->assertDatabaseHas('practice_notes', [
@@ -69,7 +69,7 @@ class PracticeNoteTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJson([
-                'message' => 'Note added.',
+                'message' => 'Nota aggiunta.',
             ]);
 
         $this->assertDatabaseHas('practice_notes', [
@@ -110,5 +110,16 @@ class PracticeNoteTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
+    }
+
+    public function test_employee_cannot_list_notes_for_an_unassigned_practice(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $practice = Practice::factory()->create();
+
+        $this->actingAs($employee)
+            ->getJson('/api/v1/practices/'.$practice->id.'/notes')
+            ->assertForbidden();
     }
 }

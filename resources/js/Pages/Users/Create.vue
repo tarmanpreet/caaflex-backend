@@ -8,6 +8,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Multiselect from '@vueform/multiselect';
+import { roleLabel } from '@/utils/roles.js';
 
 const props = defineProps({
     assignableRoles: Array,
@@ -121,7 +122,7 @@ const submit = () => {
                                 required
                             >
                                 <option value="" disabled>Seleziona un ruolo...</option>
-                                <option v-for="r in assignableRoles" :key="r" :value="r">{{ r }}</option>
+                                <option v-for="r in assignableRoles" :key="r" :value="r">{{ roleLabel(r) }}</option>
                             </select>
                             <InputError :message="form.errors.role" class="mt-2" />
                         </div>

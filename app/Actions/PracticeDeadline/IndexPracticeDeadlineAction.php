@@ -3,7 +3,6 @@
 namespace App\Actions\PracticeDeadline;
 
 use App\Http\Requests\ListPracticeDeadlinesRequest;
-use App\Models\Branch;
 use App\Models\PracticeDeadline;
 use App\Models\User;
 use App\Traits\Sortable;
@@ -13,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 class IndexPracticeDeadlineAction
 {
     use Sortable;
+
+    public function __construct(private ScopeVisiblePracticeDeadlineAction $visibleDeadlines) {}
 
     /** @var array<string, string> */
     protected array $sortableColumns = [
@@ -24,7 +25,7 @@ class IndexPracticeDeadlineAction
 
     public function execute(ListPracticeDeadlinesRequest $request, User $user): LengthAwarePaginator
     {
-        $query = $this->baseScope($user);
+        $query = $this->visibleDeadlines->execute($user);
         $this->applyFilters($query, $request);
 
         $sort = $this->sortParams($request, $this->sortableColumns, 'deadline_at');
@@ -60,7 +61,7 @@ class IndexPracticeDeadlineAction
     public function summary(User $user): array
     {
         $openStatuses = [PracticeDeadline::STATUS_PENDING, PracticeDeadline::STATUS_IN_PROGRESS];
-        $stats = (clone $this->baseScope($user))
+        $stats = $this->visibleDeadlines->execute($user)
             ->selectRaw(
                 'count(*) as total, '
                 .'sum(case when status in (?, ?) then 1 else 0 end) as open_count, '
@@ -81,19 +82,6 @@ class IndexPracticeDeadlineAction
             'overdue' => (int) $stats->overdue_count,
             'completed' => (int) $stats->completed_count,
         ];
-    }
-
-    private function baseScope(User $user): Builder
-    {
-        return PracticeDeadline::query()->whereHas('practice', function (Builder $query) use ($user): void {
-            if (Branch::query()->exists()) {
-                $query->whereIn('branch_id', $user->accessibleBranchIds());
-            }
-
-            if (! $user->hasPermissionTo('practices.view-any')) {
-                $query->whereHas('assignedUsers', fn (Builder $assignedUsers) => $assignedUsers->where('users.id', $user->id));
-            }
-        });
     }
 
     private function applyFilters(Builder $query, ListPracticeDeadlinesRequest $request): void

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\Branch;
 use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeDeadline;
@@ -223,6 +224,62 @@ class DashboardTest extends TestCase
             );
     }
 
+    public function test_employee_sees_a_deadline_assigned_directly_even_without_practice_assignment(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $practice = Practice::factory()->create();
+
+        PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'user_id' => $employee->id,
+            'title' => 'Scadenza personale',
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'deadline_at' => now()->addDay(),
+        ]);
+
+        $this->actingAs($employee)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('stats.1.value', 1)
+                ->has('deadlines', 1)
+                ->where('deadlines.0.title', 'Scadenza personale')
+            );
+    }
+
+    public function test_employee_personal_deadlines_are_prioritized_in_dashboard_highlights(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $otherEmployee = User::factory()->create();
+        $practice = Practice::factory()->create();
+        $practice->assignedUsers()->attach($employee->id, ['assigned_at' => now()]);
+
+        PracticeDeadline::factory()->count(6)->create([
+            'practice_id' => $practice->id,
+            'user_id' => $otherEmployee->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'deadline_at' => now()->addHour(),
+        ]);
+
+        PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'user_id' => $employee->id,
+            'title' => 'La mia scadenza',
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'deadline_at' => now()->addWeek(),
+        ]);
+
+        $this->actingAs($employee)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('deadlines', 6)
+                ->where('deadlines.0.title', 'La mia scadenza')
+            );
+    }
+
     public function test_admin_can_fetch_dashboard_notices_api(): void
     {
         $admin = User::factory()->create(['is_active' => true]);
@@ -299,5 +356,37 @@ class DashboardTest extends TestCase
         $response->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Visibile');
+    }
+
+    public function test_employee_dashboard_notices_respect_branch_scope(): void
+    {
+        $employee = User::factory()->create(['is_active' => true]);
+        $employee->assignRole('employee');
+        $visibleBranch = Branch::factory()->create();
+        $hiddenBranch = Branch::factory()->create();
+        $employee->branches()->attach($visibleBranch);
+
+        $visiblePractice = Practice::factory()->create(['branch_id' => $visibleBranch->id]);
+        $hiddenPractice = Practice::factory()->create(['branch_id' => $hiddenBranch->id]);
+
+        PracticeDeadline::factory()->create([
+            'practice_id' => $visiblePractice->id,
+            'user_id' => $employee->id,
+            'title' => 'Scadenza filiale visibile',
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        PracticeDeadline::factory()->create([
+            'practice_id' => $hiddenPractice->id,
+            'user_id' => $employee->id,
+            'title' => 'Scadenza filiale nascosta',
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($employee, 'api')
+            ->getJson('/api/v1/dashboard/notices')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Scadenza filiale visibile');
     }
 }

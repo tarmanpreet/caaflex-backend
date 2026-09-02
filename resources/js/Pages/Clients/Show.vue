@@ -16,11 +16,11 @@ import SortableTable from '@/Components/SortableTable.vue';
 import { CalendarDaysIcon } from '@heroicons/vue/24/outline';
 
 const documentColumns = [
-    { key: 'original_name', label: 'Filename', sortable: true },
-    { key: 'description', label: 'Description', sortable: true },
+    { key: 'original_name', label: 'Nome file', sortable: true },
+    { key: 'description', label: 'Descrizione', sortable: true },
     { key: 'expires_on', label: 'Scadenza', sortable: true },
-    { key: 'created_at', label: 'Uploaded', sortable: true },
-    { key: 'uploaded_by', label: 'Uploaded By', sortable: false },
+    { key: 'created_at', label: 'Caricato il', sortable: true },
+    { key: 'uploaded_by', label: 'Caricato da', sortable: false },
 ];
 
 const practiceColumns = [
@@ -190,7 +190,7 @@ const statusBadgeClass = (status) => {
 </script>
 
 <template>
-    <AppLayout title="Client Details">
+    <AppLayout title="Dettaglio cliente">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ client.first_name }} {{ client.last_name }}
@@ -203,26 +203,26 @@ const statusBadgeClass = (status) => {
                 <!-- Profile Section -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Profile Information</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informazioni cliente</h3>
                         <div class="flex items-center gap-3">
                             <template v-if="!editMode">
                                 <DangerButton v-if="canDeleteClient" @click="confirmingClientDelete = true">
-                                    Delete Client
+                                    Elimina cliente
                                 </DangerButton>
                                 <button
                                     v-if="canEditClient"
                                     @click="editMode = true"
                                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
                                 >
-                                    Edit
+                                    Modifica
                                 </button>
                             </template>
                             <template v-else>
                                 <SecondaryButton @click="cancelEdit" :disabled="editForm.processing">
-                                    Cancel
+                                    Annulla
                                 </SecondaryButton>
                                 <PrimaryButton @click="submitEdit" :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">
-                                    Save
+                                    Salva
                                 </PrimaryButton>
                             </template>
                         </div>
@@ -231,7 +231,7 @@ const statusBadgeClass = (status) => {
                         
                         <!-- First Name -->
                         <div>
-                            <InputLabel for="first_name" value="First Name" />
+                            <InputLabel for="first_name" value="Nome" />
                             
                             <TextInput v-if="editMode" id="first_name" v-model="editForm.first_name" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" required />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.first_name }}</p>
@@ -241,7 +241,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Last Name -->
                         <div>
-                            <InputLabel for="last_name" value="Last Name" />
+                            <InputLabel for="last_name" value="Cognome" />
                             
                             <TextInput v-if="editMode" id="last_name" v-model="editForm.last_name" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" required />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.last_name }}</p>
@@ -261,7 +261,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Phone -->
                         <div>
-                            <InputLabel for="phone" value="Phone" />
+                            <InputLabel for="phone" value="Telefono" />
                             
                             <TextInput v-if="editMode" id="phone" v-model="editForm.phone" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" required />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.phone }}</p>
@@ -271,7 +271,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Date of Birth -->
                         <div>
-                            <InputLabel for="date_of_birth" value="Date of Birth" />
+                            <InputLabel for="date_of_birth" value="Data di nascita" />
                             
                             <TextInput v-if="editMode" id="date_of_birth" v-model="editForm.date_of_birth" type="date" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" required />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ formatDate(client.date_of_birth) }}</p>
@@ -281,7 +281,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Fiscal Code -->
                         <div>
-                            <InputLabel for="fiscal_code" value="Fiscal Code" />
+                            <InputLabel for="fiscal_code" value="Codice fiscale" />
                             
                             <TextInput v-if="editMode" id="fiscal_code" v-model="editForm.fiscal_code" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" maxlength="16" />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.fiscal_code }}</p>
@@ -291,7 +291,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Address -->
                         <div class="md:col-span-2">
-                            <InputLabel for="address" value="Address" />
+                            <InputLabel for="address" value="Indirizzo" />
                             
                             <TextInput v-if="editMode" id="address" v-model="editForm.address" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.address }}</p>
@@ -301,7 +301,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- City -->
                         <div>
-                            <InputLabel for="city" value="City" />
+                            <InputLabel for="city" value="Città" />
                             
                             <TextInput v-if="editMode" id="city" v-model="editForm.city" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.city }}</p>
@@ -311,7 +311,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Province -->
                         <div>
-                            <InputLabel for="province" value="Province" />
+                            <InputLabel for="province" value="Provincia" />
                             
                             <TextInput v-if="editMode" id="province" v-model="editForm.province" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" maxlength="2" />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.province }}</p>
@@ -321,7 +321,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Postal Code -->
                         <div>
-                            <InputLabel for="postal_code" value="Postal Code" />
+                            <InputLabel for="postal_code" value="CAP" />
                             
                             <TextInput v-if="editMode" id="postal_code" v-model="editForm.postal_code" type="text" class="mt-1 block w-full text-sm py-1 px-2 !shadow-none" maxlength="5" />
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ client.postal_code }}</p>
@@ -331,7 +331,7 @@ const statusBadgeClass = (status) => {
 
                         <!-- Notes -->
                         <div class="md:col-span-2" v-if="editMode || client.notes">
-                            <InputLabel for="notes" value="Notes" />
+                            <InputLabel for="notes" value="Note" />
                             
                             <textarea
                                 v-if="editMode"
@@ -352,7 +352,7 @@ const statusBadgeClass = (status) => {
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Account Portale</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Account del portale</h3>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 Utente collegato per l'accesso al portale clienti.
                             </p>
@@ -409,7 +409,7 @@ const statusBadgeClass = (status) => {
 
                 <!-- Documents Section -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Documents</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Documenti</h3>
 
                     <!-- Upload Form -->
                     <div v-if="canUploadDocument" class="mb-8">
@@ -481,7 +481,7 @@ const statusBadgeClass = (status) => {
                         <SortableTable
                             :columns="documentColumns"
                             :rows="documents"
-                            emptyMessage="No documents yet."
+                            emptyMessage="Nessun documento presente."
                         >
                             <template #cell-created_at="{ row }">
                                 {{ formatDate(row.created_at) }}
@@ -490,7 +490,7 @@ const statusBadgeClass = (status) => {
                                 <DocumentExpiryBadge :expires-on="row.expires_on" />
                             </template>
                             <template #cell-uploaded_by="{ row }">
-                                {{ row.uploaded_by?.name || 'Unknown' }}
+                                {{ row.uploaded_by?.name || 'Sconosciuto' }}
                             </template>
                             <template #actions="{ row }">
                                 <div class="flex items-center justify-end gap-2">
@@ -498,8 +498,8 @@ const statusBadgeClass = (status) => {
                                         <CalendarDaysIcon class="h-4 w-4" />
                                         Scadenza
                                     </button>
-                                    <a :href="route('clients.documents.download', [client.id, row.id])" class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">Download</a>
-                                    <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Delete</button>
+                                    <a :href="route('clients.documents.download', [client.id, row.id])" class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">Scarica</a>
+                                    <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Elimina</button>
                                 </div>
                             </template>
                         </SortableTable>
@@ -590,16 +590,16 @@ const statusBadgeClass = (status) => {
         <!-- Document Deletion Confirmation Modal -->
         <ConfirmationModal :show="confirmingDocDelete" @close="confirmingDocDelete = false">
             <template #title>
-                Delete Document
+                Elimina documento
             </template>
 
             <template #content>
-                Are you sure you want to delete this document? This action cannot be undone.
+                Vuoi davvero eliminare questo documento? L’operazione non può essere annullata.
             </template>
 
             <template #footer>
                 <SecondaryButton @click="confirmingDocDelete = false">
-                    Cancel
+                    Annulla
                 </SecondaryButton>
 
                 <DangerButton
@@ -608,17 +608,17 @@ const statusBadgeClass = (status) => {
                     :disabled="form.processing"
                     @click="deleteDocument"
                 >
-                    Delete Document
+                    Elimina documento
                 </DangerButton>
             </template>
         </ConfirmationModal>
 
         <ConfirmationModal :show="confirmingClientDelete" @close="confirmingClientDelete = false">
-            <template #title>Delete Client</template>
-            <template #content>Are you sure you want to delete this client? This action cannot be undone.</template>
+            <template #title>Elimina cliente</template>
+            <template #content>Vuoi davvero eliminare questo cliente? L’operazione non può essere annullata.</template>
             <template #footer>
-                <SecondaryButton @click="confirmingClientDelete = false">Cancel</SecondaryButton>
-                <DangerButton class="ms-3" @click="deleteClient">Delete</DangerButton>
+                <SecondaryButton @click="confirmingClientDelete = false">Annulla</SecondaryButton>
+                <DangerButton class="ms-3" @click="deleteClient">Elimina</DangerButton>
             </template>
         </ConfirmationModal>
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ClientProfile;
+use App\Models\Practice;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -153,6 +154,25 @@ class ClientManagementTest extends TestCase
             ->assertStatus(200)
             ->assertInertia(fn ($page) => $page
                 ->component('Clients/Show')
+            );
+    }
+
+    public function test_employee_sees_only_assigned_practices_on_client_page(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $client = ClientProfile::factory()->create();
+        $assignedPractice = Practice::factory()->for($client, 'client')->create();
+        $assignedPractice->assignedUsers()->attach($employee->id, ['assigned_at' => now()]);
+        Practice::factory()->for($client, 'client')->create();
+
+        $this->actingAs($employee)
+            ->get(route('clients.show', $client))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Clients/Show')
+                ->where('practices.total', 1)
+                ->where('practices.data.0.id', $assignedPractice->id)
             );
     }
 

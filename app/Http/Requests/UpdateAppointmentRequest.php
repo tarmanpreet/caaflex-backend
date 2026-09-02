@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class UpdateAppointmentRequest extends FormRequest
 {
@@ -21,6 +23,31 @@ class UpdateAppointmentRequest extends FormRequest
             'scheduled_at' => ['nullable', 'date'],
             'duration_minutes' => ['nullable', 'integer', 'min:5'],
             'branch_id' => ['nullable', 'exists:branches,id'],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $appointment = $this->route('appointment');
+                $assignedUserId = $this->has('assigned_user_id')
+                    ? $this->integer('assigned_user_id')
+                    : (int) $appointment?->assigned_user_id;
+
+                if ($assignedUserId === 0) {
+                    return;
+                }
+
+                $branchId = $this->has('branch_id')
+                    ? ($this->filled('branch_id') ? $this->integer('branch_id') : null)
+                    : $appointment?->branch_id;
+                $assignedUser = User::query()->find($assignedUserId);
+
+                if ($assignedUser !== null && ! $assignedUser->canAccessBranchId($branchId)) {
+                    $validator->errors()->add('assigned_user_id', 'L’utente assegnato non può accedere alla filiale dell’appuntamento.');
+                }
+            },
         ];
     }
 }

@@ -66,11 +66,11 @@ const deleteSlot = () => {
 </script>
 
 <template>
-    <AppLayout title="Slot Auto-Conferma">
+    <AppLayout title="Fasce di conferma automatica">
         <template #header>
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Configurazione</p>
-                <h2 class="mt-2 font-headline text-2xl font-extrabold tracking-tight text-on-surface">Slot Auto-Conferma</h2>
+                <h2 class="mt-2 font-headline text-2xl font-extrabold tracking-tight text-on-surface">Fasce di conferma automatica</h2>
                 <p class="mt-1 text-sm text-on-surface-variant">Gli appuntamenti creati in queste fasce orarie verranno confermati automaticamente.</p>
             </div>
         </template>
@@ -80,7 +80,7 @@ const deleteSlot = () => {
 
                 <!-- Current Slots -->
                 <div class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-outline-variant/10 p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Slot configurati</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Fasce configurate</h3>
                     <div class="overflow-x-auto">
                         <SortableTable
                             :columns="slotColumns"
@@ -88,7 +88,7 @@ const deleteSlot = () => {
                             :controlled="true"
                             :sort-key="sortKey"
                             :sort-dir="sortDir"
-                            empty-message="Nessuno slot auto-conferma configurato."
+                            empty-message="Nessuna fascia di conferma automatica configurata."
                             @sort="onSort"
                         >
                             <template #cell-day_of_week="{ row }">
@@ -115,7 +115,7 @@ const deleteSlot = () => {
 
                 <!-- Add Slot Form -->
                 <div class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-outline-variant/10 p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Aggiungi Slot Auto-Conferma</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Aggiungi fascia di conferma automatica</h3>
                     <form @submit.prevent="submitForm" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
 
                         <!-- Day -->
@@ -173,9 +173,9 @@ const deleteSlot = () => {
 
         <!-- Delete Confirmation Modal -->
         <ConfirmationModal :show="confirmingDelete" @close="confirmingDelete = false">
-            <template #title>Elimina Slot Auto-Conferma</template>
+            <template #title>Elimina fascia di conferma automatica</template>
             <template #content>
-                Sei sicuro di voler eliminare questo slot auto-conferma?
+                Vuoi davvero eliminare questa fascia di conferma automatica?
             </template>
             <template #footer>
                 <SecondaryButton @click="confirmingDelete = false">Annulla</SecondaryButton>

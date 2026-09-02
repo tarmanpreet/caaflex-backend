@@ -50,7 +50,7 @@ const navItems = computed(() => {
     page.url;
 
     return [
-        { name: 'Dashboard', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
+        { name: 'Pannello', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
         { name: 'Clienti', icon: UserGroupIcon, route: route('clients.index'), active: route().current('clients.*'), show: !isCliente.value },
         { name: 'Pratiche', icon: FolderOpenIcon, route: route('practices.index'), active: route().current('practices.*'), show: !isCliente.value },
         { name: 'Scadenze', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },
@@ -86,7 +86,7 @@ const navItems = computed(() => {
 
                                 <div v-if="!isCollapsed" class="min-w-0">
                                     <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">CAF Gestionale</p>
-                                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Workspace operativo</p>
+                                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Spazio di lavoro operativo</p>
                                 </div>
                             </Link>
                         </div>
@@ -177,7 +177,7 @@ const navItems = computed(() => {
                                     </template>
 
                                     <template #content>
-                                        <div class="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Account</div>
+                                        <div class="px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Area personale</div>
                                         <DropdownLink :href="route('profile.show')">Profilo</DropdownLink>
                                         <DropdownLink :href="route('notification-settings.show')">Impostazioni notifiche</DropdownLink>
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">Token API</DropdownLink>
@@ -222,7 +222,7 @@ const navItems = computed(() => {
                             </div>
                             <div>
                                 <p class="font-headline text-lg font-extrabold text-on-surface">CAF Gestionale</p>
-                                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Workspace operativo</p>
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Spazio di lavoro operativo</p>
                             </div>
                         </div>
 

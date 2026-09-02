@@ -496,7 +496,7 @@ async function selectMiniDate(day) {
                                         @click="resetFilter" 
                                         class="rounded-xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-highest"
                                     >
-                                        Reset
+                                        Azzera
                                     </button>
                                 </div>
                             </div>
@@ -930,7 +930,7 @@ async function selectMiniDate(day) {
 
                                 <!-- Slots list -->
                                 <div class="mt-3 rounded-xl bg-surface-container-low p-4">
-                                    <p class="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">Slot auto-confermati</p>
+                                    <p class="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">Fasce con conferma automatica</p>
                                     <div class="flex flex-wrap gap-2">
                                         <span
                                             v-for="slot in autoConfirmSlotsFormatted"

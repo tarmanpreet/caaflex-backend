@@ -6,9 +6,9 @@ const props = defineProps({
     steps: {
         type: Array,
         default: () => [
-            { label: 'Step 1' },
-            { label: 'Step 2' },
-            { label: 'Step 3' },
+            { label: 'Passaggio 1' },
+            { label: 'Passaggio 2' },
+            { label: 'Passaggio 3' },
         ],
     },
     currentStep: {
@@ -84,7 +84,7 @@ const getNumberClasses = (stepIndex) => {
 <template>
     <div class="w-full">
         <!-- Stepper Breadcrumb -->
-        <nav aria-label="Progress">
+        <nav aria-label="Avanzamento">
             <ol class="flex items-center w-full p-3 space-x-2 text-sm font-medium text-center bg-surface-container  border border-outline-variant  rounded-lg shadow-sm sm:p-4 sm:space-x-4">
                 <template v-for="(step, index) in steps" :key="index">
                     <li :class="getStepClasses(index)">
@@ -116,7 +116,7 @@ const getNumberClasses = (stepIndex) => {
         <!-- Error Messages -->
         <div v-if="Object.keys(errors).length > 0" class="mt-4 rounded-lg border border-error-container/50 bg-error-container/15 p-4">
             <p class="text-sm text-error">
-                Alcuni campi contengono errori. Controlla gli step evidenziati.
+                Alcuni campi contengono errori. Controlla i passaggi evidenziati.
             </p>
         </div>
 

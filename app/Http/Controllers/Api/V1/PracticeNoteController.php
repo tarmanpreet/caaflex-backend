@@ -15,6 +15,8 @@ class PracticeNoteController extends Controller
 
     public function index(Practice $practice): JsonResponse
     {
+        $this->authorize('view', $practice);
+
         return response()->json([
             'data' => $practice->notes()->with('author')->get(),
         ]);
@@ -35,7 +37,7 @@ class PracticeNoteController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Note added.',
+            'message' => 'Nota aggiunta.',
             'data' => $note->load('author'),
         ], 201);
     }

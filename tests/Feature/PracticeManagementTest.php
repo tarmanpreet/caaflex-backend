@@ -406,4 +406,27 @@ class PracticeManagementTest extends TestCase
         $this->assertContains($employee->id, $assigned);
         $this->assertNotContains($target->id, $assigned);
     }
+
+    public function test_employee_without_assign_permission_cannot_change_assignments_through_api(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $target = User::factory()->create();
+        $target->assignRole('employee');
+        $practice = Practice::factory()->create();
+        $practice->assignedUsers()->attach($employee->id, ['assigned_at' => now()]);
+
+        $this->actingAs($employee, 'api')
+            ->putJson('/api/v1/practices/'.$practice->id, [
+                'type' => $practice->type,
+                'status' => $practice->status,
+                'user_ids' => [$target->id],
+            ])
+            ->assertOk();
+
+        $assignedUserIds = $practice->fresh()->assignedUsers->pluck('id');
+
+        $this->assertTrue($assignedUserIds->contains($employee->id));
+        $this->assertFalse($assignedUserIds->contains($target->id));
+    }
 }

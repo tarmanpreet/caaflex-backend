@@ -45,16 +45,16 @@ const closeModal = () => {
 <template>
     <ActionSection>
         <template #title>
-            Browser Sessions
+            Sessioni del browser
         </template>
 
         <template #description>
-            Manage and log out your active sessions on other browsers and devices.
+            Gestisci e termina le sessioni attive su altri browser e dispositivi.
         </template>
 
         <template #content>
             <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                If necessary, you may log out of all of your other browser sessions across all of your devices. Some of your recent sessions are listed below; however, this list may not be exhaustive. If you feel your account has been compromised, you should also update your password.
+                Se necessario, puoi terminare tutte le altre sessioni attive sui tuoi dispositivi. Di seguito sono elencate alcune sessioni recenti; l’elenco potrebbe non essere completo. Se ritieni che l’account sia stato compromesso, aggiorna anche la password.
             </div>
 
             <!-- Other Browser Sessions -->
@@ -72,15 +72,15 @@ const closeModal = () => {
 
                     <div class="ms-3">
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            {{ session.agent.platform ? session.agent.platform : 'Unknown' }} - {{ session.agent.browser ? session.agent.browser : 'Unknown' }}
+                            {{ session.agent.platform ? session.agent.platform : 'Sconosciuto' }} - {{ session.agent.browser ? session.agent.browser : 'Sconosciuto' }}
                         </div>
 
                         <div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ session.ip_address }},
 
-                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">This device</span>
-                                <span v-else>Last active {{ session.last_active }}</span>
+                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">Questo dispositivo</span>
+                                <span v-else>Ultima attività {{ session.last_active }}</span>
                             </div>
                         </div>
                     </div>
@@ -89,22 +89,22 @@ const closeModal = () => {
 
             <div class="flex items-center mt-5">
                 <PrimaryButton @click="confirmLogout">
-                    Log Out Other Browser Sessions
+                    Termina le altre sessioni
                 </PrimaryButton>
 
                 <ActionMessage :on="form.recentlySuccessful" class="ms-3">
-                    Done.
+                    Operazione completata.
                 </ActionMessage>
             </div>
 
             <!-- Log Out Other Devices Confirmation Modal -->
             <DialogModal :show="confirmingLogout" @close="closeModal">
                 <template #title>
-                    Log Out Other Browser Sessions
+                    Termina le altre sessioni
                 </template>
 
                 <template #content>
-                    Please enter your password to confirm you would like to log out of your other browser sessions across all of your devices.
+                    Inserisci la password per confermare la chiusura delle altre sessioni su tutti i dispositivi.
 
                     <div class="mt-4">
                         <TextInput
@@ -123,7 +123,7 @@ const closeModal = () => {
 
                 <template #footer>
                     <SecondaryButton @click="closeModal">
-                        Cancel
+                        Annulla
                     </SecondaryButton>
 
                     <PrimaryButton
@@ -132,7 +132,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="logoutOtherBrowserSessions"
                     >
-                        Log Out Other Browser Sessions
+                        Termina le altre sessioni
                     </PrimaryButton>
                 </template>
             </DialogModal>

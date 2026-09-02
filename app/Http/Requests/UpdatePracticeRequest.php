@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -108,6 +109,18 @@ class UpdatePracticeRequest extends FormRequest
                         'The practice_type_id does not match the procedure\'s type.'
                     );
                 }
+            }
+
+            $branchId = $this->has('branch_id')
+                ? ($this->filled('branch_id') ? $this->integer('branch_id') : null)
+                : $practice?->branch_id;
+            $hasInaccessibleAssignee = User::query()
+                ->whereKey($this->input('user_ids', []))
+                ->get()
+                ->contains(fn (User $user): bool => ! $user->canAccessBranchId($branchId));
+
+            if ($hasInaccessibleAssignee) {
+                $validator->errors()->add('user_ids', 'Uno o più utenti assegnati non possono accedere alla filiale della pratica.');
             }
         });
     }

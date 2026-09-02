@@ -63,11 +63,11 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '�
 </script>
 
 <template>
-    <AppLayout title="Dashboard">
+    <AppLayout title="Pannello di controllo">
         <template #header>
             <div>
                 <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Panoramica operativa</p>
-                <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Dashboard principale</h1>
+                <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Pannello principale</h1>
                 <p class="mt-2 text-sm text-on-surface-variant">Priorità, scadenze e attività della rete in un’unica vista.</p>
             </div>
         </template>
@@ -102,7 +102,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '�
                 </UiSectionCard>
 
                 <div class="space-y-6 lg:col-span-4">
-                    <UiSectionCard title="Attività recente" eyebrow="Timeline studio">
+                    <UiSectionCard title="Attività recente" eyebrow="Cronologia dello studio">
                         <div v-if="props.activities.length" class="relative space-y-6 pl-6 before:absolute before:bottom-0 before:left-[9px] before:top-2 before:w-px before:bg-outline-variant/40">
                             <div v-for="activity in props.activities" :key="activity.id" class="relative">
                                 <span :class="['absolute -left-6 top-1.5 h-4 w-4 rounded-full ring-4 ring-surface-container-low', activityToneClass(activity.tone)]" />

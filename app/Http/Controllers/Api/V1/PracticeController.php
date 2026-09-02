@@ -55,6 +55,10 @@ class PracticeController extends Controller
     {
         $data = $request->validated();
 
+        if (! $request->user()->can('assign', $practice)) {
+            unset($data['user_ids']);
+        }
+
         $practice = $action->execute($data, $practice, $request->user()->id);
 
         return response()->json([

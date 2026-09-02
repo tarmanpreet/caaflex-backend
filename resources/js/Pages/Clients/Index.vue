@@ -10,11 +10,11 @@ import UiSectionCard from '@/Components/ui/UiSectionCard.vue';
 import { EyeIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
 
 const columns = [
-    { key: 'first_name', label: 'Full Name' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'date_of_birth', label: 'Date of Birth' },
-    { key: 'fiscal_code', label: 'Fiscal Code' },
-    { key: 'city', label: 'City' },
+    { key: 'first_name', label: 'Nome completo' },
+    { key: 'phone', label: 'Telefono' },
+    { key: 'date_of_birth', label: 'Data di nascita' },
+    { key: 'fiscal_code', label: 'Codice fiscale' },
+    { key: 'city', label: 'Città' },
     { key: 'branch', label: 'Filiale', sortable: false },
 ];
 
@@ -50,7 +50,7 @@ const onSort = ({ key, dir }) => {
         <template #header>
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Workspace / Clienti</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Clienti</p>
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione clienti</h1>
                     <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Consulta e gestisci l’anagrafica dei clienti visibili nella tua rete.</p>
                 </div>

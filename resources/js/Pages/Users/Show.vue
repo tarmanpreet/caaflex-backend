@@ -12,6 +12,7 @@ import DangerButton from '@/Components/DangerButton.vue';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import SortableTable from '@/Components/SortableTable.vue';
 import Multiselect from '@vueform/multiselect';
+import { roleLabel } from '@/utils/roles.js';
 
 const practiceColumns = [
     { key: 'type', label: 'Tipo', sortable: true },
@@ -138,7 +139,7 @@ const statusBadgeClass = (status) => {
                     :key="role.id"
                     :class="['px-2 py-1 rounded-full text-xs font-semibold', roleBadgeClass(role.name)]"
                 >
-                    {{ role.name }}
+                    {{ roleLabel(role.name) }}
                 </span>
                 <span :class="['px-2 py-1 rounded-full text-xs font-semibold', user?.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-800']">
                     {{ user?.is_active ? 'Attivo' : 'Disattivato' }}
@@ -215,9 +216,9 @@ const statusBadgeClass = (status) => {
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface py-2 px-3 focus:ring-2 focus:ring-primary/25"
                                 required
                             >
-                                <option v-for="r in availableRoles" :key="r" :value="r">{{ r }}</option>
+                                <option v-for="r in availableRoles" :key="r" :value="r">{{ roleLabel(r) }}</option>
                             </select>
-                            <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ user.roles?.[0]?.name ?? '—' }}</p>
+                            <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ roleLabel(user.roles?.[0]?.name) || '—' }}</p>
                             <InputError :message="editForm.errors.role" class="mt-2" />
                         </div>
 

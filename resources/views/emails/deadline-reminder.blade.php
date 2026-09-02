@@ -5,7 +5,7 @@ ti ricordiamo che la scadenza "{{ $deadline->title }}" è imminente.
 **Dettagli scadenza:**
 - Titolo: {{ $deadline->title }}
 - Data: {{ $deadline->deadline_at->format('d/m/Y H:i') }}
-- Pratica: {{ $deadline->practice->title ?? 'N/A' }}
+- Pratica: {{ $deadline->practice->title ?? 'Non disponibile' }}
 
 @if($deadline->notes)
 **Note:**

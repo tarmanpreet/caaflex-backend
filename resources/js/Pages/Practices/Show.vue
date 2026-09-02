@@ -317,7 +317,7 @@ const openUpload = async () => {
 
 const tabs = computed(() => [
     { key: 'documents', label: 'Documenti', count: props.practice?.documents?.length ?? 0 },
-    { key: 'timeline', label: 'Timeline', count: props.practice?.statusLogs?.length ?? 0 },
+    { key: 'timeline', label: 'Cronologia', count: props.practice?.statusLogs?.length ?? 0 },
     { key: 'notes', label: 'Note', count: props.practice?.notes?.length ?? 0 },
     { key: 'details', label: 'Dettagli', count: null },
     { key: 'deadlines', label: 'Scadenze', count: props.practice?.deadlines?.length ?? 0 },
@@ -528,7 +528,7 @@ const completionPercentage = computed(() => {
                         </div>
 
                         <div class="mt-8 pt-8 border-t border-outline-variant/10">
-                            <h4 class="text-xs font-bold text-on-surface-variant uppercase mb-4">Team Assegnato</h4>
+                            <h4 class="text-xs font-bold text-on-surface-variant uppercase mb-4">Gruppo assegnato</h4>
                             <div class="flex -space-x-2">
                                 <template v-if="practice.assigned_users?.length">
                                     <div
@@ -729,7 +729,7 @@ const completionPercentage = computed(() => {
                             <div v-else-if="activeTab === 'timeline'" class="p-6">
                                 <h3 class="text-xl font-headline font-extrabold text-on-surface mb-6 flex items-center">
                                     <ClockIcon class="mr-3 h-5 w-5 text-primary" />
-                                    Timeline Audit
+                                    Cronologia attività
                                 </h3>
                                 <div class="relative pl-8 space-y-8 before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-surface-container-highest">
                                     <div v-if="!practice.statusLogs?.length" class="text-sm text-on-surface-variant">
@@ -792,7 +792,7 @@ const completionPercentage = computed(() => {
                                             <Link v-if="practice.client" :href="route('clients.show', practice.client.id)" class="text-sm font-semibold text-primary transition hover:text-primary-dim">
                                                 {{ practice.client.first_name }} {{ practice.client.last_name }}
                                             </Link>
-                                            <p v-else class="text-sm text-on-surface-variant">N/A</p>
+                                            <p v-else class="text-sm text-on-surface-variant">Non disponibile</p>
                                         </div>
                                     </div>
 
@@ -815,7 +815,7 @@ const completionPercentage = computed(() => {
 
                                     <div>
                                         <InputLabel value="Anno Riferimento" />
-                                        <p class="mt-1 text-sm font-semibold text-on-surface">{{ practice.reference_year || 'N/A' }}</p>
+                                        <p class="mt-1 text-sm font-semibold text-on-surface">{{ practice.reference_year || 'Non disponibile' }}</p>
                                     </div>
 
                                     <div>

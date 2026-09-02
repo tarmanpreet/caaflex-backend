@@ -78,6 +78,26 @@ class PracticeDeadlineIndexTest extends TestCase
             );
     }
 
+    public function test_employee_sees_deadlines_assigned_directly_outside_assigned_practices(): void
+    {
+        $employee = User::factory()->create();
+        $employee->assignRole('employee');
+        $practice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'user_id' => $employee->id,
+        ]);
+
+        $this->actingAs($employee)
+            ->get(route('deadlines.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('deadlines.data', 1)
+                ->where('deadlines.data.0.id', $deadline->id)
+                ->where('summary.total', 1)
+            );
+    }
+
     public function test_deadline_update_action_is_hidden_when_policy_denies_update(): void
     {
         $employee = User::factory()->create();

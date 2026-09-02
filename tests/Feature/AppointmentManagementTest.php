@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Mail\AppointmentConfirmedMail;
 use App\Models\Appointment;
 use App\Models\AutoConfirmSlot;
+use App\Models\Branch;
 use App\Models\ClientProfile;
 use App\Models\PracticeType;
 use App\Models\User;
@@ -99,6 +100,27 @@ class AppointmentManagementTest extends TestCase
         ]);
     }
 
+    public function test_appointment_inherits_the_client_branch_when_none_is_submitted(): void
+    {
+        $branch = Branch::factory()->create();
+        $client = ClientProfile::factory()->create(['branch_id' => $branch->id]);
+        $practiceType = PracticeType::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->post('/appointments', [
+                'client_profile_id' => $client->id,
+                'practice_type_id' => $practiceType->id,
+                'scheduled_at' => now()->addDays(30)->format('Y-m-d H:i'),
+                'duration_minutes' => 60,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('appointments', [
+            'client_profile_id' => $client->id,
+            'branch_id' => $branch->id,
+        ]);
+    }
+
     public function test_admin_can_confirm_appointment_and_creates_practice(): void
     {
         $practiceType = PracticeType::factory()->create();
@@ -130,6 +152,34 @@ class AppointmentManagementTest extends TestCase
         Mail::assertQueued(AppointmentConfirmedMail::class, function ($mail) use ($appointment) {
             return $mail->appointment->id === $appointment->id;
         });
+    }
+
+    public function test_confirmed_appointment_transfers_branch_and_assignee_to_the_new_practice(): void
+    {
+        $branch = Branch::factory()->create();
+        $client = ClientProfile::factory()->create([
+            'branch_id' => $branch->id,
+            'email' => 'cliente@example.com',
+        ]);
+        $practiceType = PracticeType::factory()->create();
+        $this->employee->branches()->attach($branch);
+        $appointment = Appointment::factory()->create([
+            'client_profile_id' => $client->id,
+            'practice_type_id' => $practiceType->id,
+            'practice_id' => null,
+            'branch_id' => $branch->id,
+            'assigned_user_id' => $this->employee->id,
+            'status' => 'da_confermare',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->patch('/appointments/'.$appointment->id, ['status' => 'confermato'])
+            ->assertRedirect();
+
+        $practice = $appointment->fresh()->practice;
+
+        $this->assertSame($branch->id, $practice->branch_id);
+        $this->assertTrue($practice->assignedUsers()->whereKey($this->employee->id)->exists());
     }
 
     public function test_admin_can_assign_user_to_appointment(): void

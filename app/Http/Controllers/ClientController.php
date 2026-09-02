@@ -95,7 +95,7 @@ class ClientController extends Controller
         $profile = $action->execute($request->validated(), $request->user()->id);
 
         return redirect()->route('clients.show', $profile)
-            ->with('success', 'Client created successfully.');
+            ->with('success', 'Cliente creato correttamente.');
     }
 
     public function show(ClientProfile $client, Request $request)
@@ -106,6 +106,14 @@ class ClientController extends Controller
 
         $practiceSearch = $request->practice_search;
         $practiceQuery = $client->practices()->with('assignedUsers');
+
+        if ($request->user()->hasPermissionTo('practices.view-own') && ! $request->user()->hasPermissionTo('practices.view-any')) {
+            $practiceQuery->whereHas(
+                'assignedUsers',
+                fn ($query) => $query->where('users.id', $request->user()->id)
+            );
+        }
+
         if ($practiceSearch) {
             $search = '%'.$practiceSearch.'%';
             $practiceQuery->where(fn ($q) => $q->where('type', 'like', $search)->orWhere('status', 'like', $search));
@@ -138,7 +146,7 @@ class ClientController extends Controller
         $action->execute($request->validated(), $client);
 
         return redirect()->route('clients.show', $client)
-            ->with('success', 'Client updated successfully.');
+            ->with('success', 'Cliente aggiornato correttamente.');
     }
 
     public function inviteUser(ClientProfile $client, InviteClientUserAction $action)
@@ -175,7 +183,7 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()->route('clients.index')
-            ->with('success', 'Client deleted.');
+            ->with('success', 'Cliente eliminato.');
     }
 
     private function accessibleBranches(User $user): Collection

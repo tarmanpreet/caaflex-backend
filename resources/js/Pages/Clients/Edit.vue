@@ -34,19 +34,19 @@ const submitForm = () => {
 </script>
 
 <template>
-    <AppLayout title="Edit Client">
+    <AppLayout title="Modifica cliente">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Edit Client</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Modifica cliente</h2>
         </template>
         <div class="py-12">
             <div class="w-full">
                 <FormSection @submitted="submitForm">
                     <template #title>
-                        Client Information
+                        Informazioni cliente
                     </template>
 
                     <template #description>
-                        Update the client's details.
+                        Aggiorna i dati del cliente.
                     </template>
 
                     <template #form>
@@ -59,7 +59,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="first_name" value="First Name" />
+                            <InputLabel for="first_name" value="Nome" />
                             <TextInput
                                 id="first_name"
                                 v-model="form.first_name"
@@ -71,7 +71,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="last_name" value="Last Name" />
+                            <InputLabel for="last_name" value="Cognome" />
                             <TextInput
                                 id="last_name"
                                 v-model="form.last_name"
@@ -83,7 +83,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="phone" value="Phone" />
+                            <InputLabel for="phone" value="Telefono" />
                             <TextInput
                                 id="phone"
                                 v-model="form.phone"
@@ -94,7 +94,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="date_of_birth" value="Date of Birth" />
+                            <InputLabel for="date_of_birth" value="Data di nascita" />
                             <TextInput
                                 id="date_of_birth"
                                 v-model="form.date_of_birth"
@@ -105,7 +105,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="fiscal_code" value="Fiscal Code" />
+                            <InputLabel for="fiscal_code" value="Codice fiscale" />
                             <TextInput
                                 id="fiscal_code"
                                 v-model="form.fiscal_code"
@@ -128,7 +128,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6">
-                            <InputLabel for="address" value="Address" />
+                            <InputLabel for="address" value="Indirizzo" />
                             <TextInput
                                 id="address"
                                 v-model="form.address"
@@ -139,7 +139,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="city" value="City" />
+                            <InputLabel for="city" value="Città" />
                             <TextInput
                                 id="city"
                                 v-model="form.city"
@@ -150,7 +150,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="province" value="Province" />
+                            <InputLabel for="province" value="Provincia" />
                             <TextInput
                                 id="province"
                                 v-model="form.province"
@@ -162,7 +162,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <InputLabel for="postal_code" value="Postal Code" />
+                            <InputLabel for="postal_code" value="CAP" />
                             <TextInput
                                 id="postal_code"
                                 v-model="form.postal_code"
@@ -174,7 +174,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="col-span-6">
-                            <InputLabel for="notes" value="Notes" />
+                            <InputLabel for="notes" value="Note" />
                             <TextInput
                                 id="notes"
                                 v-model="form.notes"
@@ -188,10 +188,10 @@ const submitForm = () => {
 
                     <template #actions>
                         <SecondaryButton type="button" @click="router.get(route('clients.show', client.id))">
-                            Cancel
+                            Annulla
                         </SecondaryButton>
                         <PrimaryButton class="ms-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                            Save
+                            Salva
                         </PrimaryButton>
                     </template>
                 </FormSection>

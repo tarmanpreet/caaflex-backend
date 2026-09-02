@@ -21,7 +21,7 @@ const disabledClasses = 'inline-flex items-center justify-center rounded-xl bg-s
 </script>
 
 <template>
-    <nav v-if="links && links.length > 3" aria-label="Page navigation">
+    <nav v-if="links && links.length > 3" aria-label="Navigazione tra le pagine">
         <ul class="flex flex-wrap items-center gap-2">
             <li>
                 <Link v-if="links[0].url" :href="links[0].url" :class="[baseClasses, sizeClasses]">

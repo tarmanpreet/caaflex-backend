@@ -2,23 +2,27 @@
 
 namespace App\Actions\Dashboard;
 
-use App\Models\Practice;
+use App\Actions\PracticeDeadline\ScopeVisiblePracticeDeadlineAction;
 use App\Models\PracticeDeadline;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 
 class BuildDashboardNoticesAction
 {
+    public function __construct(private ScopeVisiblePracticeDeadlineAction $visibleDeadlines) {}
+
     public function execute(User $user): array
     {
-        $practiceIds = $this->scopedPracticeQuery($user)->pluck('practices.id');
-
-        return PracticeDeadline::query()
-            ->whereIn('practice_id', $practiceIds)
+        $query = $this->visibleDeadlines->execute($user)
             ->whereIn('status', [
                 PracticeDeadline::STATUS_PENDING,
                 PracticeDeadline::STATUS_IN_PROGRESS,
-            ])
+            ]);
+
+        if (! $user->hasPermissionTo('practices.view-any')) {
+            $query->orderByRaw('case when user_id = ? then 0 else 1 end', [$user->id]);
+        }
+
+        return $query
             ->with(['practice:id,client_profile_id,type', 'practice.client:id,first_name,last_name'])
             ->orderBy('deadline_at')
             ->limit(6)
@@ -42,23 +46,6 @@ class BuildDashboardNoticesAction
             })
             ->values()
             ->all();
-    }
-
-    private function scopedPracticeQuery(User $user): Builder
-    {
-        $query = Practice::query();
-
-        if ($user->hasPermissionTo('practices.view-any')) {
-            return $query;
-        }
-
-        if ($user->hasPermissionTo('practices.view-own')) {
-            $query->whereHas('assignedUsers', fn (Builder $builder) => $builder->where('users.id', $user->id));
-
-            return $query;
-        }
-
-        return $query->whereRaw('1 = 0');
     }
 
     private function mapPriority(int|string|null $priority): string

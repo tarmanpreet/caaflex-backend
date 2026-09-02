@@ -115,7 +115,7 @@ const workflow = [
                     </span>
                     <span>
                         <span class="block text-sm font-bold tracking-tight text-white">CAF Gestionale</span>
-                        <span class="block text-[11px] font-medium tracking-[0.16em] text-slate-400">WORKSPACE</span>
+                        <span class="block text-[11px] font-medium tracking-[0.16em] text-slate-400">SPAZIO DI LAVORO</span>
                     </span>
                 </a>
 
@@ -133,7 +133,7 @@ const workflow = [
                         class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
                     >
                         <span class="hidden min-[400px]:inline">Vai alla dashboard</span>
-                        <span class="min-[400px]:hidden">Dashboard</span>
+                        <span class="min-[400px]:hidden">Pannello</span>
                         <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
                     </Link>
                     <template v-else>
@@ -179,8 +179,8 @@ const workflow = [
                                 prefetch
                                 class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
                             >
-                                <span class="sm:hidden">Apri il tuo workspace</span>
-                                <span class="hidden sm:inline">Workspace</span>
+                                <span class="sm:hidden">Apri il tuo spazio di lavoro</span>
+                                <span class="hidden sm:inline">Spazio di lavoro</span>
                                 <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
                             </Link>
                             <Link
@@ -230,10 +230,10 @@ const workflow = [
                                     <aside class="border-r border-white/10 bg-slate-950/60 p-3 sm:p-4">
                                         <div class="mb-6 hidden items-center gap-2 sm:flex">
                                             <span class="grid h-8 w-8 place-items-center rounded-lg bg-blue-500"><BuildingOffice2Icon class="h-4 w-4" /></span>
-                                            <span class="text-xs font-bold">CAF Workspace</span>
+                                            <span class="text-xs font-bold">Spazio CAF</span>
                                         </div>
                                         <div class="grid gap-2">
-                                            <div v-for="(item, index) in ['Dashboard', 'Pratiche', 'Clienti', 'Agenda']" :key="item" :class="index === 0 ? 'bg-blue-500/15 text-blue-200' : 'text-slate-500'" class="flex h-9 items-center gap-2 rounded-lg px-2 text-[11px] font-medium sm:px-3">
+                                            <div v-for="(item, index) in ['Pannello', 'Pratiche', 'Clienti', 'Agenda']" :key="item" :class="index === 0 ? 'bg-blue-500/15 text-blue-200' : 'text-slate-500'" class="flex h-9 items-center gap-2 rounded-lg px-2 text-[11px] font-medium sm:px-3">
                                                 <span class="h-4 w-4 rounded bg-current opacity-20"></span>
                                                 <span class="hidden sm:inline">{{ item }}</span>
                                             </div>
@@ -391,7 +391,7 @@ const workflow = [
                     <div class="relative">
                         <span class="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-2 text-sm font-black text-slate-950"><SparklesIcon class="h-4 w-4" />Il prossimo passo è più semplice</span>
                         <h2 class="mx-auto mt-7 max-w-4xl text-balance text-4xl font-black tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">Porta ordine nella rete. Libera tempo per le persone.</h2>
-                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Entra nel workspace e trasforma ogni attività quotidiana in un processo più chiaro, coordinato e sicuro.</p>
+                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Entra nello spazio di lavoro e trasforma ogni attività quotidiana in un processo più chiaro, coordinato e sicuro.</p>
                         <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
                             <Link v-if="$page.props.auth.user" :href="route('dashboard')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Vai alla dashboard<ArrowRightIcon class="h-5 w-5" /></Link>
                             <Link v-else-if="canLogin" :href="route('login')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Accedi al gestionale<ArrowRightIcon class="h-5 w-5" /></Link>
