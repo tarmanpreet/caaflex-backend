@@ -61,6 +61,46 @@ class ProcedureManagementTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_procedure_with_automatic_deadline_steps(): void
+    {
+        $practiceType = PracticeType::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->post('/procedures', [
+                'procedure_type_id' => $practiceType->id,
+                'name' => 'PROCEDURA_CON_STEP',
+                'deadline_templates' => [
+                    [
+                        'title' => 'Verifica documenti',
+                        'notes' => 'Controllare tutti gli allegati.',
+                        'offset_days' => 2,
+                        'offset_hours' => 3,
+                        'priority' => 2,
+                    ],
+                    [
+                        'title' => 'Invio pratica',
+                        'notes' => null,
+                        'offset_days' => 1,
+                        'offset_hours' => 0,
+                        'priority' => 1,
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $procedure = Procedure::query()->where('name', 'PROCEDURA_CON_STEP')->firstOrFail();
+
+        $this->assertDatabaseHas('procedure_deadline_templates', [
+            'procedure_id' => $procedure->id,
+            'title' => 'Verifica documenti',
+            'offset_days' => 2,
+            'offset_hours' => 3,
+            'priority' => 2,
+            'position' => 0,
+        ]);
+        $this->assertSame(2, $procedure->deadlineTemplates()->count());
+    }
+
     public function test_admin_can_update_procedure(): void
     {
         $procedure = Procedure::factory()->create([

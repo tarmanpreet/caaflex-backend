@@ -201,16 +201,16 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : 'â€
                                             {{ item.assignee?.name || 'Non assegnata' }}
                                         </span>
                                     </div>
-                                </div>
 
-                                <Link
-                                    v-if="item.practice.id"
-                                    :href="route('practices.show', item.practice.id)"
-                                    :aria-label="`Apri la pratica della scadenza ${item.title}`"
-                                    class="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center self-end rounded-xl bg-surface-container-low text-on-surface-variant transition hover:bg-primary hover:text-on-primary focus-visible:outline-none sm:self-center"
-                                >
-                                    <ArrowUpRightIcon class="h-5 w-5" />
-                                </Link>
+                                    <Link
+                                        v-if="item.practice.id"
+                                        :href="route('practices.show', item.practice.id) + '#deadlines'"
+                                        class="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-surface-container-low px-4 text-sm font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
+                                    >
+                                        Apri nel tab scadenze
+                                        <ArrowUpRightIcon class="h-4 w-4" />
+                                    </Link>
+                                </div>
                             </div>
                         </article>
                     </div>

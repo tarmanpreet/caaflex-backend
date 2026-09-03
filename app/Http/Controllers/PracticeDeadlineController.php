@@ -10,6 +10,7 @@ use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class PracticeDeadlineController extends Controller
 {
@@ -44,7 +45,10 @@ class PracticeDeadlineController extends Controller
     {
         $this->authorize('deleteDeadline', $practice);
 
-        $deadline->delete();
+        DB::transaction(function () use ($deadline): void {
+            $deadline->steps()->delete();
+            $deadline->delete();
+        });
 
         return redirect()->back()->with('success', 'Scadenza eliminata.');
     }

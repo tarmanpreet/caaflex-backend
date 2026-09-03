@@ -31,4 +31,9 @@ class Procedure extends Model
     {
         return $this->hasMany(Practice::class, 'procedure_id');
     }
+
+    public function deadlineTemplates(): HasMany
+    {
+        return $this->hasMany(ProcedureDeadlineTemplate::class)->orderBy('position');
+    }
 }

@@ -35,6 +35,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    procedureStepCount: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const emit = defineEmits(['refresh']);
@@ -85,6 +89,7 @@ const createForm = useForm({
     deadline_at: '',
     priority: 3,
     user_id: null,
+    generate_procedure_steps: props.procedureStepCount > 0,
 });
 
 const editForm = useForm({
@@ -133,6 +138,14 @@ const isOverdue = (deadline) => {
     return new Date(deadline.deadline_at) < new Date();
 };
 
+const toUtcDateTime = (dateTime) => {
+    if (!dateTime) return dateTime;
+
+    const date = new Date(dateTime);
+
+    return isNaN(date.getTime()) ? dateTime : date.toISOString();
+};
+
 const resetForms = () => {
     createForm.reset();
     editForm.reset();
@@ -140,7 +153,10 @@ const resetForms = () => {
 
 // ── Form Actions ────────────────────────────────────────────────────────────────
 const createDeadline = () => {
-    createForm.post(route('practices.deadlines.store', props.practiceId), {
+    createForm.transform((data) => ({
+        ...data,
+        deadline_at: toUtcDateTime(data.deadline_at),
+    })).post(route('practices.deadlines.store', props.practiceId), {
         preserveScroll: true,
         onSuccess: () => {
             showCreateModal.value = false;
@@ -153,7 +169,10 @@ const createDeadline = () => {
 const updateDeadline = () => {
     if (!editingDeadline.value) return;
 
-    editForm.put(route('practices.deadlines.update', [props.practiceId, editingDeadline.value.id]), {
+    editForm.transform((data) => ({
+        ...data,
+        deadline_at: toUtcDateTime(data.deadline_at),
+    })).put(route('practices.deadlines.update', [props.practiceId, editingDeadline.value.id]), {
         preserveScroll: true,
         onSuccess: () => {
             showEditModal.value = false;
@@ -206,6 +225,7 @@ const STATUS_TRANSITIONS = {
 // ── Modal Handlers ──────────────────────────────────────────────────────────────
 const openCreateModal = () => {
     createForm.reset();
+    createForm.generate_procedure_steps = props.procedureStepCount > 0;
     showCreateModal.value = true;
 };
 
@@ -293,6 +313,12 @@ const closeDeleteModal = () => {
                             <h4 class="font-semibold text-on-surface  truncate">
                                 {{ deadline.title }}
                             </h4>
+                            <span v-if="deadline.kind === 'procedure_primary'" class="rounded-full bg-primary-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-primary-container">
+                                Scadenza principale
+                            </span>
+                            <span v-else-if="deadline.kind === 'procedure_step'" class="rounded-full bg-tertiary-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-tertiary-container">
+                                Step procedura
+                            </span>
                             <!-- Status Badge with Quick Actions -->
                             <div class="relative inline-flex items-center gap-1">
                                 <span
@@ -473,6 +499,21 @@ const closeDeleteModal = () => {
                         </select>
                         <InputError :message="createForm.errors.user_id" class="mt-1" />
                     </div>
+
+                    <label v-if="procedureStepCount > 0" class="flex cursor-pointer gap-3 rounded-2xl border border-primary/25 bg-primary-container/25 p-4">
+                        <input
+                            v-model="createForm.generate_procedure_steps"
+                            type="checkbox"
+                            class="mt-1 h-5 w-5 rounded border-outline text-primary focus:ring-primary"
+                        />
+                        <span>
+                            <span class="block text-sm font-bold text-on-surface">Genera gli step della procedura</span>
+                            <span class="mt-1 block text-xs leading-5 text-on-surface-variant">
+                                Verranno create {{ procedureStepCount }} scadenze anticipate, assegnate allo stesso utente selezionato qui sopra.
+                            </span>
+                        </span>
+                    </label>
+                    <InputError :message="createForm.errors.generate_procedure_steps" class="mt-1" />
 
                     <!-- Notes -->
                     <div>

@@ -37,6 +37,7 @@ class StorePracticeDeadlineRequest extends FormRequest
                 'nullable',
                 new AssignableUser,
             ],
+            'generate_procedure_steps' => ['sometimes', 'boolean'],
         ];
     }
 }

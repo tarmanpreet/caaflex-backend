@@ -202,6 +202,7 @@ const statCards = computed(() => [
                 </div>
 
                     <SortableTable
+                        flush
                         :columns="columns"
                         :rows="practices.data"
                         :controlled="true"
@@ -244,7 +245,7 @@ const statCards = computed(() => [
                         </template>
                     </SortableTable>
 
-                    <div v-if="practices.links && practices.links.length > 3" class="p-6 pt-0 flex justify-end">
+                    <div v-if="practices.links && practices.links.length > 3" class="flex justify-end border-t border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                         <Pagination :links="practices.links" />
                     </div>
             </UiSectionCard>

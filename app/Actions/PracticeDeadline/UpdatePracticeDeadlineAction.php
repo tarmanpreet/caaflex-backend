@@ -16,7 +16,24 @@ class UpdatePracticeDeadlineAction
     {
         $oldAssigneeId = $deadline->user_id;
         $oldStatus = $deadline->status;
-        DB::transaction(fn () => $deadline->update($data));
+        DB::transaction(function () use ($data, $deadline): void {
+            $deadline->update($data);
+
+            if ($deadline->kind !== PracticeDeadline::KIND_PROCEDURE_PRIMARY) {
+                return;
+            }
+
+            $openSteps = $deadline->steps()
+                ->whereNotIn('status', [PracticeDeadline::STATUS_COMPLETED, PracticeDeadline::STATUS_CANCELLED])
+                ->get();
+
+            foreach ($openSteps as $step) {
+                $step->update([
+                    'deadline_at' => $deadline->deadline_at->copy()->subMinutes($step->advance_minutes ?? 0),
+                    'user_id' => $deadline->user_id,
+                ]);
+            }
+        });
         $changedFields = array_keys($deadline->getChanges());
         $deadline->refresh()->load('assignee');
         $actionUrl = route('practices.show', $practice, false).'#deadlines';

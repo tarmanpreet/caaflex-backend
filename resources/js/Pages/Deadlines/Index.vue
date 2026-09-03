@@ -301,6 +301,7 @@ const updateDeadline = () => {
             </div>
 
             <SortableTable
+                flush
                 :columns="columns"
                 :rows="deadlines.data"
                 :controlled="true"
@@ -350,7 +351,7 @@ const updateDeadline = () => {
                 </template>
             </SortableTable>
 
-            <div v-if="deadlines.links?.length > 3" class="flex justify-end p-6 pt-0">
+            <div v-if="deadlines.links?.length > 3" class="flex justify-end border-t border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                 <Pagination :links="deadlines.links" />
             </div>
         </UiSectionCard>

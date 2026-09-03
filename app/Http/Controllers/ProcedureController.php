@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Procedure\SyncProcedureDeadlineTemplatesAction;
 use App\Http\Requests\StoreProcedureRequest;
 use App\Http\Requests\UpdateProcedureRequest;
 use App\Models\PracticeType;
 use App\Models\Procedure;
 use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProcedureController extends Controller
@@ -42,7 +46,7 @@ class ProcedureController extends Controller
 
         return Inertia::render('Procedures/Index', [
             'procedureTypes' => PracticeType::orderBy('name')->get(),
-            'procedures' => $query->get(),
+            'procedures' => $query->withCount('deadlineTemplates')->get(),
             'filters' => array_merge(
                 $request->only(['search']),
                 ['sort' => $sort['sort'], 'direction' => $sort['direction']]
@@ -59,9 +63,15 @@ class ProcedureController extends Controller
         ]);
     }
 
-    public function store(StoreProcedureRequest $request)
+    public function store(StoreProcedureRequest $request, SyncProcedureDeadlineTemplatesAction $syncTemplates): RedirectResponse
     {
-        Procedure::create($request->validated());
+        $data = $request->validated();
+        $templates = Arr::pull($data, 'deadline_templates', []);
+
+        DB::transaction(function () use ($data, $templates, $syncTemplates): void {
+            $procedure = Procedure::query()->create($data);
+            $syncTemplates->execute($procedure, $templates);
+        });
 
         return redirect()->route('procedures.index')
             ->with('success', 'Procedura creata.');
@@ -73,13 +83,23 @@ class ProcedureController extends Controller
 
         return Inertia::render('Procedures/Edit', [
             'procedureTypes' => PracticeType::orderBy('name')->get(),
-            'procedure' => $procedure,
+            'procedure' => $procedure->load('deadlineTemplates'),
         ]);
     }
 
-    public function update(UpdateProcedureRequest $request, Procedure $procedure)
+    public function update(UpdateProcedureRequest $request, Procedure $procedure, SyncProcedureDeadlineTemplatesAction $syncTemplates): RedirectResponse
     {
-        $procedure->update($request->validated());
+        $data = $request->validated();
+        $shouldSyncTemplates = $request->has('deadline_templates');
+        $templates = Arr::pull($data, 'deadline_templates', []);
+
+        DB::transaction(function () use ($data, $procedure, $shouldSyncTemplates, $syncTemplates, $templates): void {
+            $procedure->update($data);
+
+            if ($shouldSyncTemplates) {
+                $syncTemplates->execute($procedure, $templates);
+            }
+        });
 
         return redirect()->route('procedures.index')
             ->with('success', 'Procedura aggiornata.');

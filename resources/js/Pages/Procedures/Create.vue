@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import ProcedureDeadlineTemplatesEditor from '@/Components/ProcedureDeadlineTemplatesEditor.vue';
 
 const props = defineProps({
     procedureTypes: Array,
@@ -17,6 +18,7 @@ const form = useForm({
     procedure_type_id: '',
     default_notes: '',
     deadline_days: '',
+    deadline_templates: [],
 });
 
 const submitForm = () => {
@@ -95,6 +97,8 @@ const submitForm = () => {
                             <p class="mt-1 text-xs text-gray-500">Numero di giorni prima della scadenza della pratica in cui questa procedura deve essere completata</p>
                             <InputError :message="form.errors.deadline_days" class="mt-2" />
                         </div>
+
+                        <ProcedureDeadlineTemplatesEditor v-model="form.deadline_templates" :errors="form.errors" />
                     </template>
 
                     <template #actions>

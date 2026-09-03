@@ -27,6 +27,10 @@ const props = defineProps({
         type: String,
         default: 'asc',
     },
+    flush: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits(['sort']);
@@ -100,7 +104,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
 </script>
 
 <template>
-    <div class="overflow-x-auto rounded-2xl border border-outline-variant/35">
+    <div :class="['overflow-x-auto', flush ? '' : 'rounded-2xl border border-outline-variant/35']">
         <table class="min-w-full border-collapse text-sm text-on-surface">
             <thead class="border-b border-outline-variant/35 bg-surface-container-low text-on-surface-variant">
                 <tr>

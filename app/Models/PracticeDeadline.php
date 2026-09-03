@@ -13,14 +13,26 @@ class PracticeDeadline extends Model
     use HasFactory, SoftDeletes;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const PRIORITY_URGENT = 1;
+
     public const PRIORITY_HIGH = 2;
+
     public const PRIORITY_MEDIUM = 3;
+
     public const PRIORITY_LOW = 4;
+
+    public const KIND_MANUAL = 'manual';
+
+    public const KIND_PROCEDURE_PRIMARY = 'procedure_primary';
+
+    public const KIND_PROCEDURE_STEP = 'procedure_step';
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +41,10 @@ class PracticeDeadline extends Model
      */
     protected $fillable = [
         'practice_id',
+        'kind',
+        'parent_deadline_id',
+        'procedure_deadline_template_id',
+        'advance_minutes',
         'user_id',
         'title',
         'notes',
@@ -49,6 +65,7 @@ class PracticeDeadline extends Model
             'deadline_at' => 'datetime',
             'priority' => 'integer',
             'status' => 'string',
+            'advance_minutes' => 'integer',
         ];
     }
 
@@ -82,6 +99,21 @@ class PracticeDeadline extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function parentDeadline(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_deadline_id');
+    }
+
+    public function steps(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_deadline_id');
+    }
+
+    public function procedureDeadlineTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ProcedureDeadlineTemplate::class);
     }
 
     /**

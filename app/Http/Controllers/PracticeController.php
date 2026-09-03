@@ -85,7 +85,7 @@ class PracticeController extends Controller
 
         $notesText = $practice->notes;
 
-        $practice->load(['client', 'assignedUsers', 'notes.author', 'documents.uploader', 'statusLogs.user', 'procedure', 'deadlines.assignee', 'deadlines.reminders', 'branch']);
+        $practice->load(['client', 'assignedUsers', 'notes.author', 'documents.uploader', 'statusLogs.user', 'procedure.deadlineTemplates', 'deadlines.assignee', 'deadlines.reminders', 'branch']);
 
         $users = User::assignable()
             ->select('id', 'name')

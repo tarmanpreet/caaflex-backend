@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Practice;
 use App\Models\PracticeDeadline;
+use App\Models\Procedure;
+use App\Models\ProcedureDeadlineTemplate;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -99,6 +101,104 @@ class PracticeDeadlineTest extends TestCase
             'title' => 'Test Deadline',
             'created_by' => $this->employeeAssigned->id,
         ]);
+    }
+
+    public function test_procedure_steps_inherit_primary_deadline_assignee_and_use_day_hour_offsets(): void
+    {
+        $procedure = Procedure::factory()->create();
+        ProcedureDeadlineTemplate::factory()->create([
+            'procedure_id' => $procedure->id,
+            'title' => 'Controllo preliminare',
+            'offset_days' => 1,
+            'offset_hours' => 2,
+            'priority' => PracticeDeadline::PRIORITY_HIGH,
+            'position' => 0,
+        ]);
+        ProcedureDeadlineTemplate::factory()->create([
+            'procedure_id' => $procedure->id,
+            'title' => 'Invio documentazione',
+            'offset_days' => 0,
+            'offset_hours' => 4,
+            'priority' => PracticeDeadline::PRIORITY_URGENT,
+            'position' => 1,
+        ]);
+        $this->practice->update(['procedure_id' => $procedure->id]);
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson("/api/v1/practices/{$this->practice->id}/deadlines", [
+                'title' => 'Scadenza principale',
+                'deadline_at' => '2026-09-20 12:00:00',
+                'priority' => PracticeDeadline::PRIORITY_MEDIUM,
+                'user_id' => $this->employeeAssigned->id,
+                'generate_procedure_steps' => true,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.kind', PracticeDeadline::KIND_PROCEDURE_PRIMARY);
+
+        $primary = PracticeDeadline::query()
+            ->where('practice_id', $this->practice->id)
+            ->where('kind', PracticeDeadline::KIND_PROCEDURE_PRIMARY)
+            ->firstOrFail();
+
+        $this->assertDatabaseHas('practice_deadlines', [
+            'parent_deadline_id' => $primary->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_STEP,
+            'title' => 'Controllo preliminare',
+            'deadline_at' => '2026-09-19 10:00:00',
+            'advance_minutes' => 1560,
+            'user_id' => $this->employeeAssigned->id,
+        ]);
+        $this->assertDatabaseHas('practice_deadlines', [
+            'parent_deadline_id' => $primary->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_STEP,
+            'title' => 'Invio documentazione',
+            'deadline_at' => '2026-09-20 08:00:00',
+            'advance_minutes' => 240,
+            'user_id' => $this->employeeAssigned->id,
+        ]);
+        $this->assertSame(2, $primary->steps()->count());
+    }
+
+    public function test_updating_primary_deadline_reschedules_and_reassigns_open_steps_only(): void
+    {
+        $newAssignee = User::factory()->create();
+        $newAssignee->assignRole('admin');
+        $primary = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_PRIMARY,
+            'deadline_at' => '2026-09-20 12:00:00',
+            'user_id' => $this->employeeAssigned->id,
+        ]);
+        $openStep = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_STEP,
+            'parent_deadline_id' => $primary->id,
+            'deadline_at' => '2026-09-19 12:00:00',
+            'advance_minutes' => 1440,
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'user_id' => $this->employeeAssigned->id,
+        ]);
+        $completedStep = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_STEP,
+            'parent_deadline_id' => $primary->id,
+            'deadline_at' => '2026-09-19 12:00:00',
+            'advance_minutes' => 1440,
+            'status' => PracticeDeadline::STATUS_COMPLETED,
+            'user_id' => $this->employeeAssigned->id,
+        ]);
+
+        $this->actingAs($this->admin, 'api')
+            ->putJson("/api/v1/practices/{$this->practice->id}/deadlines/{$primary->id}", [
+                'deadline_at' => '2026-09-25 15:00:00',
+                'user_id' => $newAssignee->id,
+            ])
+            ->assertOk();
+
+        $this->assertSame('2026-09-24 15:00:00', $openStep->fresh()->deadline_at->format('Y-m-d H:i:s'));
+        $this->assertSame($newAssignee->id, $openStep->fresh()->user_id);
+        $this->assertSame('2026-09-19 12:00:00', $completedStep->fresh()->deadline_at->format('Y-m-d H:i:s'));
+        $this->assertSame($this->employeeAssigned->id, $completedStep->fresh()->user_id);
     }
 
     public function test_admin_can_assign_deadline_to_unassigned_superadmin(): void

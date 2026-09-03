@@ -93,6 +93,7 @@ const deleteType = () => {
             </div>
 
             <SortableTable
+                            flush
                             :columns="columns"
                             :rows="types"
                             :controlled="true"

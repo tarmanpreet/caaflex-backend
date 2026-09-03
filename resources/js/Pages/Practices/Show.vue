@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { formatDate, formatDateTime } from '@/utils/date.js';
 import { useForm, usePage, router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -308,6 +308,35 @@ const deleteDocument = () => {
 };
 
 const activeTab = ref('documents');
+const tabsHeader = ref(null);
+const availableTabKeys = new Set(['documents', 'timeline', 'notes', 'details', 'deadlines']);
+
+const scrollActiveTabIntoView = async () => {
+    await nextTick();
+    tabsHeader.value
+        ?.querySelector(`[data-tab-key="${activeTab.value}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+};
+
+const syncActiveTabFromHash = () => {
+    const requestedTab = window.location.hash.slice(1);
+
+    if (availableTabKeys.has(requestedTab)) {
+        activeTab.value = requestedTab;
+    }
+};
+
+onMounted(() => {
+    syncActiveTabFromHash();
+    scrollActiveTabIntoView();
+    window.addEventListener('hashchange', syncActiveTabFromHash);
+});
+
+watch(activeTab, scrollActiveTabIntoView);
+
+onBeforeUnmount(() => {
+    window.removeEventListener('hashchange', syncActiveTabFromHash);
+});
 
 const openUpload = async () => {
     activeTab.value = 'documents';
@@ -325,14 +354,17 @@ const tabs = computed(() => [
 
 const statusLabel = (status) => status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
 
-const pendingDeadlines = computed(() => (props.practice?.deadlines ?? []).filter((deadline) => deadline.status === 'pending').length);
+const pendingDeadlines = computed(() => (props.practice?.deadlines ?? []).filter(
+    (deadline) => !['completed', 'cancelled'].includes(deadline.status),
+).length);
 
 const completionPercentage = computed(() => {
-    const deadlines = props.practice?.deadlines ?? [];
-    if (!deadlines.length) return props.practice?.documents?.length ? 65 : 35;
+    const steps = (props.practice?.deadlines ?? []).filter((deadline) => deadline.kind === 'procedure_step' && deadline.status !== 'cancelled');
 
-    const completed = deadlines.filter((deadline) => deadline.status === 'completed').length;
-    return Math.round((completed / deadlines.length) * 100);
+    if (!steps.length) return null;
+
+    const completed = steps.filter((deadline) => deadline.status === 'completed').length;
+    return Math.round((completed / steps.length) * 100);
 });
 </script>
 
@@ -415,7 +447,7 @@ const completionPercentage = computed(() => {
                                     <p class="text-sm font-bold text-on-surface">{{ practice.deadline_at ? formatDate(practice.deadline_at) : 'Non impostata' }}</p>
                                     <span v-if="pendingDeadlines > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-error-container/20 text-on-error-container mt-1">
                                         <span class="mr-1">•</span>
-                                        {{ pendingDeadlines }} scadenze aperte
+                                        {{ pendingDeadlines }} {{ pendingDeadlines === 1 ? 'scadenza aperta' : 'scadenze aperte' }}
                                     </span>
                                 </div>
                             </div>
@@ -426,12 +458,13 @@ const completionPercentage = computed(() => {
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-xs text-on-surface-variant font-medium uppercase mb-0.5">Completamento</p>
-                                    <div class="flex items-center space-x-3">
+                                    <div v-if="completionPercentage !== null" class="flex items-center space-x-3">
                                         <div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
                                             <div class="h-full bg-primary rounded-full" :style="{ width: completionPercentage + '%' }"></div>
                                         </div>
                                         <span class="text-sm font-bold text-on-surface">{{ completionPercentage }}%</span>
                                     </div>
+                                    <p v-else class="text-xs font-medium text-on-surface-variant">Nessun avanzamento configurato</p>
                                 </div>
                             </div>
                         </div>
@@ -589,10 +622,11 @@ const completionPercentage = computed(() => {
                 <div class="col-span-12 lg:col-span-8">
                     <div class="bg-surface-container-lowest rounded-2xl shadow-sm shadow-blue-900/5 ring-1 ring-outline-variant/10 overflow-hidden flex flex-col h-full">
                         <!-- Tabs Header -->
-                        <div class="flex items-center px-6 pt-6 border-b border-outline-variant/10 bg-surface-container-low/30 overflow-x-auto">
+                        <div ref="tabsHeader" class="flex items-center px-6 pt-6 border-b border-outline-variant/10 bg-surface-container-low/30 overflow-x-auto">
                             <button
                                 v-for="tab in tabs"
                                 :key="tab.key"
+                                :data-tab-key="tab.key"
                                 @click="activeTab = tab.key"
                                 :class="[
                                     'px-6 py-4 text-sm font-bold flex items-center whitespace-nowrap border-b-2 transition-colors',
@@ -851,6 +885,7 @@ const completionPercentage = computed(() => {
                                     :can-edit="canUpdateDeadline"
                                     :can-delete="canDeleteDeadline"
                                     :users="users || []"
+                                    :procedure-step-count="practice.procedure?.deadline_templates?.length || 0"
                                     @refresh="$inertia.reload({ only: ['practice'] })"
                                 />
                             </div>

@@ -87,6 +87,7 @@ const roleBadgeClass = (role) => {
             </div>
 
             <SortableTable
+                            flush
                             :columns="columns"
                             :rows="users.data"
                             :controlled="true"
@@ -127,7 +128,7 @@ const roleBadgeClass = (role) => {
                             </template>
             </SortableTable>
 
-                <div v-if="users.links && users.links.length > 3" class="flex justify-end p-5">
+                <div v-if="users.links && users.links.length > 3" class="flex justify-end border-t border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                     <Pagination :links="users.links" />
                 </div>
         </UiSectionCard>

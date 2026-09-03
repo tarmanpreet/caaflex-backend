@@ -118,6 +118,7 @@ const deleteProcedure = () => {
             </div>
 
             <SortableTable
+                            flush
                             :columns="columns"
                             :rows="procedures"
                             :controlled="true"
