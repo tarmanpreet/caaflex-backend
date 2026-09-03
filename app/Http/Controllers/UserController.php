@@ -131,7 +131,7 @@ class UserController extends Controller
     {
         $action->execute($request->validated(), $user);
 
-        return redirect()->route('users.show', $user)->with('success', 'Utente aggiornato.');
+        return back()->with('success', 'Utente aggiornato.');
     }
 
     public function toggleActive(User $user)
@@ -140,7 +140,7 @@ class UserController extends Controller
 
         $user->update(['is_active' => ! $user->is_active]);
 
-        return redirect()->route('users.show', $user)
+        return back()
             ->with('success', $user->is_active ? 'Utente attivato.' : 'Utente disattivato.');
     }
 

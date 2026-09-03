@@ -68,12 +68,14 @@ class ProcedureController extends Controller
         $data = $request->validated();
         $templates = Arr::pull($data, 'deadline_templates', []);
 
-        DB::transaction(function () use ($data, $templates, $syncTemplates): void {
+        $procedure = DB::transaction(function () use ($data, $templates, $syncTemplates): Procedure {
             $procedure = Procedure::query()->create($data);
             $syncTemplates->execute($procedure, $templates);
+
+            return $procedure;
         });
 
-        return redirect()->route('procedures.index')
+        return redirect()->route('procedures.edit', $procedure)
             ->with('success', 'Procedura creata.');
     }
 
@@ -101,7 +103,7 @@ class ProcedureController extends Controller
             }
         });
 
-        return redirect()->route('procedures.index')
+        return back()
             ->with('success', 'Procedura aggiornata.');
     }
 

@@ -48,6 +48,10 @@ class HandleInertiaRequests extends Middleware
                     && filled(config('broadcasting.connections.reverb.key')),
                 'key' => config('broadcasting.connections.reverb.key'),
             ],
+            'flash' => [
+                'success' => fn (): mixed => $request->session()->get('success'),
+                'error' => fn (): mixed => $request->session()->get('error'),
+            ],
         ];
     }
 }

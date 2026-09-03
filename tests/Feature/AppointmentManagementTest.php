@@ -120,9 +120,12 @@ class AppointmentManagementTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin)
+            ->from(route('appointments.index'))
             ->post('/appointments', $payload);
 
-        $response->assertStatus(302);
+        $response
+            ->assertRedirect(route('appointments.index'))
+            ->assertSessionHas('success', 'Appuntamento creato.');
 
         $this->assertDatabaseHas('appointments', [
             'client_profile_id' => $client->id,

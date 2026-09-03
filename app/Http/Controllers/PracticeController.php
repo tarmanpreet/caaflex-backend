@@ -76,7 +76,7 @@ class PracticeController extends Controller
         $practice = $action->execute($request->validated(), $request->user()->id);
 
         return redirect()->route('practices.show', $practice)
-            ->with('success', 'Practice created successfully.');
+            ->with('success', 'Pratica creata correttamente.');
     }
 
     public function show(Practice $practice)
@@ -118,8 +118,8 @@ class PracticeController extends Controller
 
         $action->execute($data, $practice, $request->user()->id);
 
-        return redirect()->route('practices.show', $practice)
-            ->with('success', 'Practice updated successfully.');
+        return back()
+            ->with('success', 'Pratica aggiornata correttamente.');
     }
 
     public function destroy(Practice $practice)
@@ -129,7 +129,7 @@ class PracticeController extends Controller
         $practice->delete();
 
         return redirect()->route('practices.index')
-            ->with('success', 'Practice deleted.');
+            ->with('success', 'Pratica eliminata.');
     }
 
     public function assignUsers(Request $request, Practice $practice, UpdatePracticeAction $action)
@@ -148,6 +148,6 @@ class PracticeController extends Controller
         );
 
         return redirect()->back()
-            ->with('success', 'Users assigned successfully.');
+            ->with('success', 'Assegnatari aggiornati.');
     }
 }

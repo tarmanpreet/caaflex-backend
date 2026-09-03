@@ -53,9 +53,9 @@ class PracticeTypeController extends Controller
 
     public function store(StorePracticeTypeRequest $request)
     {
-        PracticeType::create($request->validated());
+        $practiceType = PracticeType::create($request->validated());
 
-        return redirect()->route('practice-types.index')
+        return redirect()->route('practice-types.edit', $practiceType)
             ->with('success', 'Tipo pratica creato.');
     }
 
@@ -72,7 +72,7 @@ class PracticeTypeController extends Controller
     {
         $practice_type->update($request->validated());
 
-        return redirect()->route('practice-types.index')
+        return back()
             ->with('success', 'Tipo pratica aggiornato.');
     }
 

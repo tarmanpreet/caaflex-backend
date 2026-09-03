@@ -145,7 +145,7 @@ class ClientController extends Controller
     {
         $action->execute($request->validated(), $client);
 
-        return redirect()->route('clients.show', $client)
+        return back()
             ->with('success', 'Cliente aggiornato correttamente.');
     }
 

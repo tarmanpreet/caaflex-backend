@@ -99,9 +99,9 @@ class BranchController extends Controller
 
     public function store(StoreBranchRequest $request)
     {
-        Branch::create($request->validated());
+        $branch = Branch::create($request->validated());
 
-        return redirect()->route('branches.index')
+        return redirect()->route('branches.edit', $branch)
             ->with('success', 'Filiale creata.');
     }
 
@@ -124,7 +124,7 @@ class BranchController extends Controller
     {
         $branch->update($request->validated());
 
-        return redirect()->route('branches.index')
+        return back()
             ->with('success', 'Filiale aggiornata.');
     }
 

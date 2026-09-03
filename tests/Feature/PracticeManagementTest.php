@@ -6,9 +6,12 @@ use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use App\Models\PracticeType;
+use App\Models\Procedure;
+use App\Models\ProcedureDeadlineTemplate;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -149,6 +152,117 @@ class PracticeManagementTest extends TestCase
             'status' => 'nuova',
             'created_by' => $admin->id,
         ]);
+    }
+
+    public function test_creating_practice_generates_configured_procedure_deadlines(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create();
+        $practiceType = PracticeType::factory()->create(['name' => 'Pratica con step']);
+        $procedure = Procedure::factory()->create([
+            'procedure_type_id' => $practiceType->id,
+            'name' => 'Procedura automatica',
+        ]);
+        $template = ProcedureDeadlineTemplate::factory()->create([
+            'procedure_id' => $procedure->id,
+            'title' => 'Controllo documenti',
+            'offset_days' => 1,
+            'offset_hours' => 2,
+            'priority' => PracticeDeadline::PRIORITY_HIGH,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('practices.store'), [
+                'client_profile_id' => $client->id,
+                'type' => $practiceType->name,
+                'procedure_id' => $procedure->id,
+                'deadline_at' => '2026-09-20 12:00:00',
+                'user_ids' => [$admin->id],
+            ])
+            ->assertRedirect();
+
+        $practice = Practice::query()->whereBelongsTo($client, 'client')->firstOrFail();
+        $primaryDeadline = $practice->deadlines()
+            ->where('kind', PracticeDeadline::KIND_PROCEDURE_PRIMARY)
+            ->firstOrFail();
+
+        $this->assertSame($admin->id, $primaryDeadline->user_id);
+        $this->assertSame('2026-09-20 12:00:00', $primaryDeadline->deadline_at->format('Y-m-d H:i:s'));
+        $this->assertDatabaseHas('practice_deadlines', [
+            'practice_id' => $practice->id,
+            'parent_deadline_id' => $primaryDeadline->id,
+            'procedure_deadline_template_id' => $template->id,
+            'kind' => PracticeDeadline::KIND_PROCEDURE_STEP,
+            'title' => 'Controllo documenti',
+            'deadline_at' => '2026-09-19 10:00:00',
+            'user_id' => $admin->id,
+        ]);
+        $this->assertSame(2, $practice->deadlines()->count());
+    }
+
+    public function test_procedure_deadline_days_are_calculated_on_the_server_when_creating_practice(): void
+    {
+        Carbon::setTestNow('2026-09-03 09:30:00');
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create();
+        $practiceType = PracticeType::factory()->create(['name' => 'Pratica con scadenza calcolata']);
+        $procedure = Procedure::factory()->create([
+            'procedure_type_id' => $practiceType->id,
+            'name' => 'Procedura dieci giorni',
+            'deadline_days' => 10,
+        ]);
+        ProcedureDeadlineTemplate::factory()->create([
+            'procedure_id' => $procedure->id,
+            'offset_days' => 1,
+            'offset_hours' => 0,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('practices.store'), [
+                'client_profile_id' => $client->id,
+                'type' => $practiceType->name,
+                'procedure_id' => $procedure->id,
+                'user_ids' => [$admin->id],
+            ])
+            ->assertRedirect();
+
+        $practice = Practice::query()->whereBelongsTo($client, 'client')->firstOrFail();
+        $primaryDeadline = $practice->deadlines()
+            ->where('kind', PracticeDeadline::KIND_PROCEDURE_PRIMARY)
+            ->firstOrFail();
+
+        $this->assertSame('2026-09-13 09:30:00', $practice->deadline_at->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-09-13 09:30:00', $primaryDeadline->deadline_at->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-09-12 09:30:00', $primaryDeadline->steps()->firstOrFail()->deadline_at->format('Y-m-d H:i:s'));
+    }
+
+    public function test_procedure_steps_are_not_generated_without_a_main_deadline(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create();
+        $practiceType = PracticeType::factory()->create(['name' => 'Pratica senza scadenza']);
+        $procedure = Procedure::factory()->create([
+            'procedure_type_id' => $practiceType->id,
+            'deadline_days' => null,
+        ]);
+        ProcedureDeadlineTemplate::factory()->create(['procedure_id' => $procedure->id]);
+
+        $this->actingAs($admin)
+            ->post(route('practices.store'), [
+                'client_profile_id' => $client->id,
+                'type' => $practiceType->name,
+                'procedure_id' => $procedure->id,
+                'user_ids' => [$admin->id],
+            ])
+            ->assertRedirect();
+
+        $practice = Practice::query()->whereBelongsTo($client, 'client')->firstOrFail();
+
+        $this->assertNull($practice->deadline_at);
+        $this->assertSame(0, $practice->deadlines()->count());
     }
 
     public function test_practice_forms_offer_every_assignable_role(): void
@@ -316,8 +430,10 @@ class PracticeManagementTest extends TestCase
         ]);
 
         $this->actingAs($admin)
+            ->from(route('practices.show', $practice))
             ->put(route('practices.update', $practice), ['status' => 'completata'])
-            ->assertRedirect(route('practices.show', $practice));
+            ->assertRedirect(route('practices.show', $practice))
+            ->assertSessionHas('success', 'Pratica aggiornata correttamente.');
 
         $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $pending->fresh()->status);
         $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $inProgress->fresh()->status);
@@ -335,6 +451,7 @@ class PracticeManagementTest extends TestCase
         ]);
 
         $this->actingAs($admin)
+            ->from(route('practices.show', $practice))
             ->put(route('practices.update', $practice), ['status' => 'in_lavorazione'])
             ->assertRedirect(route('practices.show', $practice));
 

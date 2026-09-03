@@ -39,9 +39,14 @@ class PracticeTypeManagementTest extends TestCase
             'color' => '#FF5733',
         ];
 
-        $this->actingAs($this->admin)
-            ->post('/practice-types', $payload)
-            ->assertRedirect();
+        $response = $this->actingAs($this->admin)
+            ->post('/practice-types', $payload);
+
+        $practiceType = PracticeType::query()->where('name', 'TIPO_TEST_UNICO')->firstOrFail();
+
+        $response
+            ->assertRedirect(route('practice-types.edit', $practiceType))
+            ->assertSessionHas('success', 'Tipo pratica creato.');
 
         $this->assertDatabaseHas('practice_types', [
             'name' => 'TIPO_TEST_UNICO',
@@ -57,12 +62,14 @@ class PracticeTypeManagementTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
+            ->from(route('practice-types.edit', $practiceType))
             ->put('/practice-types/'.$practiceType->id, [
                 'name' => 'UPDATED_NAME',
                 'duration_minutes' => 90,
                 'color' => '#00FF00',
             ])
-            ->assertRedirect();
+            ->assertRedirect(route('practice-types.edit', $practiceType))
+            ->assertSessionHas('success', 'Tipo pratica aggiornato.');
 
         $this->assertDatabaseHas('practice_types', [
             'id' => $practiceType->id,

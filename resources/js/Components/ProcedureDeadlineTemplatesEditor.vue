@@ -55,25 +55,15 @@ const offsetSummary = (template) => {
 </script>
 
 <template>
-    <section class="col-span-6 rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4 sm:p-5">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-                <h3 class="font-headline text-base font-bold text-on-surface">Step automatici della procedura</h3>
-                <p class="mt-1 max-w-2xl text-sm leading-6 text-on-surface-variant">
-                    Quando crei una scadenza principale, questi step vengono anticipati rispetto alla sua data e assegnati allo stesso utente.
-                </p>
-            </div>
-            <button
-                type="button"
-                class="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
-                @click="addTemplate"
-            >
-                <PlusIcon class="h-4 w-4" />
-                Aggiungi step
-            </button>
+    <section class="col-span-6 flex flex-col gap-5 rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4 sm:p-5">
+        <div>
+            <h3 class="font-headline text-base font-bold text-on-surface">Step automatici della procedura</h3>
+            <p class="mt-1 max-w-2xl text-sm leading-6 text-on-surface-variant">
+                Quando crei una scadenza principale, questi step vengono anticipati rispetto alla sua data e assegnati allo stesso utente.
+            </p>
         </div>
 
-        <div v-if="modelValue.length" class="mt-5 grid gap-4">
+        <div v-if="modelValue.length" class="grid gap-4">
             <article v-for="(template, index) in modelValue" :key="template.id ?? `new-${index}`" class="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4">
                 <div class="flex items-center justify-between gap-3">
                     <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary">Step {{ index + 1 }}</p>
@@ -165,8 +155,19 @@ const offsetSummary = (template) => {
             </article>
         </div>
 
-        <p v-else class="mt-5 rounded-xl border border-dashed border-outline-variant px-4 py-5 text-sm text-on-surface-variant">
+        <p v-else class="rounded-xl border border-dashed border-outline-variant px-4 py-5 text-sm text-on-surface-variant">
             Nessuno step configurato. La procedura non genererà scadenze automatiche.
         </p>
+
+        <div class="flex justify-end">
+            <button
+                type="button"
+                class="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container transition hover:bg-primary hover:text-on-primary focus-visible:outline-none sm:w-auto"
+                @click="addTemplate"
+            >
+                <PlusIcon class="h-4 w-4" />
+                Aggiungi step
+            </button>
+        </div>
     </section>
 </template>

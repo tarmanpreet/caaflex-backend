@@ -25,7 +25,7 @@ class ClientDocumentController extends Controller
             $client
         );
 
-        return redirect()->back()->with('success', 'Documents uploaded.');
+        return redirect()->back()->with('success', 'Documenti caricati.');
     }
 
     public function updateExpiration(UpdateClientDocumentExpirationRequest $request, ClientProfile $client, ClientDocument $document): RedirectResponse
@@ -49,6 +49,6 @@ class ClientDocumentController extends Controller
         Storage::disk('local')->delete($document->disk_path);
         $document->delete();
 
-        return redirect()->back()->with('success', 'Document deleted.');
+        return redirect()->back()->with('success', 'Documento eliminato.');
     }
 }

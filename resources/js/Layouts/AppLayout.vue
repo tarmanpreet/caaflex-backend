@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { useToast } from 'vue-toastification';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
@@ -33,6 +34,7 @@ defineProps({
 });
 
 const page = usePage();
+const toast = useToast();
 const { isDark, toggleDark } = useDarkMode();
 const { isCollapsed, toggleSidebar, isMobileOpen, openMobile, closeMobile } = useSidebar();
 
@@ -45,6 +47,16 @@ const isCliente = computed(() => roles.value.includes('cliente'));
 const isAdmin = computed(() => roles.value.includes('admin') || roles.value.includes('superadmin'));
 const canCreatePractice = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 const canViewDeadlines = computed(() => page.props.auth.user?.permissions?.includes('practice-deadlines.view'));
+
+watch(() => page.props.flash, (flash) => {
+    if (flash?.success) {
+        toast.success(flash.success);
+    }
+
+    if (flash?.error) {
+        toast.error(flash.error);
+    }
+}, { immediate: true });
 
 const navItems = computed(() => {
     page.url;

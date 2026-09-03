@@ -133,7 +133,7 @@ class AppointmentController extends Controller
     {
         $appointment = $action->execute($request->validated(), $request->user()->id);
 
-        return redirect()->route('appointments.show', $appointment)
+        return back()
             ->with('success', 'Appuntamento creato.');
     }
 
@@ -164,7 +164,7 @@ class AppointmentController extends Controller
 
         $action->execute($validated, $appointment, $request->user()->id);
 
-        return redirect()->route('appointments.show', $appointment)
+        return back()
             ->with('success', 'Appuntamento aggiornato.');
     }
 

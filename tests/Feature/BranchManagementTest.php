@@ -60,7 +60,11 @@ class BranchManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('branches.store'), $data);
 
-        $response->assertRedirect(route('branches.index'));
+        $branch = Branch::query()->where('name', 'Sede Milano')->firstOrFail();
+
+        $response
+            ->assertRedirect(route('branches.edit', $branch))
+            ->assertSessionHas('success', 'Filiale creata.');
         $this->assertDatabaseHas('branches', ['name' => 'Sede Milano']);
     }
 
@@ -80,9 +84,13 @@ class BranchManagementTest extends TestCase
             'is_active' => true,
         ];
 
-        $response = $this->actingAs($user)->put(route('branches.update', $branch), $data);
+        $response = $this->actingAs($user)
+            ->from(route('branches.edit', $branch))
+            ->put(route('branches.update', $branch), $data);
 
-        $response->assertRedirect(route('branches.index'));
+        $response
+            ->assertRedirect(route('branches.edit', $branch))
+            ->assertSessionHas('success', 'Filiale aggiornata.');
         $this->assertDatabaseHas('branches', ['id' => $branch->id, 'name' => 'Updated Name']);
     }
 

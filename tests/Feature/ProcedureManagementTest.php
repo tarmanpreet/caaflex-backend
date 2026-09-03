@@ -51,9 +51,14 @@ class ProcedureManagementTest extends TestCase
             'default_notes' => 'Nota default test',
         ];
 
-        $this->actingAs($this->admin)
-            ->post('/procedures', $payload)
-            ->assertRedirect();
+        $response = $this->actingAs($this->admin)
+            ->post('/procedures', $payload);
+
+        $procedure = Procedure::query()->where('name', 'PROCEDURA_TEST_UNICA')->firstOrFail();
+
+        $response
+            ->assertRedirect(route('procedures.edit', $procedure))
+            ->assertSessionHas('success', 'Procedura creata.');
 
         $this->assertDatabaseHas('procedures', [
             'name' => 'PROCEDURA_TEST_UNICA',
@@ -108,12 +113,14 @@ class ProcedureManagementTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
+            ->from(route('procedures.edit', $procedure))
             ->put('/procedures/'.$procedure->id, [
                 'procedure_type_id' => $procedure->procedure_type_id,
                 'name' => 'NOME_AGGIORNATO',
                 'default_notes' => 'Nota aggiornata',
             ])
-            ->assertRedirect();
+            ->assertRedirect(route('procedures.edit', $procedure))
+            ->assertSessionHas('success', 'Procedura aggiornata.');
 
         $this->assertDatabaseHas('procedures', [
             'id' => $procedure->id,
