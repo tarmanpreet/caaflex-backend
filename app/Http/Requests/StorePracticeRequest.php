@@ -8,6 +8,7 @@ use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
 use App\Models\User;
+use App\Rules\AssignableUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -39,7 +40,7 @@ class StorePracticeRequest extends FormRequest
             'procedure_id' => ['nullable', 'exists:procedures,id'],
             'practice_type_id' => ['nullable', 'exists:practice_types,id'],
             'user_ids' => ['nullable', 'array'],
-            'user_ids.*' => ['exists:users,id'],
+            'user_ids.*' => [new AssignableUser],
             'deadline_at' => ['nullable', 'date'],
             'branch_id' => ['nullable', 'integer', Rule::in($this->user()->accessibleBranchIds()->all())],
         ];

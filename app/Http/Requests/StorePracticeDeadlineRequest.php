@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\PracticeDeadline;
+use App\Rules\AssignableUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -18,8 +19,6 @@ class StorePracticeDeadlineRequest extends FormRequest
 
     public function rules(): array
     {
-        $practiceId = $this->route('practice')->id;
-
         return [
             'title' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
@@ -36,8 +35,7 @@ class StorePracticeDeadlineRequest extends FormRequest
             'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
             'user_id' => [
                 'nullable',
-                'exists:users,id',
-                Rule::exists('practice_user', 'user_id')->where('practice_id', $practiceId),
+                new AssignableUser,
             ],
         ];
     }

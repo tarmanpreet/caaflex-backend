@@ -9,6 +9,7 @@ use App\Models\PracticeType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class PracticeManagementTest extends TestCase
@@ -148,6 +149,43 @@ class PracticeManagementTest extends TestCase
             'status' => 'nuova',
             'created_by' => $admin->id,
         ]);
+    }
+
+    public function test_practice_forms_offer_every_assignable_role(): void
+    {
+        $viewer = User::factory()->create(['name' => 'Viewer Admin']);
+        $viewer->assignRole('admin');
+
+        foreach ([
+            'Employee User' => 'employee',
+            'Admin User' => 'admin',
+            'Superadmin User' => 'superadmin',
+        ] as $name => $role) {
+            $user = User::factory()->create(['name' => $name]);
+            $user->assignRole($role);
+        }
+
+        $client = User::factory()->create(['name' => 'Client User']);
+        $client->assignRole('cliente');
+        $practice = Practice::factory()->create();
+
+        $expectedNames = ['Admin User', 'Employee User', 'Superadmin User', 'Viewer Admin'];
+
+        $this->actingAs($viewer)
+            ->get(route('practices.create'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Practices/Create')
+                ->where('users', fn ($users): bool => $users->pluck('name')->all() === $expectedNames)
+            );
+
+        $this->actingAs($viewer)
+            ->get(route('practices.show', $practice))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Practices/Show')
+                ->where('users', fn ($users): bool => $users->pluck('name')->all() === $expectedNames)
+            );
     }
 
     public function test_admin_can_create_practice_with_a_configured_practice_type(): void

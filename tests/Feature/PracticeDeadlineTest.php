@@ -14,8 +14,11 @@ class PracticeDeadlineTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $employeeAssigned;
+
     protected User $employeeNotAssigned;
+
     protected Practice $practice;
 
     protected function setUp(): void
@@ -98,6 +101,26 @@ class PracticeDeadlineTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_assign_deadline_to_unassigned_superadmin(): void
+    {
+        $superadmin = User::factory()->create();
+        $superadmin->assignRole('superadmin');
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson("/api/v1/practices/{$this->practice->id}/deadlines", [
+                'title' => 'Scadenza superadmin',
+                'deadline_at' => now()->addDays(7)->toDateTimeString(),
+                'user_id' => $superadmin->id,
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.user_id', $superadmin->id);
+
+        $this->assertDatabaseHas('practice_deadlines', [
+            'practice_id' => $this->practice->id,
+            'user_id' => $superadmin->id,
+        ]);
+    }
+
     public function test_employee_cannot_create_deadline_on_unassigned_practice(): void
     {
         $deadlineData = [
@@ -169,19 +192,19 @@ class PracticeDeadlineTest extends TestCase
         ]);
     }
 
-    public function test_validation_user_id_must_be_assigned(): void
+    public function test_deadline_can_be_assigned_to_user_not_assigned_to_practice(): void
     {
         $deadlineData = [
             'title' => 'Test Deadline',
             'deadline_at' => now()->addDays(7)->toDateTimeString(),
-            'user_id' => $this->employeeNotAssigned->id, // Not assigned to this practice
+            'user_id' => $this->employeeNotAssigned->id,
         ];
 
         $response = $this->actingAs($this->admin, 'api')
             ->postJson("/api/v1/practices/{$this->practice->id}/deadlines", $deadlineData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['user_id']);
+        $response->assertCreated()
+            ->assertJsonPath('data.user_id', $this->employeeNotAssigned->id);
     }
 
     public function test_validation_deadline_at_is_required(): void

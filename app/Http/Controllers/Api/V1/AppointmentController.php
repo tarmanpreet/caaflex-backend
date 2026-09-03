@@ -220,7 +220,7 @@ class AppointmentController extends Controller
 
     public function availableUsers(): JsonResponse
     {
-        $users = User::whereHas('availabilities')
+        $users = User::assignable()
             ->with('availabilities')
             ->where('is_active', true)
             ->get()

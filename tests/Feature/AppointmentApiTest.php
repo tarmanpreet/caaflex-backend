@@ -7,7 +7,6 @@ use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\User;
-use App\Models\UserAvailability;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -243,15 +242,22 @@ class AppointmentApiTest extends TestCase
 
     public function test_get_available_users(): void
     {
-        $user = User::factory()->create(['is_active' => true]);
-        UserAvailability::factory()->create(['user_id' => $user->id]);
+        foreach (['employee', 'admin', 'superadmin'] as $role) {
+            $user = User::factory()->create(['is_active' => true]);
+            $user->assignRole($role);
+        }
+
+        $inactiveAdmin = User::factory()->create(['is_active' => false]);
+        $inactiveAdmin->assignRole('admin');
 
         $response = $this->actingAs($this->clientUser, 'api')
             ->getJson('/api/v1/users/available');
 
         $response->assertStatus(200)
             ->assertJsonStructure(['data'])
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(3, 'data')
+            ->assertJsonMissing(['id' => $this->clientUser->id])
+            ->assertJsonMissing(['id' => $inactiveAdmin->id]);
     }
 
     public function test_get_practice_types(): void

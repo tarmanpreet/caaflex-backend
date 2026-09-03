@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\PracticeDeadline\IndexPracticeDeadlineAction;
 use App\Http\Requests\ListPracticeDeadlinesRequest;
+use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,7 @@ class PracticeDeadlineIndexController extends Controller
             'deadlines' => $action->execute($request, $request->user()),
             'summary' => $action->summary($request->user()),
             'filters' => $request->safe()->only(['search', 'status', 'priority', 'timing', 'sort', 'direction']),
+            'users' => User::assignable()->select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 }

@@ -12,6 +12,7 @@ use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\Procedure;
 use App\Models\User;
+use App\Rules\AssignableUser;
 use App\Traits\Sortable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -57,7 +58,7 @@ class PracticeController extends Controller
         $this->authorize('create', Practice::class);
 
         $branchIds = request()->user()->accessibleBranchIds();
-        $users = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'employee']))
+        $users = User::assignable()
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -86,7 +87,7 @@ class PracticeController extends Controller
 
         $practice->load(['client', 'assignedUsers', 'notes.author', 'documents.uploader', 'statusLogs.user', 'procedure', 'deadlines.assignee', 'deadlines.reminders', 'branch']);
 
-        $users = User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'employee']))
+        $users = User::assignable()
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -137,7 +138,7 @@ class PracticeController extends Controller
 
         $request->validate([
             'user_ids' => ['required', 'array'],
-            'user_ids.*' => ['exists:users,id'],
+            'user_ids.*' => [new AssignableUser],
         ]);
 
         $action->execute(

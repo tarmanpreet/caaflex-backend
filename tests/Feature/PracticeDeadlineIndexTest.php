@@ -27,6 +27,7 @@ class PracticeDeadlineIndexTest extends TestCase
         $admin->assignRole('admin');
         $practice = Practice::factory()->create();
         $assignee = User::factory()->create();
+        $assignee->assignRole('employee');
         $practice->assignedUsers()->attach($assignee->id, ['assigned_at' => now()]);
 
         PracticeDeadline::factory()->create([
@@ -53,6 +54,30 @@ class PracticeDeadlineIndexTest extends TestCase
                 ->has('deadlines.data.0.practice.assigned_users', 1)
                 ->missing('deadlines.data.0.practice.notes')
                 ->missing('deadlines.data.0.practice.client.email')
+            );
+    }
+
+    public function test_deadline_page_offers_every_assignable_role(): void
+    {
+        $admin = User::factory()->create(['name' => 'Admin User']);
+        $admin->assignRole('admin');
+        $employee = User::factory()->create(['name' => 'Employee User']);
+        $employee->assignRole('employee');
+        $superadmin = User::factory()->create(['name' => 'Superadmin User']);
+        $superadmin->assignRole('superadmin');
+        $client = User::factory()->create(['name' => 'Client User']);
+        $client->assignRole('cliente');
+
+        $this->actingAs($admin)
+            ->get(route('deadlines.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Deadlines/Index')
+                ->where('users', fn ($users): bool => $users->pluck('name')->all() === [
+                    'Admin User',
+                    'Employee User',
+                    'Superadmin User',
+                ])
             );
     }
 
@@ -156,6 +181,7 @@ class PracticeDeadlineIndexTest extends TestCase
         $admin->assignRole('admin');
         $practice = Practice::factory()->create();
         $assignee = User::factory()->create();
+        $assignee->assignRole('employee');
         $practice->assignedUsers()->attach($assignee->id, ['assigned_at' => now()]);
         $deadline = PracticeDeadline::factory()->create([
             'practice_id' => $practice->id,

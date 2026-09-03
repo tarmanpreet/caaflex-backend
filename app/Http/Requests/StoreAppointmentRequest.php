@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\ClientProfile;
 use App\Models\User;
+use App\Rules\AssignableUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -31,7 +32,7 @@ class StoreAppointmentRequest extends FormRequest
             'scheduled_at' => ['required', 'date', 'after:now'],
             'duration_minutes' => ['required', 'integer', 'min:5'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'assigned_user_id' => ['nullable', 'exists:users,id'],
+            'assigned_user_id' => ['nullable', new AssignableUser],
             'branch_id' => ['nullable', 'exists:branches,id'],
         ];
     }

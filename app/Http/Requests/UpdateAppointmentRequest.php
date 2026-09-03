@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Appointment;
 use App\Models\User;
+use App\Rules\AssignableUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -18,7 +19,7 @@ class UpdateAppointmentRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'string', 'in:'.implode(',', Appointment::STATUSES)],
-            'assigned_user_id' => ['nullable', 'exists:users,id'],
+            'assigned_user_id' => ['nullable', new AssignableUser],
             'notes' => ['nullable', 'string', 'max:1000'],
             'scheduled_at' => ['nullable', 'date'],
             'duration_minutes' => ['nullable', 'integer', 'min:5'],

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePracticeRequest;
 use App\Http\Requests\UpdatePracticeRequest;
 use App\Models\Practice;
+use App\Rules\AssignableUser;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -84,7 +85,7 @@ class PracticeController extends Controller
 
         $request->validate([
             'user_ids' => ['required', 'array'],
-            'user_ids.*' => ['exists:users,id'],
+            'user_ids.*' => [new AssignableUser],
         ]);
 
         $action->execute(['user_ids' => $request->input('user_ids')], $practice, $request->user()->id);

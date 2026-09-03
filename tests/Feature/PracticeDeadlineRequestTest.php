@@ -96,7 +96,7 @@ class PracticeDeadlineRequestTest extends TestCase
         $this->assertArrayHasKey('deadline_at', $validator->errors()->toArray());
     }
 
-    public function test_user_id_not_assigned_to_practice_fails(): void
+    public function test_user_id_not_assigned_to_practice_passes(): void
     {
         $data = [
             'title' => 'Test deadline',
@@ -107,8 +107,7 @@ class PracticeDeadlineRequestTest extends TestCase
         $request = $this->createStoreRequest($data);
         $validator = Validator::make($data, $request->rules());
 
-        $this->assertTrue($validator->fails());
-        $this->assertArrayHasKey('user_id', $validator->errors()->toArray());
+        $this->assertFalse($validator->fails(), $validator->errors()->toJson());
     }
 
     public function test_user_id_assigned_to_practice_passes(): void
@@ -123,6 +122,22 @@ class PracticeDeadlineRequestTest extends TestCase
         $validator = Validator::make($data, $request->rules());
 
         $this->assertFalse($validator->fails(), $validator->errors()->toJson());
+    }
+
+    public function test_client_user_cannot_be_assigned(): void
+    {
+        $client = User::factory()->create();
+        $client->assignRole('cliente');
+        $data = [
+            'title' => 'Test deadline',
+            'deadline_at' => '2026-04-15',
+            'user_id' => $client->id,
+        ];
+
+        $validator = Validator::make($data, $this->createStoreRequest()->rules());
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('user_id', $validator->errors()->toArray());
     }
 
     public function test_invalid_status_fails(): void

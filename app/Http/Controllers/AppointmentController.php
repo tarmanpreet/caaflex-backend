@@ -87,7 +87,7 @@ class AppointmentController extends Controller
 
             $clients = ClientProfile::select('id', 'first_name', 'last_name')->whereIn('branch_id', $user->accessibleBranchIds())->orderBy('last_name')->get();
             $practiceTypes = PracticeType::orderBy('name')->get();
-            $users = User::whereHas('availabilities')->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
+            $users = User::assignable()->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
             $branches = Branch::active()->whereIn('id', $user->accessibleBranchIds())->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
 
             return Inertia::render('Appointments/Index', [
@@ -111,7 +111,7 @@ class AppointmentController extends Controller
         $appointments = $query->paginate(20)->withQueryString();
         $clients = ClientProfile::select('id', 'first_name', 'last_name')->whereIn('branch_id', $user->accessibleBranchIds())->orderBy('last_name')->get();
         $practiceTypes = PracticeType::orderBy('name')->get();
-        $users = User::whereHas('availabilities')->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
+        $users = User::assignable()->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
         $branches = Branch::active()->whereIn('id', $user->accessibleBranchIds())->select('id', 'name', 'address', 'city', 'province', 'postal_code')->orderBy('name')->get();
 
         return Inertia::render('Appointments/Index', [
@@ -143,7 +143,7 @@ class AppointmentController extends Controller
 
         $appointment->load(['client', 'assignedUser', 'practiceType', 'practice', 'creator']);
 
-        $users = User::where('is_active', true)->select('id', 'name')->orderBy('name')->get();
+        $users = User::assignable()->where('is_active', true)->select('id', 'name')->orderBy('name')->get();
 
         return Inertia::render('Appointments/Show', [
             'appointment' => $appointment,

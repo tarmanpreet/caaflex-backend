@@ -440,7 +440,7 @@ const completionPercentage = computed(() => {
                         <div v-if="editMode" class="mt-6 pt-6 border-t border-outline-variant/10 space-y-4">
                             <div>
                                 <InputLabel for="edit-type" value="Tipo" />
-                                <select id="edit-type" v-model="editForm.type" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25">
+                                <select id="edit-type" v-model="editForm.type" class="app-select mt-1 block w-full">
                                     <option v-if="editForm.type && !(practiceTypes ?? []).some((practiceType) => practiceType.name === editForm.type)" :value="editForm.type">{{ editForm.type }}</option>
                                     <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.name">{{ practiceType.name }}</option>
                                 </select>
@@ -449,7 +449,7 @@ const completionPercentage = computed(() => {
 
                             <div>
                                 <InputLabel for="edit-procedure" value="Procedura" />
-                                <select id="edit-procedure" v-model="editForm.procedure_id" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25">
+                                <select id="edit-procedure" v-model="editForm.procedure_id" class="app-select mt-1 block w-full">
                                     <option :value="null">-- Seleziona procedura --</option>
                                     <option v-for="proc in filteredProcedures" :key="proc.id" :value="proc.id">{{ proc.name }}</option>
                                 </select>
@@ -458,7 +458,7 @@ const completionPercentage = computed(() => {
 
                             <div>
                                 <InputLabel for="edit-status" value="Stato" />
-                                <select id="edit-status" v-model="editForm.status" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25">
+                                <select id="edit-status" v-model="editForm.status" class="app-select mt-1 block w-full">
                                     <option v-for="s in STATUSES" :key="s" :value="s">{{ s.replace(/_/g, ' ') }}</option>
                                 </select>
                                 <InputError :message="editForm.errors.status" class="mt-1" />
@@ -466,13 +466,13 @@ const completionPercentage = computed(() => {
 
                             <div>
                                 <InputLabel for="edit-year" value="Anno Riferimento" />
-                                <TextInput id="edit-year" v-model="editForm.reference_year" type="number" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm" />
+                                <TextInput id="edit-year" v-model="editForm.reference_year" type="number" class="mt-1 block w-full" />
                                 <InputError :message="editForm.errors.reference_year" class="mt-1" />
                             </div>
 
                             <div>
                                 <InputLabel for="edit-deadline" value="Data Scadenza" />
-                                <input id="edit-deadline" v-model="editForm.deadline_at" type="datetime-local" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" />
+                                <input id="edit-deadline" v-model="editForm.deadline_at" type="datetime-local" class="app-input mt-1 block w-full" />
                                 <InputError :message="editForm.errors.deadline_at" class="mt-1" />
                             </div>
 
@@ -522,7 +522,7 @@ const completionPercentage = computed(() => {
 
                             <div>
                                 <InputLabel for="edit-notes" value="Note Pratica" />
-                                <textarea id="edit-notes" v-model="editForm.notes" rows="3" class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"></textarea>
+                                <textarea id="edit-notes" v-model="editForm.notes" rows="3" class="app-input mt-1 block w-full"></textarea>
                                 <InputError :message="editForm.errors.notes" class="mt-1" />
                             </div>
                         </div>
@@ -643,7 +643,7 @@ const completionPercentage = computed(() => {
                                                 </div>
                                                 <div>
                                                     <label :for="`practice-document-description-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Descrizione</label>
-                                                    <input :id="`practice-document-description-${index}`" v-model="item.description" type="text" placeholder="Descrizione opzionale" class="min-h-[44px] w-full rounded-xl border-0 bg-surface-container-high text-sm focus:ring-2 focus:ring-primary/25">
+                                                    <input :id="`practice-document-description-${index}`" v-model="item.description" type="text" placeholder="Descrizione opzionale" class="app-input min-h-[44px] w-full">
                                                     <InputError :message="docForm.errors[`descriptions.${index}`]" class="mt-1" />
                                                 </div>
                                                 <div>
@@ -770,7 +770,7 @@ const completionPercentage = computed(() => {
 
                                 <div v-if="canCreateNote" class="rounded-2xl bg-surface-container-low p-5 ring-1 ring-outline-variant/10">
                                     <InputLabel for="new_note" value="Aggiungi una nota" />
-                                    <textarea id="new_note" v-model="noteForm.body" rows="4" class="mt-3 block w-full rounded-xl border-0 bg-surface-container-lowest text-sm text-on-surface focus:ring-2 focus:ring-primary/25" placeholder="Scrivi qui la tua nota..."></textarea>
+                                    <textarea id="new_note" v-model="noteForm.body" rows="4" class="app-input mt-3 block w-full" placeholder="Scrivi qui la tua nota..."></textarea>
                                     <div class="mt-4 flex justify-end">
                                         <PrimaryButton @click="submitNote" :disabled="noteForm.processing || !noteForm.body.trim()">
                                             Aggiungi Nota
@@ -850,7 +850,7 @@ const completionPercentage = computed(() => {
                                     :can-create="canCreateDeadline"
                                     :can-edit="canUpdateDeadline"
                                     :can-delete="canDeleteDeadline"
-                                    :users="practice.assigned_users || []"
+                                    :users="users || []"
                                     @refresh="$inertia.reload({ only: ['practice'] })"
                                 />
                             </div>

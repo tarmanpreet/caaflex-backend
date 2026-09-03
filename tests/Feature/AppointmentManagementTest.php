@@ -61,6 +61,38 @@ class AppointmentManagementTest extends TestCase
             );
     }
 
+    public function test_appointment_forms_offer_active_users_for_every_assignable_role_without_availabilities(): void
+    {
+        $superadmin = User::factory()->create(['name' => 'Superadmin User', 'is_active' => true]);
+        $superadmin->assignRole('superadmin');
+        $inactiveAdmin = User::factory()->create(['name' => 'Inactive Admin', 'is_active' => false]);
+        $inactiveAdmin->assignRole('admin');
+        $client = User::factory()->create(['name' => 'Client User', 'is_active' => true]);
+        $client->assignRole('cliente');
+
+        $expectedUserIds = collect([$this->admin, $this->employee, $this->anotherEmployee, $superadmin])
+            ->sortBy('name')
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        $this->actingAs($this->admin)
+            ->get(route('appointments.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Appointments/Index')
+                ->where('users', fn ($users): bool => $users->pluck('id')->all() === $expectedUserIds)
+            );
+
+        $this->actingAs($this->admin)
+            ->get(route('appointments.index', ['view' => 'calendar']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Appointments/Index')
+                ->where('users', fn ($users): bool => $users->pluck('id')->all() === $expectedUserIds)
+            );
+    }
+
     public function test_employee_sees_only_own_appointments(): void
     {
         Appointment::factory()->create(['assigned_user_id' => $this->employee->id]);

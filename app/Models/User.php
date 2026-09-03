@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -132,6 +133,11 @@ class User extends Authenticatable
     public function branches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Branch::class, 'branch_user')->withPivot('assigned_at');
+    }
+
+    public function scopeAssignable(Builder $query): Builder
+    {
+        return $query->role(['employee', 'admin', 'superadmin']);
     }
 
     /** @return Collection<int, int> */

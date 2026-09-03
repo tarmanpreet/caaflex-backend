@@ -28,6 +28,7 @@ const props = defineProps({
     deadlines: Object,
     filters: Object,
     summary: Object,
+    users: Array,
 });
 
 const columns = [
@@ -146,8 +147,6 @@ const editForm = useForm({
     priority: 3,
     user_id: null,
 });
-
-const assignedUsers = computed(() => editingDeadline.value?.practice?.assigned_users ?? []);
 
 const toDateTimeLocal = (value) => {
     if (!value) return '';
@@ -402,9 +401,9 @@ const updateDeadline = () => {
                         <InputLabel for="global_deadline_user" value="Assegnatario" />
                         <select id="global_deadline_user" v-model="editForm.user_id" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
                             <option :value="null">Non assegnata</option>
-                            <option v-for="user in assignedUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
+                            <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
                         </select>
-                        <p class="mt-1 text-xs text-on-surface-variant">Sono disponibili gli utenti assegnati alla pratica.</p>
+                        <p class="mt-1 text-xs text-on-surface-variant">Sono disponibili tutti gli utenti operativi.</p>
                         <InputError :message="editForm.errors.user_id" class="mt-1" />
                     </div>
 
