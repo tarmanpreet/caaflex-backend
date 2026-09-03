@@ -200,16 +200,15 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : 'â€
                                             <UserCircleIcon class="h-4 w-4" />
                                             {{ item.assignee?.name || 'Non assegnata' }}
                                         </span>
+                                        <Link
+                                            v-if="item.practice.id"
+                                            :href="route('practices.show', item.practice.id) + '#deadlines'"
+                                            class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-surface-container-low px-3 font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
+                                        >
+                                            Apri scadenze
+                                            <ArrowUpRightIcon class="h-4 w-4" />
+                                        </Link>
                                     </div>
-
-                                    <Link
-                                        v-if="item.practice.id"
-                                        :href="route('practices.show', item.practice.id) + '#deadlines'"
-                                        class="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-surface-container-low px-4 text-sm font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
-                                    >
-                                        Apri nel tab scadenze
-                                        <ArrowUpRightIcon class="h-4 w-4" />
-                                    </Link>
                                 </div>
                             </div>
                         </article>
