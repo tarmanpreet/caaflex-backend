@@ -210,7 +210,7 @@ const steps = [
                                 </div>
 
                                 <div class="col-span-6">
-                                    <InputLabel for="deadline_at" value="Data Scadenza" />
+                                    <InputLabel for="deadline_at" value="Data finale" />
                                     <input 
                                         id="deadline_at"
                                         type="datetime-local"

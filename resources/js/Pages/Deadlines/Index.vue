@@ -17,6 +17,7 @@ import { formatDateTime } from '@/utils/date.js';
 import {
     AdjustmentsHorizontalIcon,
     ArrowPathIcon,
+    CheckIcon,
     ChevronDownIcon,
     EyeIcon,
     MagnifyingGlassIcon,
@@ -32,7 +33,7 @@ const props = defineProps({
 });
 
 const columns = [
-    { key: 'title', label: 'Scadenza' },
+    { key: 'title', label: 'Step' },
     { key: 'practice', label: 'Pratica', sortable: false },
     { key: 'deadline_at', label: 'Data' },
     { key: 'status', label: 'Stato' },
@@ -55,8 +56,8 @@ const showAdvancedFilters = ref(Boolean(
 const statusLabels = {
     pending: 'In attesa',
     in_progress: 'In corso',
-    completed: 'Completata',
-    cancelled: 'Annullata',
+    completed: 'Completato',
+    cancelled: 'Annullato',
 };
 
 const priorityConfig = {
@@ -75,10 +76,10 @@ const activeSummary = computed(() => {
 });
 
 const quickFilters = computed(() => [
-    { key: 'total', label: 'Tutte', value: props.summary?.total ?? 0 },
-    { key: 'open', label: 'Aperte', value: props.summary?.open ?? 0 },
-    { key: 'overdue', label: 'Scadute', value: props.summary?.overdue ?? 0 },
-    { key: 'completed', label: 'Completate', value: props.summary?.completed ?? 0 },
+    { key: 'total', label: 'Tutti', value: props.summary?.total ?? 0 },
+    { key: 'open', label: 'Aperti', value: props.summary?.open ?? 0 },
+    { key: 'overdue', label: 'In ritardo', value: props.summary?.overdue ?? 0 },
+    { key: 'completed', label: 'Completati', value: props.summary?.completed ?? 0 },
 ]);
 
 const activeFilterCount = computed(() => [
@@ -188,19 +189,31 @@ const updateDeadline = () => {
         onSuccess: closeEditModal,
     });
 };
+
+const completingStepId = ref(null);
+
+const completeStep = (deadline) => {
+    completingStepId.value = deadline.id;
+    router.patch(route('practices.deadlines.complete', [deadline.practice_id, deadline.id]), {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            completingStepId.value = null;
+        },
+    });
+};
 </script>
 
 <template>
-    <AppLayout title="Scadenze">
+    <AppLayout title="Step">
         <template #header>
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Scadenze</p>
-                <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione scadenze</h1>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Step</p>
+                <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione step</h1>
                 <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Controlla e aggiorna tutte le attività collegate alle pratiche da un’unica vista.</p>
             </div>
         </template>
 
-        <UiSectionCard title="Archivio scadenze" eyebrow="Vista operativa" :padded="false">
+        <UiSectionCard title="Archivio step" eyebrow="Vista operativa" :padded="false">
             <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
                     <div class="flex flex-wrap gap-2" aria-label="Filtri rapidi">
@@ -226,7 +239,7 @@ const updateDeadline = () => {
 
                     <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row xl:justify-end">
                         <div class="relative min-w-0 flex-1 xl:max-w-sm">
-                            <label for="deadline-search" class="sr-only">Cerca scadenze</label>
+                            <label for="deadline-search" class="sr-only">Cerca step</label>
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                             <input
                                 id="deadline-search"
@@ -307,7 +320,7 @@ const updateDeadline = () => {
                 :controlled="true"
                 :sort-key="sortKey"
                 :sort-dir="sortDir"
-                empty-message="Nessuna scadenza trovata."
+                empty-message="Nessuno step trovato."
                 @sort="onSort"
             >
                 <template #cell-title="{ row }">
@@ -315,10 +328,10 @@ const updateDeadline = () => {
                         <button v-if="row.can_update" type="button" class="inline-flex min-h-[44px] items-center text-left font-semibold text-on-surface transition hover:text-primary focus-visible:outline-none focus-visible:underline" @click="openEditModal(row)">
                             {{ row.title }}
                         </button>
-                        <Link v-else :href="route('practices.show', row.practice_id) + '#deadlines'" class="font-semibold text-on-surface transition hover:text-primary">
+                        <Link v-else :href="route('practices.show', row.practice_id) + '#steps'" class="font-semibold text-on-surface transition hover:text-primary">
                             {{ row.title }}
                         </Link>
-                        <span v-if="isOverdue(row)" class="mt-1 block text-xs font-semibold text-error">Scaduta</span>
+                        <span v-if="isOverdue(row)" class="mt-1 block text-xs font-semibold text-error">In ritardo</span>
                     </div>
                 </template>
                 <template #cell-practice="{ row }">
@@ -341,10 +354,22 @@ const updateDeadline = () => {
                 </template>
                 <template #actions="{ row }">
                     <div class="flex justify-end gap-2">
-                        <IconButton v-if="row.can_update" type="button" tooltip="Modifica scadenza" class="rounded-xl bg-primary-container p-2 text-on-primary-container transition hover:bg-primary/15" @click="openEditModal(row)">
+                        <button
+                            v-if="row.can_update && !['completed', 'cancelled'].includes(row.status)"
+                            type="button"
+                            class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-on-primary transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                            :disabled="completingStepId === row.id"
+                            :aria-label="`Completa lo step ${row.title}`"
+                            @click="completeStep(row)"
+                        >
+                            <ArrowPathIcon v-if="completingStepId === row.id" class="h-4 w-4 animate-spin" aria-hidden="true" />
+                            <CheckIcon v-else class="h-4 w-4" aria-hidden="true" />
+                            {{ completingStepId === row.id ? 'Completamento…' : 'Completa' }}
+                        </button>
+                        <IconButton v-if="row.can_update" type="button" tooltip="Modifica step" class="rounded-xl bg-primary-container p-2 text-on-primary-container transition hover:bg-primary/15" @click="openEditModal(row)">
                             <PencilSquareIcon class="h-5 w-5" />
                         </IconButton>
-                        <IconButton :as="Link" :href="route('practices.show', row.practice_id) + '#deadlines'" tooltip="Apri pratica" class="rounded-xl bg-surface-container-low p-2 text-primary transition hover:bg-primary-container">
+                        <IconButton :as="Link" :href="route('practices.show', row.practice_id) + '#steps'" tooltip="Apri gli step della pratica" class="rounded-xl bg-surface-container-low p-2 text-primary transition hover:bg-primary-container">
                             <EyeIcon class="h-5 w-5" />
                         </IconButton>
                     </div>
@@ -359,13 +384,13 @@ const updateDeadline = () => {
         <ConfirmationModal :show="Boolean(editingDeadline)" :closeable="!editForm.processing" max-width="2xl" @close="closeEditModal">
             <template #title>
                 <span class="block pr-12">
-                    Modifica scadenza
+                    Modifica step
                     <span class="mt-1 block text-sm font-semibold text-primary">Pratica #{{ editingDeadline?.practice_id }}</span>
                 </span>
             </template>
 
             <template #content>
-                <button type="button" class="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-xl text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Chiudi modifica scadenza" :disabled="editForm.processing" @click="closeEditModal">
+                <button type="button" class="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-xl text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Chiudi modifica step" :disabled="editForm.processing" @click="closeEditModal">
                     <XMarkIcon class="h-5 w-5" />
                 </button>
 
@@ -410,7 +435,7 @@ const updateDeadline = () => {
 
                     <div class="sm:col-span-2">
                         <InputLabel for="global_deadline_notes" value="Note" />
-                        <textarea id="global_deadline_notes" v-model="editForm.notes" rows="4" class="app-input mt-1 block w-full rounded-xl" placeholder="Aggiungi informazioni utili per questa scadenza"></textarea>
+                        <textarea id="global_deadline_notes" v-model="editForm.notes" rows="4" class="app-input mt-1 block w-full rounded-xl" placeholder="Aggiungi informazioni utili per questo step"></textarea>
                         <InputError :message="editForm.errors.notes" class="mt-1" />
                     </div>
                 </form>

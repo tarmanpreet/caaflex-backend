@@ -23,7 +23,7 @@ const expiryDateKey = computed(() => props.expiresOn?.slice(0, 10) ?? null);
 const expiryState = computed(() => {
     if (!expiryDateKey.value) {
         return {
-            label: 'Nessuna scadenza',
+            label: 'Senza limite di validità',
             class: 'bg-surface-container-high text-on-surface-variant',
         };
     }

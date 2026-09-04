@@ -14,7 +14,7 @@ const columns = [
     { key: 'name', label: 'Nome' },
     { key: 'procedure_type_id', label: 'Tipo Pratica' },
     { key: 'default_notes', label: 'Note predefinite', sortable: false },
-    { key: 'deadline_days', label: 'Giorni alla Scadenza' },
+    { key: 'deadline_days', label: 'Durata (giorni)' },
 ];
 
 const props = defineProps({
@@ -89,7 +89,7 @@ const deleteProcedure = () => {
                 <div>
                     <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Configurazione / Procedure</p>
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Procedure</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Configura procedure, note predefinite e tempistiche delle scadenze.</p>
+                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Configura procedure, note predefinite e tempistiche degli step.</p>
                 </div>
                 <Link v-if="canCreate" :href="route('procedures.create')" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
                     <PlusIcon class="h-5 w-5" />

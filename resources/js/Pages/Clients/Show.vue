@@ -18,7 +18,7 @@ import { CalendarDaysIcon } from '@heroicons/vue/24/outline';
 const documentColumns = [
     { key: 'original_name', label: 'Nome file', sortable: true },
     { key: 'description', label: 'Descrizione', sortable: true },
-    { key: 'expires_on', label: 'Scadenza', sortable: true },
+    { key: 'expires_on', label: 'Validità', sortable: true },
     { key: 'created_at', label: 'Caricato il', sortable: true },
     { key: 'uploaded_by', label: 'Caricato da', sortable: false },
 ];
@@ -455,7 +455,7 @@ const statusBadgeClass = (status) => {
                                         <InputError :message="form.errors[`descriptions.${index}`]" class="mt-1" />
                                     </div>
                                     <div>
-                                        <label :for="`client-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Scadenza</label>
+                                        <label :for="`client-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Valido fino al</label>
                                         <input :id="`client-document-expiration-${index}`" v-model="item.expires_on" type="date" class="app-input min-h-[44px] w-full rounded-xl text-sm">
                                         <InputError :message="form.errors[`expires_on.${index}`]" class="mt-1" />
                                     </div>
@@ -496,7 +496,7 @@ const statusBadgeClass = (status) => {
                                 <div class="flex items-center justify-end gap-2">
                                     <button v-if="canUploadDocument" type="button" class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" @click="editingDocumentExpiration = row">
                                         <CalendarDaysIcon class="h-4 w-4" />
-                                        Scadenza
+                                        Validità
                                     </button>
                                     <a :href="route('clients.documents.download', [client.id, row.id])" class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">Scarica</a>
                                     <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Elimina</button>

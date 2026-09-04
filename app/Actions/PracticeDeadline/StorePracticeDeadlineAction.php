@@ -65,10 +65,10 @@ class StorePracticeDeadlineAction
                 [$deadline->assignee],
                 'deadlines.assigned',
                 'deadlines',
-                'Nuova scadenza assegnata',
-                "Ti è stata assegnata la scadenza «{$deadline->title}».",
+                'Nuovo step assegnato',
+                "Ti è stato assegnato lo step «{$deadline->title}».",
                 $deadline,
-                route('practices.show', $practice, false).'#deadlines',
+                route('practices.show', $practice, false).'#steps',
                 $createdBy,
             );
         }

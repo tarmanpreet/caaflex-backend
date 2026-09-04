@@ -65,7 +65,7 @@ const navItems = computed(() => {
         { name: 'Pannello', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
         { name: 'Clienti', icon: UserGroupIcon, route: route('clients.index'), active: route().current('clients.*'), show: !isCliente.value },
         { name: 'Pratiche', icon: FolderOpenIcon, route: route('practices.index'), active: route().current('practices.*'), show: !isCliente.value },
-        { name: 'Scadenze', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },
+        { name: 'Step', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },
         { name: 'Tipi pratica', icon: TagIcon, route: route('practice-types.index'), active: route().current('practice-types.*'), show: isAdmin.value },
         { name: 'Procedure', icon: ClipboardDocumentListIcon, route: route('procedures.index'), active: route().current('procedures.*'), show: isAdmin.value },
         { name: 'Appuntamenti', icon: CalendarDaysIcon, route: route('appointments.index'), active: route().current('appointments.*'), show: !isCliente.value },

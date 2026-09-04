@@ -54,7 +54,7 @@ const submit = () => {
 <template>
     <ConfirmationModal :show="show" :closeable="!form.processing" max-width="md" @close="close">
         <template #title>
-            Scadenza documento
+            Validità documento
         </template>
 
         <template #content>
@@ -62,14 +62,14 @@ const submit = () => {
                 <p class="break-words font-semibold text-on-surface">{{ document?.original_name }}</p>
 
                 <div>
-                    <InputLabel for="document_expires_on" value="Data di scadenza" />
+                    <InputLabel for="document_expires_on" value="Valido fino al" />
                     <input
                         id="document_expires_on"
                         v-model="form.expires_on"
                         type="date"
                         class="app-input mt-1 block min-h-[44px] w-full rounded-xl"
                     >
-                    <p class="mt-1.5 text-xs text-on-surface-variant">Lascia vuoto se il documento non ha scadenza.</p>
+                    <p class="mt-1.5 text-xs text-on-surface-variant">Lascia vuoto se il documento non ha un limite di validità.</p>
                     <InputError :message="form.errors.expires_on" class="mt-1" />
                 </div>
             </form>
@@ -80,7 +80,7 @@ const submit = () => {
                 Annulla
             </SecondaryButton>
             <PrimaryButton type="submit" form="document-expiration-form" :disabled="form.processing">
-                {{ form.processing ? 'Salvataggio…' : 'Salva scadenza' }}
+                {{ form.processing ? 'Salvataggio…' : 'Salva validità' }}
             </PrimaryButton>
         </template>
     </ConfirmationModal>

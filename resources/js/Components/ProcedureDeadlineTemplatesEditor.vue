@@ -59,7 +59,7 @@ const offsetSummary = (template) => {
         <div>
             <h3 class="font-headline text-base font-bold text-on-surface">Step automatici della procedura</h3>
             <p class="mt-1 max-w-2xl text-sm leading-6 text-on-surface-variant">
-                Quando crei una scadenza principale, questi step vengono anticipati rispetto alla sua data e assegnati allo stesso utente.
+                Quando imposti la data finale della pratica, questi step vengono anticipati rispetto a quella data e assegnati allo stesso utente.
             </p>
         </div>
 
@@ -150,13 +150,13 @@ const offsetSummary = (template) => {
                 </div>
 
                 <p class="mt-3 text-xs font-semibold text-on-surface-variant">
-                    Verrà impostato {{ offsetSummary(template) }} prima della scadenza principale.
+                    Verrà impostato {{ offsetSummary(template) }} prima della data finale della pratica.
                 </p>
             </article>
         </div>
 
         <p v-else class="rounded-xl border border-dashed border-outline-variant px-4 py-5 text-sm text-on-surface-variant">
-            Nessuno step configurato. La procedura non genererà scadenze automatiche.
+            Nessuno step configurato. La procedura non genererà step automatici.
         </p>
 
         <div class="flex justify-end">

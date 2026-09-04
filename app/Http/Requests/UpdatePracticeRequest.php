@@ -123,6 +123,14 @@ class UpdatePracticeRequest extends FormRequest
             if ($hasInaccessibleAssignee) {
                 $validator->errors()->add('user_ids', 'Uno o più utenti assegnati non possono accedere alla filiale della pratica.');
             }
+
+            if ($this->input('status') === 'completata'
+                && $practice?->status !== 'completata'
+                && $practice?->deadlines()
+                    ->whereNotIn('status', ['completed', 'cancelled'])
+                    ->exists()) {
+                $validator->errors()->add('status', 'Completa prima tutti gli step aperti della pratica.');
+            }
         });
     }
 }

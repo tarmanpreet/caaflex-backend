@@ -31,7 +31,7 @@ class NotificationFeedService
     {
         $data = $notification->data;
         $legacyDeadlineAt = data_get($data, 'deadline_at');
-        $legacyTitle = data_get($data, 'title', 'Scadenza');
+        $legacyTitle = data_get($data, 'title', 'Step');
 
         return [
             'id' => $notification->id,
@@ -43,7 +43,7 @@ class NotificationFeedService
                 ? sprintf('%s entro il %s', $legacyTitle, Carbon::parse($legacyDeadlineAt)->format('d/m/Y H:i'))
                 : 'Hai ricevuto una nuova notifica.'),
             'action_url' => data_get($data, 'action_url', data_get($data, 'practice_id')
-                ? route('practices.show', data_get($data, 'practice_id'), false).'#deadlines'
+                ? route('practices.show', data_get($data, 'practice_id'), false).'#steps'
                 : route('dashboard', absolute: false)),
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at?->toIso8601String(),

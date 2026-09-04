@@ -89,9 +89,9 @@ const submitForm = () => {
                             <InputError :message="form.errors.default_notes" class="mt-2" />
                         </div>
 
-                        <!-- Giorni alla Scadenza -->
+                        <!-- Durata della pratica -->
                         <div class="col-span-6">
-                            <InputLabel for="deadline_days" value="Giorni alla Scadenza (opzionale)" />
+                            <InputLabel for="deadline_days" value="Durata pratica in giorni (opzionale)" />
                             <TextInput
                                 id="deadline_days"
                                 v-model="form.deadline_days"
@@ -100,7 +100,7 @@ const submitForm = () => {
                                 class="mt-1 block w-full"
                                 placeholder="Es: 30"
                             />
-                            <p class="mt-1 text-xs text-gray-500">Numero di giorni prima della scadenza della pratica</p>
+                            <p class="mt-1 text-xs text-gray-500">Numero di giorni usato per calcolare la data finale della pratica</p>
                             <InputError :message="form.errors.deadline_days" class="mt-2" />
                         </div>
 

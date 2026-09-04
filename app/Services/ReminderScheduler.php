@@ -212,10 +212,10 @@ class ReminderScheduler
                 [$occurrence->user],
                 'deadlines.reminder',
                 'deadlines',
-                'Promemoria scadenza',
-                "{$subject->title} scade il {$when}.",
+                'Promemoria step',
+                "Completa «{$subject->title}» entro {$when}.",
                 $subject,
-                route('practices.show', $subject->practice_id, false).'#deadlines',
+                route('practices.show', $subject->practice_id, false).'#steps',
                 severity: 'warning',
             );
         }

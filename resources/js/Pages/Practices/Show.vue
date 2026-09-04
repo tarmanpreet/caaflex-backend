@@ -65,7 +65,6 @@ const STATUSES = ['nuova', 'in_lavorazione', 'in_attesa_documenti', 'completata'
 // Edit Logic
 const editMode = ref(false);
 const trackingCodeCopied = ref(false);
-const confirmingCompletion = ref(false);
 
 const copyTrackingCode = async () => {
     if (!props.practice?.tracking_code || !navigator.clipboard) {
@@ -155,14 +154,14 @@ const persistEdit = () => {
         preserveScroll: true,
         onSuccess: () => {
             editMode.value = false;
-            confirmingCompletion.value = false;
         }
     });
 };
 
 const submitEdit = () => {
     if (props.practice?.status !== 'completata' && editForm.status === 'completata' && incompleteDeadlines.value.length > 0) {
-        confirmingCompletion.value = true;
+        editForm.setError('status', 'Completa prima tutti gli step aperti della pratica.');
+        activeTab.value = 'steps';
         return;
     }
 
@@ -307,9 +306,9 @@ const deleteDocument = () => {
     });
 };
 
-const activeTab = ref('documents');
+const activeTab = ref('steps');
 const tabsHeader = ref(null);
-const availableTabKeys = new Set(['documents', 'timeline', 'notes', 'details', 'deadlines']);
+const availableTabKeys = new Set(['steps', 'documents', 'timeline', 'notes', 'details']);
 
 const scrollActiveTabIntoView = async () => {
     await nextTick();
@@ -319,7 +318,8 @@ const scrollActiveTabIntoView = async () => {
 };
 
 const syncActiveTabFromHash = () => {
-    const requestedTab = window.location.hash.slice(1);
+    const hashTab = window.location.hash.slice(1);
+    const requestedTab = hashTab === 'deadlines' ? 'steps' : hashTab;
 
     if (availableTabKeys.has(requestedTab)) {
         activeTab.value = requestedTab;
@@ -345,11 +345,11 @@ const openUpload = async () => {
 };
 
 const tabs = computed(() => [
+    { key: 'steps', label: 'Step', count: props.practice?.deadlines?.length ?? 0 },
     { key: 'documents', label: 'Documenti', count: props.practice?.documents?.length ?? 0 },
     { key: 'timeline', label: 'Cronologia', count: props.practice?.statusLogs?.length ?? 0 },
     { key: 'notes', label: 'Note', count: props.practice?.notes?.length ?? 0 },
     { key: 'details', label: 'Dettagli', count: null },
-    { key: 'deadlines', label: 'Scadenze', count: props.practice?.deadlines?.length ?? 0 },
 ]);
 
 const statusLabel = (status) => status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
@@ -359,7 +359,7 @@ const pendingDeadlines = computed(() => (props.practice?.deadlines ?? []).filter
 ).length);
 
 const completionPercentage = computed(() => {
-    const steps = (props.practice?.deadlines ?? []).filter((deadline) => deadline.kind === 'procedure_step' && deadline.status !== 'cancelled');
+    const steps = (props.practice?.deadlines ?? []).filter((deadline) => deadline.status !== 'cancelled');
 
     if (!steps.length) return null;
 
@@ -443,11 +443,11 @@ const completionPercentage = computed(() => {
                                     <CalendarDaysIcon class="h-5 w-5 text-on-tertiary-container" />
                                 </div>
                                 <div>
-                                    <p class="text-xs text-on-surface-variant font-medium uppercase mb-0.5">Scadenza</p>
+                                    <p class="text-xs text-on-surface-variant font-medium uppercase mb-0.5">Data finale</p>
                                     <p class="text-sm font-bold text-on-surface">{{ practice.deadline_at ? formatDate(practice.deadline_at) : 'Non impostata' }}</p>
                                     <span v-if="pendingDeadlines > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-error-container/20 text-on-error-container mt-1">
                                         <span class="mr-1">•</span>
-                                        {{ pendingDeadlines }} {{ pendingDeadlines === 1 ? 'scadenza aperta' : 'scadenze aperte' }}
+                                        {{ pendingDeadlines }} {{ pendingDeadlines === 1 ? 'step aperto' : 'step aperti' }}
                                     </span>
                                 </div>
                             </div>
@@ -504,7 +504,7 @@ const completionPercentage = computed(() => {
                             </div>
 
                             <div>
-                                <InputLabel for="edit-deadline" value="Data Scadenza" />
+                                <InputLabel for="edit-deadline" value="Data finale" />
                                 <input id="edit-deadline" v-model="editForm.deadline_at" type="datetime-local" class="app-input mt-1 block w-full" />
                                 <InputError :message="editForm.errors.deadline_at" class="mt-1" />
                             </div>
@@ -644,8 +644,22 @@ const completionPercentage = computed(() => {
 
                         <!-- Tab Content -->
                         <div class="p-0 flex-1">
+                            <!-- Steps Tab -->
+                            <div v-if="activeTab === 'steps'" class="p-4 sm:p-6">
+                                <DeadlinesSection
+                                    :deadlines="practice.deadlines || []"
+                                    :practice-id="practice.id"
+                                    :can-create="canCreateDeadline"
+                                    :can-edit="canUpdateDeadline"
+                                    :can-delete="canDeleteDeadline"
+                                    :users="users || []"
+                                    :procedure-step-count="practice.procedure?.deadline_templates?.length || 0"
+                                    @refresh="$inertia.reload({ only: ['practice'] })"
+                                />
+                            </div>
+
                             <!-- Documents Tab -->
-                            <div v-if="activeTab === 'documents'" class="p-6 space-y-6">
+                            <div v-else-if="activeTab === 'documents'" class="p-6 space-y-6">
                                 <!-- Upload Dropzone -->
                                 <div v-if="canUploadDocument">
                                     <div
@@ -681,7 +695,7 @@ const completionPercentage = computed(() => {
                                                     <InputError :message="docForm.errors[`descriptions.${index}`]" class="mt-1" />
                                                 </div>
                                                 <div>
-                                                    <label :for="`practice-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Scadenza</label>
+                                                    <label :for="`practice-document-expiration-${index}`" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Valido fino al</label>
                                                     <input :id="`practice-document-expiration-${index}`" v-model="item.expires_on" type="date" class="app-input block min-h-[44px] w-full rounded-xl">
                                                     <InputError :message="docForm.errors[`expires_on.${index}`]" class="mt-1" />
                                                 </div>
@@ -708,7 +722,7 @@ const completionPercentage = computed(() => {
                                             <tr>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nome</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Descrizione</th>
-                                                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Scadenza</th>
+                                                <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Validità</th>
                                                 <th class="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Data</th>
                                                 <th class="sticky right-0 z-20 min-w-[176px] border-l border-outline-variant/20 bg-surface-container-low px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-on-surface-variant shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">Azioni</th>
                                             </tr>
@@ -742,7 +756,7 @@ const completionPercentage = computed(() => {
                                                 </td>
                                                 <td class="sticky right-0 z-10 min-w-[176px] border-l border-outline-variant/10 bg-inherit px-6 py-4 text-right shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">
                                                     <div class="flex items-center justify-end space-x-2">
-                                                        <button v-if="canUploadDocument" type="button" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Modifica scadenza documento" @click="editingDocumentExpiration = doc">
+                                                        <button v-if="canUploadDocument" type="button" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" aria-label="Modifica validità documento" @click="editingDocumentExpiration = doc">
                                                             <CalendarDaysIcon class="h-5 w-5" />
                                                         </button>
                                                         <a :href="route('practices.documents.download', [practice.id, doc.id])" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" :aria-label="`Scarica ${doc.original_name}`">
@@ -860,7 +874,7 @@ const completionPercentage = computed(() => {
                                     </div>
 
                                     <div>
-                                        <InputLabel value="Data Scadenza" />
+                                        <InputLabel value="Data finale" />
                                         <p class="mt-1 text-sm font-semibold text-on-surface">{{ practice.deadline_at ? formatDateTime(practice.deadline_at) : 'Non impostata' }}</p>
                                     </div>
 
@@ -876,19 +890,6 @@ const completionPercentage = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Deadlines Tab -->
-                            <div v-else-if="activeTab === 'deadlines'" class="p-6">
-                                <DeadlinesSection
-                                    :deadlines="practice.deadlines || []"
-                                    :practice-id="practice.id"
-                                    :can-create="canCreateDeadline"
-                                    :can-edit="canUpdateDeadline"
-                                    :can-delete="canDeleteDeadline"
-                                    :users="users || []"
-                                    :procedure-step-count="practice.procedure?.deadline_templates?.length || 0"
-                                    @refresh="$inertia.reload({ only: ['practice'] })"
-                                />
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -924,26 +925,6 @@ const completionPercentage = computed(() => {
                 >
                     Elimina Documento
                 </DangerButton>
-            </template>
-        </ConfirmationModal>
-
-        <ConfirmationModal :show="confirmingCompletion" @close="confirmingCompletion = false">
-            <template #title>
-                Completa pratica
-            </template>
-
-            <template #content>
-                Ci sono {{ incompleteDeadlines.length }} scadenze non completate. Chiudendo la pratica verranno completate anche tutte le scadenze associate ancora aperte.
-            </template>
-
-            <template #footer>
-                <SecondaryButton :disabled="editForm.processing" @click="confirmingCompletion = false">
-                    Torna alla modifica
-                </SecondaryButton>
-
-                <PrimaryButton class="ms-3" :disabled="editForm.processing" @click="persistEdit">
-                    Completa pratica e scadenze
-                </PrimaryButton>
             </template>
         </ConfirmationModal>
 

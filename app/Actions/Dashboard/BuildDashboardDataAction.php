@@ -59,7 +59,7 @@ class BuildDashboardDataAction
                 'tone' => 'primary',
             ],
             [
-                'title' => 'Scadenze aperte',
+                'title' => 'Step aperti',
                 'value' => $openDeadlineCount,
                 'caption' => 'Pending o in corso',
                 'tone' => 'tertiary',
@@ -236,7 +236,7 @@ class BuildDashboardDataAction
 
         return [
             'value' => $value,
-            'caption' => 'Scadenze completate negli ultimi 7 giorni',
+            'caption' => 'Step completati negli ultimi 7 giorni',
             'completed' => $completed,
             'total' => $total,
         ];

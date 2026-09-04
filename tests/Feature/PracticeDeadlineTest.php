@@ -264,6 +264,66 @@ class PracticeDeadlineTest extends TestCase
         ]);
     }
 
+    public function test_assigned_employee_can_complete_step_directly(): void
+    {
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($this->employeeAssigned)
+            ->from(route('practices.show', $this->practice))
+            ->patch(route('practices.deadlines.complete', [$this->practice, $deadline]))
+            ->assertRedirect(route('practices.show', $this->practice))
+            ->assertSessionHas('success', 'Step completato.');
+
+        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $deadline->fresh()->status);
+    }
+
+    public function test_completing_an_already_completed_step_is_idempotent(): void
+    {
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'status' => PracticeDeadline::STATUS_COMPLETED,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->patch(route('practices.deadlines.complete', [$this->practice, $deadline]))
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Step completato.');
+
+        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $deadline->fresh()->status);
+    }
+
+    public function test_unassigned_employee_cannot_complete_step(): void
+    {
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $this->practice->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($this->employeeNotAssigned)
+            ->patch(route('practices.deadlines.complete', [$this->practice, $deadline]))
+            ->assertForbidden();
+
+        $this->assertSame(PracticeDeadline::STATUS_PENDING, $deadline->fresh()->status);
+    }
+
+    public function test_step_from_another_practice_cannot_be_completed_through_nested_route(): void
+    {
+        $otherPractice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $otherPractice->id,
+            'status' => PracticeDeadline::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->patch(route('practices.deadlines.complete', [$this->practice, $deadline]))
+            ->assertNotFound();
+
+        $this->assertSame(PracticeDeadline::STATUS_PENDING, $deadline->fresh()->status);
+    }
+
     public function test_admin_can_delete_deadline(): void
     {
         $deadline = PracticeDeadline::factory()->create(['practice_id' => $this->practice->id]);

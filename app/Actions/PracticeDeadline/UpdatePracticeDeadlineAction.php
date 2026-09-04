@@ -36,7 +36,7 @@ class UpdatePracticeDeadlineAction
         });
         $changedFields = array_keys($deadline->getChanges());
         $deadline->refresh()->load('assignee');
-        $actionUrl = route('practices.show', $practice, false).'#deadlines';
+        $actionUrl = route('practices.show', $practice, false).'#steps';
 
         if ($oldAssigneeId !== $deadline->user_id) {
             $recipients = User::query()->whereKey(array_filter([$oldAssigneeId, $deadline->user_id]))->get();
@@ -44,8 +44,8 @@ class UpdatePracticeDeadlineAction
                 $recipients,
                 'deadlines.assigned',
                 'deadlines',
-                'Assegnazione scadenza modificata',
-                "È cambiato l’assegnatario della scadenza «{$deadline->title}».",
+                'Assegnazione step modificata',
+                "È cambiato l’assegnatario dello step «{$deadline->title}».",
                 $deadline,
                 $actionUrl,
                 $actorId,
@@ -57,8 +57,8 @@ class UpdatePracticeDeadlineAction
                 [$deadline->assignee],
                 'deadlines.status_changed',
                 'deadlines',
-                'Stato scadenza aggiornato',
-                "La scadenza «{$deadline->title}» è passata da {$oldStatus} a {$deadline->status}.",
+                'Stato step aggiornato',
+                "Lo step «{$deadline->title}» è passato da {$oldStatus} a {$deadline->status}.",
                 $deadline,
                 $actionUrl,
                 $actorId,
@@ -72,8 +72,8 @@ class UpdatePracticeDeadlineAction
                 [$deadline->assignee],
                 'deadlines.changed',
                 'deadlines',
-                'Scadenza modificata',
-                "Sono stati aggiornati i dettagli della scadenza «{$deadline->title}».",
+                'Step modificato',
+                "Sono stati aggiornati i dettagli dello step «{$deadline->title}».",
                 $deadline,
                 $actionUrl,
                 $actorId,

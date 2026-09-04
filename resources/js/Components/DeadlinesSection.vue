@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
-import { formatDateTime } from '@/utils/date.js';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -56,12 +55,12 @@ const STATUS_CONFIG = {
         class: 'bg-primary/10 text-primary',
     },
     completed: {
-        label: 'Completata',
+        label: 'Completato',
         icon: 'check',
         class: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
     },
     cancelled: {
-        label: 'Annullata',
+        label: 'Annullato',
         icon: 'x',
         class: 'bg-surface-container-low text-on-surface-variant',
     },
@@ -146,11 +145,6 @@ const toUtcDateTime = (dateTime) => {
     return isNaN(date.getTime()) ? dateTime : date.toISOString();
 };
 
-const resetForms = () => {
-    createForm.reset();
-    editForm.reset();
-};
-
 // ── Form Actions ────────────────────────────────────────────────────────────────
 const createDeadline = () => {
     createForm.transform((data) => ({
@@ -197,29 +191,19 @@ const deleteDeadline = () => {
 };
 
 // ── Quick Status Update ───────────────────────────────────────────────────────────
-const statusUpdateForm = useForm({ status: '' });
 const updatingStatusId = ref(null);
 
-const updateStatus = (deadline, newStatus) => {
+const completeStep = (deadline) => {
     updatingStatusId.value = deadline.id;
-    statusUpdateForm.status = newStatus;
-    statusUpdateForm.put(route('practices.deadlines.update', [props.practiceId, deadline.id]), {
+    router.patch(route('practices.deadlines.complete', [props.practiceId, deadline.id]), {}, {
         preserveScroll: true,
         onSuccess: () => {
-            updatingStatusId.value = null;
             emit('refresh');
         },
-        onError: () => {
+        onFinish: () => {
             updatingStatusId.value = null;
         },
     });
-};
-
-const STATUS_TRANSITIONS = {
-    pending: ['in_progress'],
-    in_progress: ['completed', 'pending'],
-    completed: ['in_progress'],
-    cancelled: ['pending'],
 };
 
 // ── Modal Handlers ──────────────────────────────────────────────────────────────
@@ -275,15 +259,18 @@ const closeDeleteModal = () => {
 </script>
 
 <template>
-    <div class="overflow-hidden bg-surface-container-lowest p-6 shadow-xl sm:rounded-lg">
+    <div>
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-medium text-on-surface">Scadenze</h3>
-            <PrimaryButton v-if="canCreate" @click="openCreateModal">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-on-surface">Step della pratica</h3>
+                <p class="mt-1 text-sm text-on-surface-variant">Completa tutti gli step aperti per poter chiudere la pratica.</p>
+            </div>
+            <PrimaryButton v-if="canCreate" class="w-full justify-center sm:w-auto" @click="openCreateModal">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                Nuova Scadenza
+                Nuovo step
             </PrimaryButton>
         </div>
 
@@ -292,21 +279,21 @@ const closeDeleteModal = () => {
             <svg class="mx-auto h-12 w-12 text-on-surface-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <p class="mt-2 text-sm text-outline">Nessuna scadenza presente.</p>
+            <p class="mt-2 text-sm text-outline">Nessuno step presente.</p>
         </div>
 
         <div v-else class="space-y-4">
             <div
                 v-for="deadline in sortedDeadlines"
                 :key="deadline.id"
-                class="border rounded-lg p-4 transition-colors"
+                class="rounded-2xl border p-4 transition-colors sm:p-5"
                 :class="[
                     isOverdue(deadline)
                         ? 'border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10'
                         : 'border-outline-variant bg-surface-container-lowest/50'
                 ]"
             >
-                <div class="flex items-start justify-between gap-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <!-- Left: Title, Date, Badges -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -314,12 +301,11 @@ const closeDeleteModal = () => {
                                 {{ deadline.title }}
                             </h4>
                             <span v-if="deadline.kind === 'procedure_primary'" class="rounded-full bg-primary-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-primary-container">
-                                Scadenza principale
+                                Step finale
                             </span>
                             <span v-else-if="deadline.kind === 'procedure_step'" class="rounded-full bg-tertiary-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-tertiary-container">
-                                Step procedura
+                                Step automatico
                             </span>
-                            <!-- Status Badge with Quick Actions -->
                             <div class="relative inline-flex items-center gap-1">
                                 <span
                                     :class="[
@@ -339,36 +325,6 @@ const closeDeleteModal = () => {
                                     </svg>
                                     {{ getStatusConfig(deadline.status).label }}
                                 </span>
-                                <!-- Quick Status Change Buttons -->
-                                <div v-if="canEdit && STATUS_TRANSITIONS[deadline.status]?.length > 0" class="flex items-center gap-1">
-                                    <button
-                                        v-for="nextStatus in STATUS_TRANSITIONS[deadline.status]"
-                                        :key="nextStatus"
-                                        @click="updateStatus(deadline, nextStatus)"
-                                        :disabled="updatingStatusId === deadline.id"
-                                        :title="`Cambia in ${getStatusConfig(nextStatus).label}`"
-                                        class="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs transition-colors hover:bg-surface-container-high disabled:opacity-50"
-                                        :class="[
-                                            nextStatus === 'in_progress' ? 'text-yellow-600 hover:text-yellow-700' : '',
-                                            nextStatus === 'completed' ? 'text-green-600 hover:text-green-700' : '',
-                                            nextStatus === 'pending' ? 'text-on-surface-variant hover:text-on-surface-variant' : ''
-                                        ]"
-                                    >
-                                        <svg v-if="updatingStatusId === deadline.id" class="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <svg v-else-if="nextStatus === 'in_progress'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        <svg v-else-if="nextStatus === 'completed'" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
                             </div>
                             <!-- Priority Badge -->
                             <span
@@ -384,7 +340,7 @@ const closeDeleteModal = () => {
                                 v-if="isOverdue(deadline)"
                                 class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white"
                             >
-                                Scaduta
+                                In ritardo
                             </span>
                         </div>
                         <p class="mt-1 text-sm text-on-surface-variant ">
@@ -409,12 +365,31 @@ const closeDeleteModal = () => {
                     </div>
 
                     <!-- Right: Actions -->
-                    <div v-if="canEdit || canDelete" class="flex items-center gap-2 flex-shrink-0">
+                    <div v-if="canEdit || canDelete" class="flex flex-wrap items-center gap-2 sm:flex-shrink-0 sm:justify-end">
+                        <button
+                            v-if="canEdit && !['completed', 'cancelled'].includes(deadline.status)"
+                            type="button"
+                            class="inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-lowest disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                            :disabled="updatingStatusId === deadline.id"
+                            :aria-label="`Completa lo step ${deadline.title}`"
+                            @click="completeStep(deadline)"
+                        >
+                            <svg v-if="updatingStatusId === deadline.id" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{ updatingStatusId === deadline.id ? 'Completamento…' : 'Completa step' }}
+                        </button>
                         <button
                             v-if="canEdit"
+                            type="button"
                             @click="openEditModal(deadline)"
-                            class="p-1.5 text-gray-400 hover:text-primary dark:hover:text-indigo-400 transition-colors"
-                            title="Modifica"
+                            class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                            title="Modifica step"
+                            :aria-label="`Modifica lo step ${deadline.title}`"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -422,9 +397,11 @@ const closeDeleteModal = () => {
                         </button>
                         <button
                             v-if="canDelete"
+                            type="button"
                             @click="openDeleteModal(deadline)"
-                            class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                            title="Elimina"
+                            class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-on-surface-variant transition-colors hover:bg-error-container/30 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40"
+                            title="Elimina step"
+                            :aria-label="`Elimina lo step ${deadline.title}`"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -438,7 +415,7 @@ const closeDeleteModal = () => {
         <!-- Create Modal -->
         <ConfirmationModal :show="showCreateModal" @close="closeCreateModal" max-width="lg">
             <template #title>
-                Nuova Scadenza
+                Nuovo step
             </template>
 
             <template #content>
@@ -451,14 +428,14 @@ const closeDeleteModal = () => {
                             v-model="createForm.title"
                             type="text"
                             class="mt-1 block w-full"
-                            placeholder="Es. Scadenza dichiarazione"
+                            placeholder="Es. Verifica documenti"
                         />
                         <InputError :message="createForm.errors.title" class="mt-1" />
                     </div>
 
                     <!-- Deadline Date -->
                     <div>
-                        <InputLabel for="deadline_at" value="Data e ora scadenza *" />
+                        <InputLabel for="deadline_at" value="Da completare entro *" />
                         <input
                             id="deadline_at"
                             v-model="createForm.deadline_at"
@@ -509,7 +486,7 @@ const closeDeleteModal = () => {
                         <span>
                             <span class="block text-sm font-bold text-on-surface">Genera gli step della procedura</span>
                             <span class="mt-1 block text-xs leading-5 text-on-surface-variant">
-                                Verranno create {{ procedureStepCount }} scadenze anticipate, assegnate allo stesso utente selezionato qui sopra.
+                                Verranno creati {{ procedureStepCount }} step automatici, assegnati allo stesso utente selezionato qui sopra.
                             </span>
                         </span>
                     </label>
@@ -543,7 +520,7 @@ const closeDeleteModal = () => {
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Crea Scadenza
+                    Crea step
                 </PrimaryButton>
             </template>
         </ConfirmationModal>
@@ -551,7 +528,7 @@ const closeDeleteModal = () => {
         <!-- Edit Modal -->
         <ConfirmationModal :show="showEditModal" @close="closeEditModal" max-width="lg">
             <template #title>
-                Modifica Scadenza
+                Modifica step
             </template>
 
             <template #content>
@@ -564,14 +541,14 @@ const closeDeleteModal = () => {
                             v-model="editForm.title"
                             type="text"
                             class="mt-1 block w-full"
-                            placeholder="Es. Scadenza dichiarazione"
+                            placeholder="Es. Verifica documenti"
                         />
                         <InputError :message="editForm.errors.title" class="mt-1" />
                     </div>
 
                     <!-- Deadline Date -->
                     <div>
-                        <InputLabel for="edit_deadline_at" value="Data e ora scadenza *" />
+                        <InputLabel for="edit_deadline_at" value="Da completare entro *" />
                         <input
                             id="edit_deadline_at"
                             v-model="editForm.deadline_at"
@@ -664,12 +641,12 @@ const closeDeleteModal = () => {
         <!-- Delete Confirmation Modal -->
         <ConfirmationModal :show="showDeleteModal" @close="closeDeleteModal">
             <template #title>
-                Elimina Scadenza
+                Elimina step
             </template>
 
             <template #content>
                 <p class="text-sm text-on-surface-variant">
-                    Sei sicuro di voler eliminare la scadenza <strong>"{{ deletingDeadline?.title }}"</strong>?
+                    Sei sicuro di voler eliminare lo step <strong>"{{ deletingDeadline?.title }}"</strong>?
                     L'azione non può essere annullata.
                 </p>
             </template>

@@ -71,7 +71,7 @@ const features = [
         icon: ClipboardDocumentCheckIcon,
         eyebrow: 'Operatività',
         title: 'Pratiche sotto controllo',
-        description: 'Stati, scadenze, documenti, note e responsabili riuniti in un flusso chiaro e sempre aggiornato.',
+        description: 'Stati, step, documenti, note e responsabili riuniti in un flusso chiaro e sempre aggiornato.',
         accent: 'amber',
     },
     {
@@ -92,7 +92,7 @@ const features = [
 
 const workflow = [
     { number: '01', title: 'Accogli il cliente', text: 'Crea o ritrova subito il profilo nella filiale corretta.' },
-    { number: '02', title: 'Avvia la pratica', text: 'Assegna tipo, procedura, responsabili e scadenze in pochi passaggi.' },
+    { number: '02', title: 'Avvia la pratica', text: 'Assegna tipo, procedura, responsabili e step in pochi passaggi.' },
     { number: '03', title: 'Lavora in squadra', text: 'Documenti, note e attività restano leggibili da chi ne ha davvero bisogno.' },
     { number: '04', title: 'Chiudi con sicurezza', text: 'Lo storico conserva ogni passaggio e rende il lavoro verificabile.' },
 ];
@@ -250,7 +250,7 @@ const workflow = [
                                         </div>
 
                                         <div class="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                                            <div v-for="stat in [{ value: '128', label: 'Attive', color: 'text-cyan-300' }, { value: '24', label: 'Scadenze', color: 'text-amber-300' }, { value: '91%', label: 'Efficienza', color: 'text-emerald-300' }]" :key="stat.label" class="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-3">
+                                            <div v-for="stat in [{ value: '128', label: 'Attive', color: 'text-cyan-300' }, { value: '24', label: 'Step', color: 'text-amber-300' }, { value: '91%', label: 'Efficienza', color: 'text-emerald-300' }]" :key="stat.label" class="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-3">
                                                 <p :class="stat.color" class="text-lg font-black sm:text-2xl">{{ stat.value }}</p>
                                                 <p class="mt-1 text-[9px] text-slate-500 sm:text-[11px]">{{ stat.label }}</p>
                                             </div>
@@ -297,7 +297,7 @@ const workflow = [
                         </div>
                         <div class="float-card float-card-right absolute -right-3 bottom-12 hidden items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-xl sm:flex">
                             <span class="grid h-10 w-10 place-items-center rounded-xl bg-amber-300/15 text-amber-200"><ClockIcon class="h-5 w-5" /></span>
-                            <span><span class="block text-xs font-bold">Scadenza gestita</span><span class="block text-[10px] text-slate-400">Promemoria automatico</span></span>
+                            <span><span class="block text-xs font-bold">Step gestito</span><span class="block text-[10px] text-slate-400">Promemoria automatico</span></span>
                         </div>
                     </div>
                 </div>
@@ -305,7 +305,7 @@ const workflow = [
                 <div class="mx-auto mt-20 max-w-7xl border-y border-white/10 py-6">
                     <p class="text-center text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Un unico ritmo per tutta l’organizzazione</p>
                     <div class="mt-5 grid grid-cols-2 gap-4 text-center text-sm font-semibold text-slate-300 sm:grid-cols-4">
-                        <span>Clienti connessi</span><span>Pratiche tracciate</span><span>Filiali coordinate</span><span>Scadenze presidiate</span>
+                        <span>Clienti connessi</span><span>Pratiche tracciate</span><span>Filiali coordinate</span><span>Step presidiati</span>
                     </div>
                 </div>
             </section>

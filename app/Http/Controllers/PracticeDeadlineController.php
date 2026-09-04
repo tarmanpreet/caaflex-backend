@@ -10,6 +10,7 @@ use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PracticeDeadlineController extends Controller
@@ -20,7 +21,7 @@ class PracticeDeadlineController extends Controller
     {
         $this->authorize('viewDeadline', $practice);
 
-        return redirect()->route('practices.show', $practice->id);
+        return redirect()->route('practices.show', $practice->id)->withFragment('steps');
     }
 
     public function store(StorePracticeDeadlineRequest $request, Practice $practice, StorePracticeDeadlineAction $action): RedirectResponse
@@ -29,7 +30,7 @@ class PracticeDeadlineController extends Controller
 
         $action->execute($request->validated(), $practice, $request->user()->id);
 
-        return redirect()->back()->with('success', 'Scadenza creata.');
+        return redirect()->back()->with('success', 'Step creato.');
     }
 
     public function update(UpdatePracticeDeadlineRequest $request, Practice $practice, PracticeDeadline $deadline, UpdatePracticeDeadlineAction $action): RedirectResponse
@@ -38,7 +39,16 @@ class PracticeDeadlineController extends Controller
 
         $action->execute($request->validated(), $practice, $deadline, $request->user()->id);
 
-        return redirect()->back()->with('success', 'Scadenza aggiornata.');
+        return redirect()->back()->with('success', 'Step aggiornato.');
+    }
+
+    public function complete(Request $request, Practice $practice, PracticeDeadline $deadline, UpdatePracticeDeadlineAction $action): RedirectResponse
+    {
+        $this->authorize('updateDeadline', $practice);
+
+        $action->execute(['status' => PracticeDeadline::STATUS_COMPLETED], $practice, $deadline, $request->user()->id);
+
+        return redirect()->back()->with('success', 'Step completato.');
     }
 
     public function destroy(Practice $practice, PracticeDeadline $deadline): RedirectResponse
@@ -50,6 +60,6 @@ class PracticeDeadlineController extends Controller
             $deadline->delete();
         });
 
-        return redirect()->back()->with('success', 'Scadenza eliminata.');
+        return redirect()->back()->with('success', 'Step eliminato.');
     }
 }

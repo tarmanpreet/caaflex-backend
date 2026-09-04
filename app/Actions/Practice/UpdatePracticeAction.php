@@ -3,7 +3,6 @@
 namespace App\Actions\Practice;
 
 use App\Models\Practice;
-use App\Models\PracticeDeadline;
 use App\Models\PracticeStatusLog;
 use App\Models\User;
 use App\Services\NotificationManager;
@@ -41,12 +40,6 @@ class UpdatePracticeAction
 
             if (array_key_exists('user_ids', $data)) {
                 $practice->assignedUsers()->sync($data['user_ids']);
-            }
-
-            if ($oldStatus !== 'completata' && $practice->status === 'completata') {
-                $practice->deadlines()
-                    ->whereNotIn('status', [PracticeDeadline::STATUS_COMPLETED, PracticeDeadline::STATUS_CANCELLED])
-                    ->update(['status' => PracticeDeadline::STATUS_COMPLETED]);
             }
         });
 

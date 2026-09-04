@@ -411,7 +411,7 @@ class PracticeManagementTest extends TestCase
         ]);
     }
 
-    public function test_completing_practice_completes_all_open_deadlines(): void
+    public function test_practice_cannot_be_completed_while_steps_are_open(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('admin');
@@ -433,11 +433,35 @@ class PracticeManagementTest extends TestCase
             ->from(route('practices.show', $practice))
             ->put(route('practices.update', $practice), ['status' => 'completata'])
             ->assertRedirect(route('practices.show', $practice))
+            ->assertSessionHasErrors(['status' => 'Completa prima tutti gli step aperti della pratica.']);
+
+        $this->assertSame('in_lavorazione', $practice->fresh()->status);
+        $this->assertSame(PracticeDeadline::STATUS_PENDING, $pending->fresh()->status);
+        $this->assertSame(PracticeDeadline::STATUS_IN_PROGRESS, $inProgress->fresh()->status);
+        $this->assertSame(PracticeDeadline::STATUS_CANCELLED, $cancelled->fresh()->status);
+    }
+
+    public function test_practice_can_be_completed_when_all_steps_are_closed(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $practice = Practice::factory()->create(['status' => 'in_lavorazione']);
+        PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_COMPLETED,
+        ]);
+        PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'status' => PracticeDeadline::STATUS_CANCELLED,
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('practices.show', $practice))
+            ->put(route('practices.update', $practice), ['status' => 'completata'])
+            ->assertRedirect(route('practices.show', $practice))
             ->assertSessionHas('success', 'Pratica aggiornata correttamente.');
 
-        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $pending->fresh()->status);
-        $this->assertSame(PracticeDeadline::STATUS_COMPLETED, $inProgress->fresh()->status);
-        $this->assertSame(PracticeDeadline::STATUS_CANCELLED, $cancelled->fresh()->status);
+        $this->assertSame('completata', $practice->fresh()->status);
     }
 
     public function test_updating_practice_without_completing_it_keeps_deadlines_open(): void

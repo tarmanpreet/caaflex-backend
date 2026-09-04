@@ -88,6 +88,7 @@ Route::middleware([
     Route::post('/practices/{practice}/notes', [PracticeNoteController::class, 'store'])->name('practices.notes.store');
 
     Route::post('/practices/{practice}/deadlines', [PracticeDeadlineController::class, 'store'])->name('practices.deadlines.store')->scopeBindings();
+    Route::patch('/practices/{practice}/deadlines/{deadline}/complete', [PracticeDeadlineController::class, 'complete'])->name('practices.deadlines.complete')->scopeBindings();
     Route::put('/practices/{practice}/deadlines/{deadline}', [PracticeDeadlineController::class, 'update'])->name('practices.deadlines.update')->scopeBindings();
     Route::delete('/practices/{practice}/deadlines/{deadline}', [PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy')->scopeBindings();
 

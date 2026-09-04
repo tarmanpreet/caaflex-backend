@@ -144,7 +144,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '‚Ä
             <div>
                 <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Panoramica operativa</p>
                 <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Pannello principale</h1>
-                <p class="mt-2 text-sm text-on-surface-variant">Priorit√†, scadenze e attivit√† della rete in un‚Äôunica vista.</p>
+                <p class="mt-2 text-sm text-on-surface-variant">Priorit√†, step e attivit√† della rete in un‚Äôunica vista.</p>
             </div>
         </template>
 
@@ -154,7 +154,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '‚Ä
             </section>
 
             <section class="grid gap-8 lg:grid-cols-12">
-                <UiSectionCard class="lg:col-span-8" title="Scadenze in primo piano" eyebrow="Focus di giornata">
+                <UiSectionCard class="lg:col-span-8" title="Step in primo piano" eyebrow="Focus di giornata">
                     <template #actions>
                         <Link :href="route('deadlines.index')" class="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none">
                             Vedi tutte
@@ -202,10 +202,10 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '‚Ä
                                         </span>
                                         <Link
                                             v-if="item.practice.id"
-                                            :href="route('practices.show', item.practice.id) + '#deadlines'"
+                                            :href="route('practices.show', item.practice.id) + '#steps'"
                                             class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-surface-container-low px-3 font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
                                         >
-                                            Apri scadenze
+                                            Apri step
                                             <ArrowUpRightIcon class="h-4 w-4" />
                                         </Link>
                                     </div>
@@ -213,7 +213,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '‚Ä
                             </div>
                         </article>
                     </div>
-                    <p v-else class="text-sm text-on-surface-variant">Nessuna scadenza aperta nel perimetro visibile.</p>
+                    <p v-else class="text-sm text-on-surface-variant">Nessuno step aperto nel perimetro visibile.</p>
                 </UiSectionCard>
 
                 <div class="space-y-6 lg:col-span-4">
@@ -234,7 +234,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : '‚Ä
                         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">Efficienza settimanale</p>
                         <p class="mt-3 font-headline text-4xl font-extrabold">{{ props.efficiency.value }}%</p>
                         <p class="mt-3 max-w-xs text-sm text-white/85">{{ props.efficiency.caption }}</p>
-                        <p class="mt-2 text-xs text-white/70">{{ props.efficiency.completed }} completate su {{ props.efficiency.total }} scadenze nel periodo.</p>
+                        <p class="mt-2 text-xs text-white/70">{{ props.efficiency.completed }} completati su {{ props.efficiency.total }} step nel periodo.</p>
                     </div>
                 </div>
             </section>
