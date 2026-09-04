@@ -32,6 +32,8 @@ const branchFilter = ref(props.filters?.branch_id ?? '');
 
 const canCreate = computed(() => page.props.auth.user?.permissions?.includes('clients.create'));
 
+const branchDisplayName = (branch) => branch?.name?.replace(/\s+filiale$/i, '') || '—';
+
 // Search
 const performSearch = () => {
     router.get(route('clients.index'), { search: search.value, branch_id: branchFilter.value, sort: sortKey.value, direction: sortDir.value }, { preserveState: true, replace: true });
@@ -107,8 +109,11 @@ const onSort = ({ key, dir }) => {
                                 </span>
                             </template>
                             <template #cell-branch="{ row }">
-                                <span class="inline-flex rounded-full bg-primary-container px-2.5 py-1 text-xs font-medium text-on-primary-container">
-                                    {{ row.branch?.name || '—' }}
+                                <span
+                                    :title="row.branch?.name"
+                                    class="inline-flex max-w-40 items-center whitespace-nowrap rounded-lg bg-primary-container/70 px-3 py-1.5 text-xs font-semibold text-on-primary-container"
+                                >
+                                    <span class="truncate">{{ branchDisplayName(row.branch) }}</span>
                                 </span>
                             </template>
                             <template #actions="{ row }">
