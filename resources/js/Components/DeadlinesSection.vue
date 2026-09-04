@@ -369,7 +369,7 @@ const closeDeleteModal = () => {
                         <button
                             v-if="canEdit && !['completed', 'cancelled'].includes(deadline.status)"
                             type="button"
-                            class="inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-lowest disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                            class="inline-flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-primary/25 bg-primary/5 px-3 text-xs font-bold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                             :disabled="updatingStatusId === deadline.id"
                             :aria-label="`Completa lo step ${deadline.title}`"
                             @click="completeStep(deadline)"
