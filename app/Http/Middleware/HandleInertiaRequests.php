@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'branding' => [
+                'name' => config('branding.name'),
+                'logo_url' => config('branding.logo_url'),
+                'mark_url' => config('branding.mark_url'),
+                'favicon_url' => config('branding.favicon_url'),
+            ],
             'auth' => [
                 'user' => $request->user() ? array_merge($request->user()->toArray(), [
                     'roles' => $request->user()->getRoleNames(),

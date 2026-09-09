@@ -9,7 +9,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import Toast from 'vue-toastification';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = document.querySelector('meta[name="application-name"]')?.content || 'Laravel';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -17,7 +17,7 @@ const { isDark, toggleDark } = useDarkMode();
             <div class="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:44px_44px]" aria-hidden="true" />
             <div class="relative flex flex-col items-center">
             <slot name="logo" />
-                <h1 class="mt-7 font-headline text-4xl font-extrabold tracking-tight">CAF Gestionale</h1>
+                <h1 class="mt-7 font-headline text-4xl font-extrabold tracking-tight">{{ $page.props.branding.name }}</h1>
                 <p class="mt-4 max-w-sm text-center text-base leading-7 text-slate-300">Clienti, pratiche, appuntamenti e filiali in un unico spazio operativo sicuro.</p>
             </div>
         </div>

@@ -114,7 +114,7 @@ const workflow = [
                         <ApplicationMark class="h-7 w-7" aria-hidden="true" />
                     </span>
                     <span>
-                        <span class="block text-sm font-bold tracking-tight text-white">CAF Gestionale</span>
+                        <span class="block text-sm font-bold tracking-tight text-white">{{ $page.props.branding.name }}</span>
                         <span class="block text-[11px] font-medium tracking-[0.16em] text-slate-400">SPAZIO DI LAVORO</span>
                     </span>
                 </a>
@@ -404,7 +404,7 @@ const workflow = [
 
         <footer class="border-t border-white/10 bg-slate-950 px-5 py-8 sm:px-8">
             <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-center text-sm text-slate-500 sm:flex-row sm:text-left">
-                <div class="flex items-center gap-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-blue-600 text-white"><ApplicationMark class="h-6 w-6" aria-hidden="true" /></span><span><strong class="block text-white">CAF Gestionale</strong><span>Più ordine. Più servizio.</span></span></div>
+                <div class="flex items-center gap-3"><span class="grid h-9 w-9 place-items-center rounded-xl bg-blue-600 text-white"><ApplicationMark class="h-6 w-6" aria-hidden="true" /></span><span><strong class="block text-white">{{ $page.props.branding.name }}</strong><span>Più ordine. Più servizio.</span></span></div>
                 <p>Clienti, pratiche e filiali in un unico spazio operativo.</p>
             </div>
         </footer>

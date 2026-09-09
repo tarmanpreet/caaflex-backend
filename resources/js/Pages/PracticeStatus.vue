@@ -83,7 +83,7 @@ const submit = () => {
                         <ApplicationMark class="h-7 w-7" aria-hidden="true" />
                     </span>
                     <span>
-                        <span class="block text-sm font-bold">CAF Gestionale</span>
+                        <span class="block text-sm font-bold">{{ $page.props.branding.name }}</span>
                         <span class="block text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Area pubblica</span>
                     </span>
                 </Link>

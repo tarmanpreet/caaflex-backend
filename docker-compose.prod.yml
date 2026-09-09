@@ -45,6 +45,7 @@ services:
     volumes:
       - app_storage:/var/www/html/storage
       - app_bootstrap_cache:/var/www/html/bootstrap/cache
+      - ${BRANDING_PATH:-./branding}:/var/www/html/public/customer-brand:ro
     networks:
       - caf_network
 

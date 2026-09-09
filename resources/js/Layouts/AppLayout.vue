@@ -97,7 +97,7 @@ const navItems = computed(() => {
                                 </div>
 
                                 <div v-if="!isCollapsed" class="min-w-0">
-                                    <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">CAF Gestionale</p>
+                                    <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">{{ $page.props.branding.name }}</p>
                                     <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Spazio di lavoro operativo</p>
                                 </div>
                             </Link>
@@ -207,7 +207,7 @@ const navItems = computed(() => {
                         <section class="mb-6 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest px-5 py-5 shadow-sm sm:px-6 sm:py-6">
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                                 <div class="min-w-0">
-                                    <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">CAF Gestionale</p>
+                                    <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{{ $page.props.branding.name }}</p>
                                     <div class="mt-2">
                                         <slot name="header">
                                             <h1 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface">{{ title }}</h1>
@@ -233,7 +233,7 @@ const navItems = computed(() => {
                                 <ApplicationMark class="h-6 w-6" />
                             </div>
                             <div>
-                                <p class="font-headline text-lg font-extrabold text-on-surface">CAF Gestionale</p>
+                                <p class="font-headline text-lg font-extrabold text-on-surface">{{ $page.props.branding.name }}</p>
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Spazio di lavoro operativo</p>
                             </div>
                         </div>
