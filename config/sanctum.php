@@ -51,6 +51,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mobile App Token Lifetimes
+    |--------------------------------------------------------------------------
+    |
+    | Lifetimes (seconds-based, set per-token at creation) used by the mobile
+    | app login endpoint. The access token is short-lived; the refresh token
+    | is long-lived and rotated on every use.
+    |
+    */
+
+    'mobile' => [
+        'access_token_minutes' => (int) env('SANCTUM_ACCESS_TOKEN_MINUTES', 60),
+        'refresh_token_days' => (int) env('SANCTUM_REFRESH_TOKEN_DAYS', 180),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Token Prefix
     |--------------------------------------------------------------------------
     |

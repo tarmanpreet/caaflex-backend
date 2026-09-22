@@ -10,18 +10,9 @@ class LogoutOtherSessionsAction
 {
     public function execute(User $user, string $password, ?string $currentTokenId): int
     {
-        $revokedTokens = 0;
-
-        $user->tokens()
-            ->where('revoked', false)
+        $revokedTokens = $user->tokens()
             ->when($currentTokenId, fn ($query) => $query->whereKeyNot($currentTokenId))
-            ->with('refreshToken')
-            ->get()
-            ->each(function ($token) use (&$revokedTokens): void {
-                $token->refreshToken?->revoke();
-                $token->revoke();
-                $revokedTokens++;
-            });
+            ->delete();
 
         $guard = Auth::guard('web');
         $guard->setUser($user);

@@ -123,7 +123,7 @@ class AccountController extends Controller
         $revokedTokens = $logoutOtherSessions->execute(
             $request->user(),
             $request->validated('password'),
-            $request->user()->token()?->getKey(),
+            $request->user()->currentAccessToken()?->getKey(),
         );
 
         return response()->json([
@@ -134,10 +134,7 @@ class AccountController extends Controller
 
     public function destroy(ConfirmAccountPasswordRequest $request, DeleteUser $deleteUser): JsonResponse
     {
-        $request->user()->tokens()->with('refreshToken')->get()->each(function ($token): void {
-            $token->refreshToken?->revoke();
-            $token->revoke();
-        });
+        $request->user()->tokens()->delete();
 
         $deleteUser->delete($request->user());
 

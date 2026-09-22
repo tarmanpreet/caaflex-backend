@@ -10,6 +10,10 @@ Route::prefix('v1')->name('api.')->group(function () {
     Route::post('/practice-status', App\Http\Controllers\Api\V1\PublicPracticeStatusController::class)
         ->middleware('throttle:10,1')
         ->name('practice-status');
+    Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login'])->middleware('throttle:20,1');
+    Route::post('/tokens/refresh', [App\Http\Controllers\Api\V1\AuthController::class, 'refresh'])->middleware('throttle:30,1');
+    Route::post('/email-password-reset', [App\Http\Controllers\Api\V1\AuthController::class, 'emailPasswordReset'])->middleware('throttle:5,1');
+    Route::post('/password-reset', [App\Http\Controllers\Api\V1\AuthController::class, 'passwordReset'])->middleware('throttle:5,1');
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:api');
 
     // Protected routes

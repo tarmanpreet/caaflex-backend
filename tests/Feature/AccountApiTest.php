@@ -6,10 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Fortify;
-use Laravel\Passport\AccessToken;
-use Laravel\Passport\Passport;
-use Laravel\Passport\RefreshToken;
-use Laravel\Passport\Token;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
 
@@ -118,33 +114,25 @@ class AccountApiTest extends TestCase
             ->assertJsonValidationErrors('code');
     }
 
-    public function test_logging_out_other_sessions_revokes_other_access_and_refresh_tokens(): void
+    public function test_logging_out_other_sessions_revokes_other_api_tokens(): void
     {
         $user = User::factory()->create();
-        $client = Passport::client()->factory()->create(['provider' => 'users']);
-        $currentToken = $this->createToken($user, $client->getKey(), 'current-token');
-        $otherToken = $this->createToken($user, $client->getKey(), 'other-token');
+        $currentToken = $user->createToken('current-token')->plainTextToken;
+        $otherToken = $user->createToken('other-token')->plainTextToken;
 
-        RefreshToken::query()->create([
-            'id' => 'other-refresh-token',
-            'access_token_id' => $otherToken->getKey(),
-            'revoked' => false,
-            'expires_at' => now()->addHour(),
-        ]);
-
-        $user->withAccessToken(new AccessToken([
-            'oauth_access_token_id' => $currentToken->getKey(),
-            'oauth_scopes' => [],
-        ]));
-
-        $this->actingAs($user, 'api')
+        $this->withToken($currentToken)
             ->deleteJson('/api/v1/account/other-sessions', ['password' => 'password'])
             ->assertOk()
             ->assertJsonPath('data.revoked_tokens', 1);
 
-        $this->assertFalse($currentToken->fresh()->revoked);
-        $this->assertTrue($otherToken->fresh()->revoked);
-        $this->assertTrue(RefreshToken::query()->findOrFail('other-refresh-token')->revoked);
+        $this->assertDatabaseHas('personal_access_tokens', ['token' => $this->hashedToken($currentToken)]);
+        $this->assertDatabaseMissing('personal_access_tokens', ['token' => $this->hashedToken($otherToken)]);
+
+        $this->app['auth']->forgetGuards();
+
+        $this->withToken($otherToken)
+            ->getJson('/api/v1/me')
+            ->assertUnauthorized();
     }
 
     public function test_user_can_delete_own_account_with_current_password(): void
@@ -158,16 +146,8 @@ class AccountApiTest extends TestCase
         $this->assertModelMissing($user);
     }
 
-    private function createToken(User $user, string $clientId, string $id): Token
+    private function hashedToken(string $token): string
     {
-        return Token::query()->create([
-            'id' => $id,
-            'user_id' => $user->getKey(),
-            'client_id' => $clientId,
-            'name' => null,
-            'scopes' => [],
-            'revoked' => false,
-            'expires_at' => now()->addHour(),
-        ]);
+        return hash('sha256', str_contains($token, '|') ? explode('|', $token, 2)[1] : $token);
     }
 }
