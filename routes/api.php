@@ -4,11 +4,32 @@ use Illuminate\Support\Facades\Route;
 
 // API v1 routes
 Route::prefix('v1')->name('api.')->group(function () {
+    Route::get('/app-config', App\Http\Controllers\Api\V1\AppConfigController::class)
+        ->middleware('throttle:60,1')
+        ->name('app-config');
+    Route::post('/practice-status', App\Http\Controllers\Api\V1\PublicPracticeStatusController::class)
+        ->middleware('throttle:10,1')
+        ->name('practice-status');
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:api');
 
     // Protected routes
     Route::middleware('auth:api')->group(function () {
         Route::get('/me', [App\Http\Controllers\Api\V1\AuthController::class, 'me']);
+
+        // Account and security routes
+        Route::put('/account/profile', [App\Http\Controllers\Api\V1\AccountController::class, 'updateProfile']);
+        Route::put('/account/password', [App\Http\Controllers\Api\V1\AccountController::class, 'updatePassword']);
+        Route::get('/account/two-factor', [App\Http\Controllers\Api\V1\AccountController::class, 'twoFactorStatus']);
+        Route::post('/account/two-factor', [App\Http\Controllers\Api\V1\AccountController::class, 'enableTwoFactor']);
+        Route::post('/account/two-factor/confirm', [App\Http\Controllers\Api\V1\AccountController::class, 'confirmTwoFactor']);
+        Route::delete('/account/two-factor', [App\Http\Controllers\Api\V1\AccountController::class, 'disableTwoFactor']);
+        Route::get('/account/two-factor/qr-code', [App\Http\Controllers\Api\V1\AccountController::class, 'twoFactorQrCode']);
+        Route::get('/account/two-factor/recovery-codes', [App\Http\Controllers\Api\V1\AccountController::class, 'recoveryCodes']);
+        Route::post('/account/two-factor/recovery-codes', [App\Http\Controllers\Api\V1\AccountController::class, 'regenerateRecoveryCodes']);
+        Route::delete('/account/other-sessions', [App\Http\Controllers\Api\V1\AccountController::class, 'logoutOtherSessions']);
+        Route::delete('/account', [App\Http\Controllers\Api\V1\AccountController::class, 'destroy']);
+
+        Route::match(['get', 'post'], '/broadcasting/auth', [Illuminate\Broadcasting\BroadcastController::class, 'authenticate']);
 
         // Client routes
         Route::get('/clients/search', [App\Http\Controllers\Api\V1\ClientController::class, 'search'])->name('clients.search');
@@ -35,6 +56,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::get('/practices/{practice}/deadlines', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'index'])->name('practices.deadlines.index');
         Route::post('/practices/{practice}/deadlines', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'store'])->name('practices.deadlines.store')->scopeBindings();
         Route::get('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'show'])->name('practices.deadlines.show')->scopeBindings();
+        Route::patch('/practices/{practice}/deadlines/{deadline}/complete', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'complete'])->name('practices.deadlines.complete')->scopeBindings();
         Route::put('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'update'])->name('practices.deadlines.update')->scopeBindings();
         Route::delete('/practices/{practice}/deadlines/{deadline}', [App\Http\Controllers\Api\V1\PracticeDeadlineController::class, 'destroy'])->name('practices.deadlines.destroy')->scopeBindings();
 
@@ -48,6 +70,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::apiResource('/procedures', App\Http\Controllers\Api\V1\ProcedureController::class);
 
         // Appointment routes
+        Route::patch('/appointments/{appointment}/cancel', [App\Http\Controllers\Api\V1\AppointmentController::class, 'cancel']);
         Route::apiResource('/appointments', App\Http\Controllers\Api\V1\AppointmentController::class)
             ->only(['index', 'store', 'show', 'update', 'destroy']);
         Route::get('/appointments-manage', [App\Http\Controllers\Api\V1\AppointmentController::class, 'manageIndex']);
@@ -60,12 +83,18 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::get('/notifications', [App\Http\Controllers\Api\V1\NotificationController::class, 'index']);
         Route::get('/notifications/unread-count', [App\Http\Controllers\Api\V1\NotificationController::class, 'unreadCount']);
         Route::post('/notifications/{notification}/read', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/{notification}/open', [App\Http\Controllers\Api\V1\NotificationController::class, 'open']);
         Route::post('/notifications/read-all', [App\Http\Controllers\Api\V1\NotificationController::class, 'markAllAsRead']);
         Route::get('/notification-settings', [App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'show']);
         Route::put('/notification-settings', [App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'update']);
+        Route::post('/push-tokens', [App\Http\Controllers\Api\V1\ExpoPushTokenController::class, 'store']);
+        Route::delete('/push-tokens/{expoPushToken}', [App\Http\Controllers\Api\V1\ExpoPushTokenController::class, 'destroy']);
 
         // Dashboard routes
+        Route::get('/dashboard', App\Http\Controllers\Api\V1\DashboardController::class)->name('dashboard');
         Route::get('/dashboard/notices', [App\Http\Controllers\Api\V1\DashboardNoticeController::class, 'index']);
+
+        Route::get('/deadlines', App\Http\Controllers\Api\V1\PracticeDeadlineIndexController::class)->name('deadlines.index');
 
         // Practice type routes
         Route::apiResource('/practice-types-manage', App\Http\Controllers\Api\V1\PracticeTypeController::class)

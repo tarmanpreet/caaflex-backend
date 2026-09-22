@@ -70,14 +70,29 @@ class ClientController extends Controller
         ], 201);
     }
 
-    public function show(ClientProfile $client): JsonResponse
+    public function show(Request $request, ClientProfile $client): JsonResponse
     {
         $this->authorize('view', $client);
 
         $client->load(['user', 'documents.uploadedBy']);
+        $practiceSearch = trim((string) $request->query('practice_search', ''));
+        $practices = $client->practices()
+            ->with(['practiceType:id,name,color', 'procedure:id,name', 'branch:id,name'])
+            ->when($practiceSearch !== '', function ($query) use ($practiceSearch): void {
+                $like = '%'.$practiceSearch.'%';
+                $query->where(fn ($builder) => $builder
+                    ->where('type', 'like', $like)
+                    ->orWhere('status', 'like', $like)
+                    ->orWhere('tracking_code', 'like', $like));
+            })
+            ->latest('updated_at')
+            ->paginate(10, ['*'], 'practice_page')
+            ->withQueryString();
 
         return response()->json([
             'data' => $client,
+            'practices' => $practices,
+            'filters' => ['practice_search' => $practiceSearch],
         ]);
     }
 

@@ -46,7 +46,14 @@ class AppointmentPolicy
 
     public function delete(User $user, Appointment $appointment): bool
     {
-        return $user->canAccessBranchId($appointment->branch_id) && $user->hasPermissionTo('appointments.delete');
+        return $user->clientProfile === null
+            && $user->canAccessBranchId($appointment->branch_id)
+            && $user->hasPermissionTo('appointments.delete');
+    }
+
+    public function cancel(User $user, Appointment $appointment): bool
+    {
+        return $user->clientProfile?->id === $appointment->client_profile_id;
     }
 
     public function assign(User $user): bool

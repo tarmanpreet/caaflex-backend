@@ -8,6 +8,7 @@ use App\Actions\User\UpdateUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Branch;
 use App\Models\PracticeType;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -36,6 +37,15 @@ class UserController extends Controller
                     ])
                     ->values()
                     ->all(),
+                'branches' => $user->branches
+                    ->map(fn ($branch) => [
+                        'id' => $branch->id,
+                        'name' => $branch->name,
+                        'city' => $branch->city,
+                        'province' => $branch->province,
+                    ])
+                    ->values()
+                    ->all(),
             ],
             'message' => 'User created successfully.',
         ], 201);
@@ -45,7 +55,7 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $query = User::with('roles')->withCount([
+        $query = User::with(['roles', 'branches:id,name,city,province'])->withCount([
             'assignedPractices',
             'assignedPractices as open_practices_count' => fn ($q) => $q->whereNotIn('status', ['completata', 'annullata']),
         ])->whereDoesntHave('roles', fn ($q) => $q->where('name', 'cliente'));
@@ -64,7 +74,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        $user->load('roles');
+        $user->load(['roles', 'branches']);
         if ($user->hasRole('employee')) {
             $user->load('practiceTypes');
         }
@@ -93,6 +103,11 @@ class UserController extends Controller
             ->unique()
             ->values();
         $allPracticeTypes = PracticeType::orderBy('name')->get(['id', 'name', 'color']);
+        $branches = Branch::active()
+            ->whereIn('id', $request->user()->accessibleBranchIds())
+            ->select('id', 'parent_id', 'name', 'city', 'province')
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'data' => [
@@ -101,6 +116,7 @@ class UserController extends Controller
                 'closedPractices' => $closedPractices,
                 'availableRoles' => $roles,
                 'allPracticeTypes' => $allPracticeTypes,
+                'branches' => $branches,
                 'practiceFilters' => [
                     'active_search' => $activeSearch,
                     'closed_search' => $closedSearch,
@@ -113,7 +129,10 @@ class UserController extends Controller
     {
         $action->execute($request->validated(), $user);
 
-        return response()->json(['message' => 'Utente aggiornato.', 'data' => $user]);
+        return response()->json([
+            'message' => 'Utente aggiornato.',
+            'data' => $user->fresh(['roles', 'practiceTypes', 'branches']),
+        ]);
     }
 
     public function toggleActive(User $user): JsonResponse

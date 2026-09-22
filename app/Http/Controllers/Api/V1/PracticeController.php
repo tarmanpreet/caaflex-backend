@@ -45,7 +45,19 @@ class PracticeController extends Controller
     {
         $this->authorize('view', $practice);
 
-        $practice->load(['client', 'assignedUsers', 'notes.author', 'documents.uploader', 'statusLogs.user']);
+        $practice->load([
+            'client',
+            'assignedUsers',
+            'notes.author',
+            'documents.uploader',
+            'statusLogs.user',
+            'procedure.deadlineTemplates',
+            'deadlines.assignee',
+            'deadlines.reminders',
+            'deadlines.steps',
+            'branch',
+            'practiceType',
+        ]);
 
         return response()->json([
             'data' => $practice,

@@ -12,10 +12,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements OAuthenticatable
 {
     private ?Collection $accessibleBranchIdsCache = null;
 
@@ -123,6 +124,11 @@ class User extends Authenticatable
     public function notificationReminderPreferences(): HasMany
     {
         return $this->hasMany(UserNotificationReminderPreference::class);
+    }
+
+    public function expoPushTokens(): HasMany
+    {
+        return $this->hasMany(ExpoPushToken::class);
     }
 
     public function practiceTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

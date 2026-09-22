@@ -11,6 +11,7 @@ use App\Models\Practice;
 use App\Models\PracticeDeadline;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PracticeDeadlineController extends Controller
@@ -60,6 +61,18 @@ class PracticeDeadlineController extends Controller
 
         return response()->json([
             'message' => 'Deadline updated.',
+            'data' => $deadline->fresh(['assignee', 'reminders']),
+        ]);
+    }
+
+    public function complete(Request $request, Practice $practice, PracticeDeadline $deadline, UpdatePracticeDeadlineAction $action): JsonResponse
+    {
+        $this->authorize('updateDeadline', $practice);
+
+        $action->execute(['status' => PracticeDeadline::STATUS_COMPLETED], $practice, $deadline, $request->user()->id);
+
+        return response()->json([
+            'message' => 'Step completato.',
             'data' => $deadline->fresh(['assignee', 'reminders']),
         ]);
     }

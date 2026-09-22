@@ -32,13 +32,6 @@ class Practice extends Model
         'sospesa',
     ];
 
-    /**
-     * The attributes that are not mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $guarded = ['id'];
-
     protected $fillable = [
         'tracking_code',
         'client_profile_id',

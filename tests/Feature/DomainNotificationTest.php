@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SendExpoPushNotification;
 use App\Models\Appointment;
+use App\Models\ExpoPushToken;
 use App\Models\User;
 use App\Models\UserNotificationPreference;
 use App\Notifications\DomainNotification;
 use App\Services\NotificationManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class DomainNotificationTest extends TestCase
@@ -31,9 +34,13 @@ class DomainNotificationTest extends TestCase
             route('appointments.show', $appointment, false),
         );
 
-        Notification::assertSentTo($user, DomainNotification::class, function (DomainNotification $notification): bool {
+        Notification::assertSentTo($user, DomainNotification::class, function (DomainNotification $notification) use ($appointment): bool {
             return $notification->channels === ['database', 'mail', 'broadcast']
                 && $notification->payload['section'] === 'appointments'
+                && $notification->payload['target'] === [
+                    'resource' => 'appointment',
+                    'id' => $appointment->id,
+                ]
                 && $notification->payload['action_url'] !== null;
         });
     }
@@ -81,5 +88,35 @@ class DomainNotificationTest extends TestCase
         );
 
         Notification::assertNothingSent();
+    }
+
+    public function test_realtime_preference_dispatches_push_for_registered_device(): void
+    {
+        Queue::fake();
+        Notification::fake();
+        $user = User::factory()->create(['is_active' => true]);
+        $appointment = Appointment::factory()->create();
+        ExpoPushToken::query()->create([
+            'user_id' => $user->id,
+            'token' => 'ExpoPushToken[test-device]',
+            'token_hash' => hash('sha256', 'ExpoPushToken[test-device]'),
+            'device_id' => 'device-test',
+            'platform' => 'ios',
+            'last_registered_at' => now(),
+        ]);
+
+        app(NotificationManager::class)->send(
+            [$user],
+            'appointments.status_changed',
+            'appointments',
+            'Stato aggiornato',
+            'Corpo',
+            $appointment,
+            '/appointments/'.$appointment->id,
+        );
+
+        Queue::assertPushed(SendExpoPushNotification::class, fn (SendExpoPushNotification $job): bool => $job->userId === $user->id
+            && $job->target === ['resource' => 'appointment', 'id' => $appointment->id]
+        );
     }
 }

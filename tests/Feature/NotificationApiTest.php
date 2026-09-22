@@ -74,6 +74,45 @@ class NotificationApiTest extends TestCase
         ]);
     }
 
+    public function test_opening_notification_marks_it_as_read_and_returns_mobile_target(): void
+    {
+        $practice = Practice::factory()->create();
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => $practice->id,
+            'deadline_at' => now()->addDay(),
+        ]);
+
+        $this->admin->notify(new DeadlineReminderNotification($deadline));
+        $notificationId = $this->admin->notifications()->first()->id;
+
+        $response = $this->actingAs($this->admin, 'api')
+            ->postJson("/api/v1/notifications/{$notificationId}/open");
+
+        $response->assertOk()
+            ->assertJsonPath('data.id', $notificationId)
+            ->assertJsonPath('data.target.resource', 'practice')
+            ->assertJsonPath('data.target.id', $practice->id)
+            ->assertJsonPath('data.target.section', 'steps');
+
+        $this->assertNotNull($this->admin->notifications()->findOrFail($notificationId)->read_at);
+    }
+
+    public function test_user_cannot_open_another_users_notification(): void
+    {
+        $otherUser = User::factory()->create();
+        $deadline = PracticeDeadline::factory()->create([
+            'practice_id' => Practice::factory()->create()->id,
+            'deadline_at' => now()->addDay(),
+        ]);
+
+        $otherUser->notify(new DeadlineReminderNotification($deadline));
+        $notificationId = $otherUser->notifications()->first()->id;
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson("/api/v1/notifications/{$notificationId}/open")
+            ->assertNotFound();
+    }
+
     public function test_user_can_mark_all_notifications_as_read(): void
     {
         $deadlineA = PracticeDeadline::factory()->create([

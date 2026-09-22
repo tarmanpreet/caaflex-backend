@@ -22,6 +22,6 @@ class CreateUserAction
             $user->branches()->sync($data['branch_ids'] ?? []);
         }
 
-        return $user->load(['roles', 'practiceTypes:id,name']);
+        return $user->load(['roles', 'practiceTypes:id,name', 'branches:id,name,city,province']);
     }
 }

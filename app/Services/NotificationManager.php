@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendExpoPushNotification;
 use App\Models\User;
 use App\Notifications\DomainNotification;
 use Illuminate\Database\Eloquent\Model;
@@ -45,9 +46,45 @@ class NotificationManager
                     'body' => $body,
                     'subject_type' => $subject->getMorphClass(),
                     'subject_id' => $subject->getKey(),
+                    'target' => $this->target($subject, $section),
                     'action_url' => $actionUrl,
                     'occurred_at' => ($occurredAt ?? now())->toIso8601String(),
                 ], $channels));
+
+                if (in_array('broadcast', $channels, true) && $user->expoPushTokens()->exists()) {
+                    SendExpoPushNotification::dispatch(
+                        $user->id,
+                        $title,
+                        $body,
+                        $this->target($subject, $section),
+                    );
+                }
             });
+    }
+
+    /** @return array<string, mixed> */
+    private function target(Model $subject, string $section): array
+    {
+        return match ($subject->getMorphClass()) {
+            \App\Models\Appointment::class => [
+                'resource' => 'appointment',
+                'id' => $subject->getKey(),
+            ],
+            \App\Models\Practice::class => [
+                'resource' => 'practice',
+                'id' => $subject->getKey(),
+            ],
+            \App\Models\PracticeDeadline::class => [
+                'resource' => 'practice',
+                'id' => $subject->getAttribute('practice_id'),
+                'section' => 'steps',
+                'child_resource' => 'practice_deadline',
+                'child_id' => $subject->getKey(),
+            ],
+            default => [
+                'resource' => $section,
+                'id' => $subject->getKey(),
+            ],
+        };
     }
 }

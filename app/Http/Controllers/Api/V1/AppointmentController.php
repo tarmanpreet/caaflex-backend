@@ -89,13 +89,9 @@ class AppointmentController extends Controller
         ], 201);
     }
 
-    public function destroy(Appointment $appointment, UpdateAppointmentAction $action): JsonResponse
+    public function cancel(Appointment $appointment, UpdateAppointmentAction $action): JsonResponse
     {
-        $client = auth()->user()->clientProfile;
-
-        if (! $client || $appointment->client_profile_id !== $client->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('cancel', $appointment);
 
         if ($appointment->status === 'completato') {
             return response()->json(['message' => 'Impossibile cancellare un appuntamento completato.'], 422);
@@ -104,6 +100,15 @@ class AppointmentController extends Controller
         $action->execute(['status' => 'cancellato'], $appointment, request()->user()->id);
 
         return response()->json(['message' => 'Appuntamento cancellato.']);
+    }
+
+    public function destroy(Appointment $appointment): JsonResponse
+    {
+        $this->authorize('delete', $appointment);
+
+        $appointment->delete();
+
+        return response()->json(['message' => 'Appuntamento eliminato.']);
     }
 
     public function show(Appointment $appointment): JsonResponse

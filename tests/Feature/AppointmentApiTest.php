@@ -9,6 +9,7 @@ use App\Models\PracticeType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class AppointmentApiTest extends TestCase
@@ -30,6 +31,9 @@ class AppointmentApiTest extends TestCase
         $this->seed(RolesAndPermissionsSeeder::class);
         $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class);
         $this->withoutVite();
+
+        Route::middleware(['api', 'auth:api'])
+            ->patch('/api/v1/appointments/{appointment}/cancel', [\App\Http\Controllers\Api\V1\AppointmentController::class, 'cancel']);
 
         $this->clientUser = User::factory()->create(['is_active' => true]);
         $this->clientUser->assignRole('cliente');
@@ -194,8 +198,10 @@ class AppointmentApiTest extends TestCase
             'status' => 'da_confermare',
         ]);
 
+        $this->assertTrue($this->clientUser->can('cancel', $appointment));
+
         $response = $this->actingAs($this->clientUser, 'api')
-            ->deleteJson('/api/v1/appointments/'.$appointment->id);
+            ->patchJson('/api/v1/appointments/'.$appointment->id.'/cancel');
 
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Appuntamento cancellato.');
@@ -214,7 +220,7 @@ class AppointmentApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->clientUser, 'api')
-            ->deleteJson('/api/v1/appointments/'.$appointment->id);
+            ->patchJson('/api/v1/appointments/'.$appointment->id.'/cancel');
 
         $response->assertStatus(422)
             ->assertJsonPath('message', 'Impossibile cancellare un appuntamento completato.');
@@ -228,9 +234,36 @@ class AppointmentApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->clientUser, 'api')
-            ->deleteJson('/api/v1/appointments/'.$appointment->id);
+            ->patchJson('/api/v1/appointments/'.$appointment->id.'/cancel');
 
         $response->assertStatus(403);
+    }
+
+    public function test_staff_with_delete_permission_can_delete_appointment(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->assignRole('admin');
+        $appointment = Appointment::factory()->create();
+
+        $this->actingAs($admin, 'api')
+            ->deleteJson('/api/v1/appointments/'.$appointment->id)
+            ->assertOk()
+            ->assertJsonPath('message', 'Appuntamento eliminato.');
+
+        $this->assertModelMissing($appointment);
+    }
+
+    public function test_client_cannot_hard_delete_appointment(): void
+    {
+        $appointment = Appointment::factory()->create([
+            'client_profile_id' => $this->clientProfile->id,
+        ]);
+
+        $this->actingAs($this->clientUser, 'api')
+            ->deleteJson('/api/v1/appointments/'.$appointment->id)
+            ->assertForbidden();
+
+        $this->assertModelExists($appointment);
     }
 
     public function test_unauthenticated_cannot_access_appointments(): void

@@ -35,6 +35,17 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function open(string $notification, NotificationFeedService $feed): JsonResponse
+    {
+        $record = request()->user()->notifications()->whereKey($notification)->firstOrFail();
+        $record->markAsRead();
+
+        return response()->json([
+            'message' => 'Notifica aperta.',
+            'data' => $feed->transform($record->fresh()),
+        ]);
+    }
+
     public function markAllAsRead(): JsonResponse
     {
         request()->user()->unreadNotifications()->update(['read_at' => now()]);
