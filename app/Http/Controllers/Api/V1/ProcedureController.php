@@ -25,7 +25,18 @@ class ProcedureController extends Controller
             abort(403);
         }
 
-        $procedures = Procedure::with(['practiceType', 'deadlineTemplates'])->get();
+        $procedures = Procedure::query()
+            ->with(['practiceType', 'deadlineTemplates'])
+            ->when($request->filled('procedure_type_id'), fn ($query) => $query->where('procedure_type_id', $request->integer('procedure_type_id')))
+            ->when($request->filled('search'), function ($query) use ($request): void {
+                $search = '%'.$request->string('search')->toString().'%';
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', $search)
+                        ->orWhere('default_notes', 'like', $search);
+                });
+            })
+            ->orderBy('name')
+            ->get();
 
         return response()->json($procedures);
     }
@@ -33,7 +44,7 @@ class ProcedureController extends Controller
     public function store(StoreProcedureRequest $request, SyncProcedureDeadlineTemplatesAction $syncTemplates): JsonResponse
     {
         $data = $request->validated();
-        $templates = Arr::pull($data, 'deadline_templates', []);
+        $templates = Arr::pull($data, 'deadline_templates', []) ?? [];
         $procedure = DB::transaction(function () use ($data, $syncTemplates, $templates): Procedure {
             $procedure = Procedure::query()->create($data);
             $syncTemplates->execute($procedure, $templates);
@@ -63,7 +74,7 @@ class ProcedureController extends Controller
     {
         $data = $request->validated();
         $shouldSyncTemplates = $request->has('deadline_templates');
-        $templates = Arr::pull($data, 'deadline_templates', []);
+        $templates = Arr::pull($data, 'deadline_templates', []) ?? [];
 
         DB::transaction(function () use ($data, $procedure, $shouldSyncTemplates, $syncTemplates, $templates): void {
             $procedure->update($data);
@@ -82,12 +93,6 @@ class ProcedureController extends Controller
     public function destroy(Procedure $procedure): JsonResponse
     {
         $this->authorize('delete', $procedure);
-
-        if ($procedure->practices()->exists()) {
-            return response()->json([
-                'message' => 'Cannot delete procedure with attached practices.',
-            ], 409);
-        }
 
         $procedure->delete();
 

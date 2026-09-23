@@ -180,6 +180,8 @@ class BuildDashboardDataAction
                     'meta' => $log->user?->name ?: 'Sistema',
                     'occurred_at' => optional($log->created_at)?->toIso8601String(),
                     'tone' => 'neutral',
+                    'old_status' => $log->old_status,
+                    'new_status' => $log->new_status,
                 ];
             });
 

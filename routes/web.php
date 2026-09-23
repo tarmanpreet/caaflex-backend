@@ -38,6 +38,7 @@ Route::post('/controlla-pratica', [PublicPracticeStatusController::class, 'looku
 
 Route::middleware([
     'auth:sanctum',
+    'active-user',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {

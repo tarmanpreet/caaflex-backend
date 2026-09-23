@@ -46,7 +46,7 @@ class ClientDocumentController extends Controller
     {
         $this->authorize('downloadDocument', [$client, $document]);
 
-        return response()->download(storage_path('app/'.$document->disk_path), $document->original_name);
+        return Storage::disk('local')->download($document->disk_path, $document->original_name);
     }
 
     public function destroy(ClientProfile $client, ClientDocument $document): JsonResponse

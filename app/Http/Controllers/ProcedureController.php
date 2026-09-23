@@ -66,7 +66,7 @@ class ProcedureController extends Controller
     public function store(StoreProcedureRequest $request, SyncProcedureDeadlineTemplatesAction $syncTemplates): RedirectResponse
     {
         $data = $request->validated();
-        $templates = Arr::pull($data, 'deadline_templates', []);
+        $templates = Arr::pull($data, 'deadline_templates', []) ?? [];
 
         $procedure = DB::transaction(function () use ($data, $templates, $syncTemplates): Procedure {
             $procedure = Procedure::query()->create($data);
@@ -93,7 +93,7 @@ class ProcedureController extends Controller
     {
         $data = $request->validated();
         $shouldSyncTemplates = $request->has('deadline_templates');
-        $templates = Arr::pull($data, 'deadline_templates', []);
+        $templates = Arr::pull($data, 'deadline_templates', []) ?? [];
 
         DB::transaction(function () use ($data, $procedure, $shouldSyncTemplates, $syncTemplates, $templates): void {
             $procedure->update($data);

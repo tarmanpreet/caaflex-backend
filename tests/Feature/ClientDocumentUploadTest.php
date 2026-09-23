@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Branch;
 use App\Models\ClientDocument;
 use App\Models\ClientProfile;
 use App\Models\User;
@@ -252,5 +253,28 @@ class ClientDocumentUploadTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('content-disposition');
+    }
+
+    public function test_client_can_download_own_document_from_its_profile_branch(): void
+    {
+        Storage::fake('local');
+        $main = Branch::factory()->create(['parent_id' => null]);
+        $child = Branch::factory()->create(['parent_id' => $main->id]);
+        $clientUser = User::factory()->create();
+        $clientUser->assignRole('cliente');
+        $client = ClientProfile::factory()->forUser($clientUser)->create(['branch_id' => $child->id]);
+        $filePath = "client-documents/{$client->id}/own.pdf";
+        Storage::disk('local')->put($filePath, 'content');
+        $document = ClientDocument::factory()->create([
+            'client_profile_id' => $client->id,
+            'uploaded_by' => User::factory()->create()->id,
+            'disk_path' => $filePath,
+            'original_name' => 'own.pdf',
+        ]);
+
+        $this->actingAs($clientUser, 'api')
+            ->get('/api/v1/clients/'.$client->id.'/documents/'.$document->id.'/download')
+            ->assertOk()
+            ->assertHeader('content-disposition');
     }
 }

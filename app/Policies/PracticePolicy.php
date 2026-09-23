@@ -93,12 +93,14 @@ class PracticePolicy
 
     public function deleteDeadline(User $user, Practice $practice): bool
     {
-        return $user->canAccessBranchId($practice->branch_id) && $user->hasPermissionTo('practice-deadlines.delete') && $user->hasRole('admin');
+        return $user->canAccessBranchId($practice->branch_id)
+            && $user->hasPermissionTo('practice-deadlines.delete')
+            && $user->hasAnyRole(['admin', 'superadmin']);
     }
 
     private function isAdminOrAssigned(User $user, Practice $practice): bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->hasAnyRole(['admin', 'superadmin'])) {
             return true;
         }
 

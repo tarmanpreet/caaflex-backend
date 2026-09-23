@@ -139,6 +139,9 @@ class UserController extends Controller
     {
         $this->authorize('toggleActive', $user);
         $user->update(['is_active' => ! $user->is_active]);
+        if (! $user->is_active) {
+            $user->tokens()->delete();
+        }
         $message = $user->is_active ? 'Utente attivato.' : 'Utente disattivato.';
 
         return response()->json(['message' => $message, 'data' => $user]);

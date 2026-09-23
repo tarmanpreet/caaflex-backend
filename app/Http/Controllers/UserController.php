@@ -140,6 +140,10 @@ class UserController extends Controller
 
         $user->update(['is_active' => ! $user->is_active]);
 
+        if (! $user->is_active) {
+            $user->tokens()->delete();
+        }
+
         return back()
             ->with('success', $user->is_active ? 'Utente attivato.' : 'Utente disattivato.');
     }

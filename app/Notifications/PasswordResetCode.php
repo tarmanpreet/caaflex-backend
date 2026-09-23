@@ -3,11 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PasswordResetCode extends Notification implements ShouldQueue
+class PasswordResetCode extends Notification implements ShouldBeEncrypted, ShouldQueue
 {
     use Queueable;
 
@@ -39,7 +40,7 @@ class PasswordResetCode extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $name = method_exists($notifiable, 'name') ? $notifiable->name : '';
+        $name = filled($notifiable->name ?? null) ? ' '.$notifiable->name : '';
 
         return (new MailMessage)
             ->subject(config('app.name').' — Codice per il reset della password')

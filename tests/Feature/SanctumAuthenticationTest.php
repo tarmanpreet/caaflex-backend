@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ClientProfile;
 use App\Models\User;
 use App\Notifications\PasswordResetCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
+use Laravel\Sanctum\PersonalAccessToken;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
 
@@ -41,11 +43,24 @@ class SanctumAuthenticationTest extends TestCase
             ]);
 
         $this->assertDatabaseCount('personal_access_tokens', 2);
+        $this->assertSame(['access'], PersonalAccessToken::findToken($response->json('access_token'))?->abilities);
+        $this->assertSame(['refresh'], PersonalAccessToken::findToken($response->json('refresh_token'))?->abilities);
 
         $this->withToken($response->json('access_token'))
             ->getJson('/api/v1/me')
             ->assertOk()
             ->assertJsonPath('id', $user->id);
+    }
+
+    public function test_bootstrap_exposes_the_linked_client_profile_identifier(): void
+    {
+        $user = User::factory()->create();
+        $profile = ClientProfile::factory()->forUser($user)->create();
+
+        $this->actingAs($user, 'api')
+            ->getJson('/api/v1/me')
+            ->assertOk()
+            ->assertJsonPath('client_profile_id', $profile->id);
     }
 
     public function test_login_rejects_invalid_credentials_without_issuing_tokens(): void
@@ -146,6 +161,33 @@ class SanctumAuthenticationTest extends TestCase
         ])->assertOk();
     }
 
+    public function test_refresh_token_cannot_authenticate_protected_api_routes(): void
+    {
+        $user = User::factory()->create(['password' => 'password']);
+        $response = $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+
+        $this->withToken($response->json('refresh_token'))
+            ->getJson('/api/v1/me')
+            ->assertForbidden();
+    }
+
+    public function test_an_existing_token_is_rejected_and_revoked_when_the_user_is_inactive(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $token = $user->createToken('mobile-access', ['access'], now()->addHour())->plainTextToken;
+        $user->update(['is_active' => false]);
+
+        $this->withToken($token)
+            ->getJson('/api/v1/me')
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Account disattivato.');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
     public function test_refresh_rejects_invalid_and_expired_tokens(): void
     {
         $user = User::factory()->create();
@@ -153,7 +195,7 @@ class SanctumAuthenticationTest extends TestCase
         $this->postJson('/api/v1/tokens/refresh', ['token' => 'bogus-token-value'])
             ->assertUnauthorized();
 
-        $expired = $user->createToken('mobile-refresh', ['*'], now()->subDay())->plainTextToken;
+        $expired = $user->createToken('mobile-refresh', ['refresh'], now()->subDay())->plainTextToken;
 
         $this->postJson('/api/v1/tokens/refresh', ['token' => $expired])
             ->assertUnauthorized();
@@ -167,7 +209,7 @@ class SanctumAuthenticationTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors('token');
 
-        $accessToken = $user->createToken('mobile-access', ['*'], now()->addHour())->plainTextToken;
+        $accessToken = $user->createToken('mobile-access', ['access'], now()->addHour())->plainTextToken;
 
         $this->postJson('/api/v1/tokens/refresh', ['token' => $accessToken])
             ->assertUnauthorized();
@@ -198,6 +240,23 @@ class SanctumAuthenticationTest extends TestCase
         $this->postJson('/api/v1/tokens/refresh', [
             'token' => $response->json('refresh_token'),
         ])->assertUnauthorized();
+    }
+
+    public function test_logout_does_not_revoke_another_users_refresh_token(): void
+    {
+        $user = User::factory()->create(['password' => 'password']);
+        $otherUser = User::factory()->create();
+        $response = $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+        $otherRefreshToken = $otherUser->createToken('mobile-refresh', ['refresh'], now()->addDay())->plainTextToken;
+
+        $this->withToken($response->json('access_token'))
+            ->postJson('/api/v1/logout', ['refresh_token' => $otherRefreshToken])
+            ->assertOk();
+
+        $this->assertNotNull(PersonalAccessToken::findToken($otherRefreshToken));
     }
 
     public function test_me_requires_a_valid_token(): void
@@ -242,6 +301,9 @@ class SanctumAuthenticationTest extends TestCase
 
         $this->postJson('/api/v1/email-password-reset', ['email' => $user->email])->assertOk();
 
+        $accessToken = $user->createToken('mobile-access', ['access'], now()->addHour())->plainTextToken;
+        $refreshToken = $user->createToken('mobile-refresh', ['refresh'], now()->addDay())->plainTextToken;
+
         Notification::assertSentTo($user, PasswordResetCode::class, function (PasswordResetCode $notification) use (&$sentCode): bool {
             $sentCode = $notification->code;
 
@@ -258,6 +320,18 @@ class SanctumAuthenticationTest extends TestCase
 
         $this->assertTrue(Hash::check('a-new-secure-password', $user->fresh()->password));
         $this->assertFalse(Hash::check('password', $user->fresh()->password));
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        $this->app['auth']->forgetGuards();
+        $this->withToken($accessToken)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->postJson('/api/v1/tokens/refresh', ['token' => $refreshToken])->assertUnauthorized();
+
+        $this->postJson('/api/v1/password-reset', [
+            'email' => $user->email,
+            'token' => $sentCode,
+            'password' => 'another-secure-password',
+            'password_confirmation' => 'another-secure-password',
+        ])->assertUnauthorized();
 
         $this->postJson('/api/v1/login', [
             'email' => $user->email,

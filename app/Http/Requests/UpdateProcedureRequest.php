@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateProcedureRequest extends FormRequest
 {
@@ -39,6 +40,28 @@ class UpdateProcedureRequest extends FormRequest
             'deadline_templates.*.offset_days' => ['required', 'integer', 'min:0', 'max:3650'],
             'deadline_templates.*.offset_hours' => ['required', 'integer', 'min:0', 'max:23'],
             'deadline_templates.*.priority' => ['required', 'integer', 'min:1', 'max:4'],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                $procedure = $this->route('procedure');
+
+                if (! $procedure instanceof \App\Models\Procedure) {
+                    return;
+                }
+
+                $practiceTypeId = (int) $this->input('procedure_type_id');
+
+                if ($practiceTypeId !== $procedure->procedure_type_id && $procedure->practices()->exists()) {
+                    $validator->errors()->add(
+                        'procedure_type_id',
+                        'Il tipo non può essere modificato finché la procedura è collegata a delle pratiche.'
+                    );
+                }
+            },
         ];
     }
 }

@@ -39,17 +39,6 @@ fi
 echo "==> [entrypoint] Rigenero package discovery dal vendor installato..."
 php /var/www/html/artisan package:discover --ansi
 
-# ── Passport encryption keys ─────────────────────────────────────────────────
-# Generate RSA key files on first boot if not provided via env vars.
-# Must run BEFORE config:cache so the keys exist when Passport loads them.
-# --force is safe here: we only invoke it when the key files are missing.
-if [ -z "${PASSPORT_PRIVATE_KEY}" ] && [ -z "${PASSPORT_PUBLIC_KEY}" ]; then
-    if [ ! -f /var/www/html/storage/oauth-private.key ] || [ ! -f /var/www/html/storage/oauth-public.key ]; then
-        echo "==> [entrypoint] Generazione chiavi Passport..."
-        php /var/www/html/artisan passport:keys --force --no-interaction
-    fi
-fi
-
 if [ "${APP_ENV}" != "local" ]; then
     echo "==> [entrypoint] Ottimizzazione configurazione Laravel..."
     php /var/www/html/artisan config:cache

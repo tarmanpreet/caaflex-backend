@@ -20,7 +20,7 @@ class StorePracticeAction
 
     public function execute(array $data, int $createdBy): Practice
     {
-        $data['branch_id'] = ClientProfile::query()->findOrFail($data['client_profile_id'])->branch_id;
+        $data['branch_id'] ??= ClientProfile::query()->findOrFail($data['client_profile_id'])->branch_id;
         $procedure = $this->procedureFor($data);
 
         if (blank($data['deadline_at'] ?? null) && $procedure?->deadline_days !== null) {

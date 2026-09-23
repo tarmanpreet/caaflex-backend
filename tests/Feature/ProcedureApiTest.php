@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Practice;
-use App\Models\Procedure;
 use App\Models\PracticeType;
+use App\Models\Procedure;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,8 +15,11 @@ class ProcedureApiTest extends TestCase
     use RefreshDatabase;
 
     protected User $adminUser;
+
     protected User $employeeUser;
+
     protected User $unauthorizedUser;
+
     protected PracticeType $practiceType;
 
     protected function setUp(): void
@@ -39,7 +42,7 @@ class ProcedureApiTest extends TestCase
 
         // Create a practice type for tests
         $this->practiceType = PracticeType::factory()->create([
-            'name' => 'TestPracticeType_' . uniqid(),
+            'name' => 'TestPracticeType_'.uniqid(),
             'duration_minutes' => 60,
         ]);
     }
@@ -88,6 +91,20 @@ class ProcedureApiTest extends TestCase
             ]);
     }
 
+    public function test_index_filters_procedures_by_search_and_practice_type(): void
+    {
+        $otherType = PracticeType::factory()->create();
+        Procedure::factory()->create(['procedure_type_id' => $this->practiceType->id, 'name' => 'ISEE ordinario']);
+        Procedure::factory()->create(['procedure_type_id' => $this->practiceType->id, 'name' => 'Successione']);
+        Procedure::factory()->create(['procedure_type_id' => $otherType->id, 'name' => 'ISEE esterno']);
+
+        $this->actingAs($this->adminUser, 'api')
+            ->getJson('/api/v1/procedures?search=ISEE&procedure_type_id='.$this->practiceType->id)
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.name', 'ISEE ordinario');
+    }
+
     public function test_store_creates_procedure(): void
     {
         $payload = [
@@ -109,6 +126,40 @@ class ProcedureApiTest extends TestCase
             'procedure_type_id' => $this->practiceType->id,
             'default_notes' => 'Default note for this procedure',
         ]);
+    }
+
+    public function test_api_creates_and_updates_step_templates_in_order(): void
+    {
+        $response = $this->actingAs($this->adminUser, 'api')
+            ->postJson('/api/v1/procedures', [
+                'procedure_type_id' => $this->practiceType->id,
+                'name' => 'Procedura con step',
+                'deadline_templates' => [
+                    ['title' => 'Raccolta documenti', 'notes' => null, 'offset_days' => 2, 'offset_hours' => 3, 'priority' => 2],
+                    ['title' => 'Invio', 'notes' => 'Controllo finale', 'offset_days' => 1, 'offset_hours' => 0, 'priority' => 1],
+                ],
+            ])
+            ->assertCreated()
+            ->assertJsonCount(2, 'data.deadline_templates')
+            ->assertJsonPath('data.deadline_templates.0.position', 0);
+
+        $procedureId = $response->json('data.id');
+        $templateId = $response->json('data.deadline_templates.1.id');
+
+        $this->actingAs($this->adminUser, 'api')
+            ->putJson('/api/v1/procedures/'.$procedureId, [
+                'procedure_type_id' => $this->practiceType->id,
+                'name' => 'Procedura con step aggiornata',
+                'deadline_templates' => [
+                    ['id' => $templateId, 'title' => 'Invio telematico', 'notes' => null, 'offset_days' => 0, 'offset_hours' => 4, 'priority' => 1],
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonCount(1, 'data.deadline_templates')
+            ->assertJsonPath('data.deadline_templates.0.title', 'Invio telematico')
+            ->assertJsonPath('data.deadline_templates.0.position', 0);
+
+        $this->assertDatabaseCount('procedure_deadline_templates', 1);
     }
 
     public function test_store_validates_unique_nome_per_type(): void
@@ -161,7 +212,7 @@ class ProcedureApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->adminUser, 'api')
-            ->getJson('/api/v1/procedures/' . $procedure->id);
+            ->getJson('/api/v1/procedures/'.$procedure->id);
 
         $response->assertStatus(200)
             ->assertJsonPath('data.id', $procedure->id)
@@ -193,7 +244,7 @@ class ProcedureApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->adminUser, 'api')
-            ->putJson('/api/v1/procedures/' . $procedure->id, $payload);
+            ->putJson('/api/v1/procedures/'.$procedure->id, $payload);
 
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Procedure updated.')
@@ -224,7 +275,7 @@ class ProcedureApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->adminUser, 'api')
-            ->putJson('/api/v1/procedures/' . $procedure->id, $payload);
+            ->putJson('/api/v1/procedures/'.$procedure->id, $payload);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
@@ -238,7 +289,7 @@ class ProcedureApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->adminUser, 'api')
-            ->deleteJson('/api/v1/procedures/' . $procedure->id);
+            ->deleteJson('/api/v1/procedures/'.$procedure->id);
 
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Procedure deleted.');
@@ -248,7 +299,7 @@ class ProcedureApiTest extends TestCase
         ]);
     }
 
-    public function test_destroy_returns_409_when_practices_attached(): void
+    public function test_destroy_unlinks_attached_practices(): void
     {
         $procedure = Procedure::factory()->create([
             'procedure_type_id' => $this->practiceType->id,
@@ -256,21 +307,56 @@ class ProcedureApiTest extends TestCase
         ]);
 
         // Create a practice attached to this procedure
-        Practice::factory()->create([
+        $practice = Practice::factory()->create([
             'procedure_id' => $procedure->id,
             'practice_type_id' => $this->practiceType->id,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'api')
-            ->deleteJson('/api/v1/procedures/' . $procedure->id);
+            ->deleteJson('/api/v1/procedures/'.$procedure->id);
 
-        $response->assertStatus(409)
-            ->assertJsonPath('message', 'Cannot delete procedure with attached practices.');
+        $response->assertOk()
+            ->assertJsonPath('message', 'Procedure deleted.');
 
-        // Verify procedure still exists
-        $this->assertDatabaseHas('procedures', [
+        $this->assertDatabaseMissing('procedures', [
             'id' => $procedure->id,
         ]);
+        $this->assertNull($practice->fresh()->procedure_id);
+    }
+
+    public function test_update_rejects_type_change_when_practices_are_attached(): void
+    {
+        $procedure = Procedure::factory()->create([
+            'procedure_type_id' => $this->practiceType->id,
+        ]);
+        Practice::factory()->create([
+            'procedure_id' => $procedure->id,
+            'practice_type_id' => $this->practiceType->id,
+        ]);
+        $newType = PracticeType::factory()->create();
+
+        $this->actingAs($this->adminUser, 'api')
+            ->putJson('/api/v1/procedures/'.$procedure->id, [
+                'procedure_type_id' => $newType->id,
+                'name' => $procedure->name,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['procedure_type_id']);
+
+        $this->assertSame($this->practiceType->id, $procedure->fresh()->procedure_type_id);
+    }
+
+    public function test_nullable_deadline_templates_are_treated_as_an_empty_list(): void
+    {
+        $response = $this->actingAs($this->adminUser, 'api')
+            ->postJson('/api/v1/procedures', [
+                'procedure_type_id' => $this->practiceType->id,
+                'name' => 'No automatic steps',
+                'deadline_templates' => null,
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonCount(0, 'data.deadline_templates');
     }
 
     public function test_unauthenticated_user_cannot_access(): void
@@ -313,7 +399,7 @@ class ProcedureApiTest extends TestCase
         ];
 
         $response = $this->actingAs($this->unauthorizedUser, 'api')
-            ->putJson('/api/v1/procedures/' . $procedure->id, $payload);
+            ->putJson('/api/v1/procedures/'.$procedure->id, $payload);
 
         $response->assertStatus(403);
     }
@@ -325,7 +411,7 @@ class ProcedureApiTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->unauthorizedUser, 'api')
-            ->deleteJson('/api/v1/procedures/' . $procedure->id);
+            ->deleteJson('/api/v1/procedures/'.$procedure->id);
 
         $response->assertStatus(403);
     }
@@ -346,7 +432,7 @@ class ProcedureApiTest extends TestCase
     public function test_same_nome_allowed_across_different_types(): void
     {
         $anotherPracticeType = PracticeType::factory()->create([
-            'name' => 'AnotherType_' . uniqid(),
+            'name' => 'AnotherType_'.uniqid(),
         ]);
 
         Procedure::factory()->create([

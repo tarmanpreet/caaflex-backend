@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
@@ -82,7 +83,10 @@ class AuthController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $token || str_starts_with($token->name, self::REFRESH_TOKEN_PREFIX) === false || $this->isExpired($token)) {
+            if (! $token
+                || str_starts_with($token->name, self::REFRESH_TOKEN_PREFIX) === false
+                || ! $token->can('refresh')
+                || $this->isExpired($token)) {
                 return response()->json(['message' => 'Token di refresh non valido.'], 401);
             }
 
@@ -109,10 +113,15 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        $user = $request->user();
+        $user->currentAccessToken()?->delete();
 
         if (filled($request->input('refresh_token'))) {
-            PersonalAccessToken::findToken($request->input('refresh_token'))?->delete();
+            $refreshToken = PersonalAccessToken::findToken($request->input('refresh_token'));
+
+            if ($refreshToken?->tokenable()->is($user) && $refreshToken->can('refresh')) {
+                $refreshToken->delete();
+            }
         }
 
         return response()->json(['message' => 'Disconnesso con successo.']);
@@ -137,7 +146,7 @@ class AuthController extends Controller
         return response()->json(['message' => "Se l'indirizzo esiste, riceverai un'email con il codice di reset."]);
     }
 
-    public function passwordReset(Request $request): JsonResponse
+    public function passwordReset(Request $request, ResetUserPassword $resetUserPassword): JsonResponse
     {
         $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -147,8 +156,11 @@ class AuthController extends Controller
 
         $status = Password::reset(
             $request->only('email', 'token', 'password', 'password_confirmation'),
-            function ($user, string $password): void {
-                $user->forceFill(['password' => $password])->save();
+            function (User $user, string $password) use ($resetUserPassword): void {
+                $resetUserPassword->reset($user, [
+                    'password' => $password,
+                    'password_confirmation' => $password,
+                ]);
                 event(new PasswordResetEvent($user));
             },
         );
@@ -163,7 +175,7 @@ class AuthController extends Controller
     /** @return array<string, mixed> */
     private function buildUserPayload(User $user): array
     {
-        $user->loadMissing(['roles:id,name', 'permissions:id,name']);
+        $user->loadMissing(['roles:id,name', 'permissions:id,name', 'clientProfile:id,user_id']);
         $roles = $user->getRoleNames()->values();
         $roleName = $roles->first() ?? 'employee';
         $role = $roleName === 'cliente' ? 'citizenapp' : 'adminapp';
@@ -187,6 +199,7 @@ class AuthController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'client_profile_id' => $user->clientProfile?->id,
             'role' => $role,
             'role_name' => $roleName,
             'roles' => $roles,
@@ -217,12 +230,12 @@ class AuthController extends Controller
     {
         $access = $user->createToken(
             self::ACCESS_TOKEN_PREFIX,
-            ['*'],
+            ['access'],
             now()->addMinutes(config('sanctum.mobile.access_token_minutes')),
         );
         $refresh = $user->createToken(
             self::REFRESH_TOKEN_PREFIX,
-            ['*'],
+            ['refresh'],
             now()->addDays(config('sanctum.mobile.refresh_token_days')),
         );
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -72,13 +73,18 @@ class PasswordResetTest extends TestCase
 
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'password' => 'old-password',
+            'remember_token' => 'old-remember-token',
+        ]);
+        $user->createToken('mobile-access', ['access'], now()->addHour());
+        $rememberToken = $user->remember_token;
 
         $this->post('/forgot-password', [
             'email' => $user->email,
         ]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
+        Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($rememberToken, $user) {
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,
@@ -87,6 +93,11 @@ class PasswordResetTest extends TestCase
             ]);
 
             $response->assertSessionHasNoErrors();
+
+            $user->refresh();
+            $this->assertTrue(Hash::check('password', $user->password));
+            $this->assertNotSame($rememberToken, $user->remember_token);
+            $this->assertDatabaseCount('personal_access_tokens', 0);
 
             return true;
         });
