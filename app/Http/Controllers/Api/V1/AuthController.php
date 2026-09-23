@@ -228,13 +228,14 @@ class AuthController extends Controller
     /** @return array<string, string> */
     private function issueTokens(User $user): array
     {
+        $sessionId = Str::uuid()->toString();
         $access = $user->createToken(
-            self::ACCESS_TOKEN_PREFIX,
+            self::ACCESS_TOKEN_PREFIX.':'.$sessionId,
             ['access'],
             now()->addMinutes(config('sanctum.mobile.access_token_minutes')),
         );
         $refresh = $user->createToken(
-            self::REFRESH_TOKEN_PREFIX,
+            self::REFRESH_TOKEN_PREFIX.':'.$sessionId,
             ['refresh'],
             now()->addDays(config('sanctum.mobile.refresh_token_days')),
         );

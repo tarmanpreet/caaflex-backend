@@ -135,6 +135,31 @@ class AccountApiTest extends TestCase
             ->assertUnauthorized();
     }
 
+    public function test_logging_out_other_sessions_keeps_the_current_mobile_refresh_token(): void
+    {
+        $user = User::factory()->create(['password' => 'password']);
+        $firstLogin = $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+        $secondLogin = $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+
+        $this->withToken($firstLogin->json('access_token'))
+            ->deleteJson('/api/v1/account/other-sessions', ['password' => 'password'])
+            ->assertOk()
+            ->assertJsonPath('data.revoked_tokens', 2);
+
+        $this->assertNotNull(\Laravel\Sanctum\PersonalAccessToken::findToken($firstLogin->json('refresh_token')));
+        $this->assertNull(\Laravel\Sanctum\PersonalAccessToken::findToken($secondLogin->json('refresh_token')));
+
+        $this->postJson('/api/v1/tokens/refresh', [
+            'token' => $firstLogin->json('refresh_token'),
+        ])->assertOk();
+    }
+
     public function test_user_can_delete_own_account_with_current_password(): void
     {
         $user = User::factory()->create();

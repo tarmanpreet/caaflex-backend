@@ -134,6 +134,24 @@ class SanctumAuthenticationTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
+    public function test_two_factor_recovery_code_can_be_used_only_once(): void
+    {
+        $user = $this->userWithTwoFactor();
+
+        $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'two_factor_code' => 'abcd1234',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'two_factor_code' => 'abcd1234',
+        ])->assertUnauthorized()
+            ->assertJsonPath('two_factor_required', false);
+    }
+
     public function test_refresh_token_rotates_the_pair_and_revokes_the_used_token(): void
     {
         $user = User::factory()->create(['password' => 'password']);
@@ -379,7 +397,7 @@ class SanctumAuthenticationTest extends TestCase
         $user->forceFill([
             'two_factor_secret' => Fortify::currentEncrypter()->encrypt($secret),
             'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(
-                array_fill(0, 8, 'abcd1234'),
+                array_merge(['abcd1234'], array_map(fn (int $index): string => sprintf('code-%04d', $index), range(1, 7))),
             )),
             'two_factor_confirmed_at' => now(),
         ])->save();
