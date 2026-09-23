@@ -64,6 +64,45 @@ class PracticeController extends Controller
         ]);
     }
 
+    public function showMine(Request $request, int $practice): JsonResponse
+    {
+        $clientProfile = $request->user()->clientProfile;
+
+        if (! $clientProfile || ! $request->user()->hasPermissionTo('clients.view-own')) {
+            abort(404);
+        }
+
+        $ownedPractice = $clientProfile->practices()
+            ->with([
+                'practiceType:id,name,color',
+                'procedure:id,name',
+                'branch:id,name',
+                'statusLogs:id,practice_id,old_status,new_status,created_at',
+            ])
+            ->findOrFail($practice);
+
+        return response()->json([
+            'data' => [
+                'id' => $ownedPractice->id,
+                'type' => $ownedPractice->type,
+                'status' => $ownedPractice->status,
+                'tracking_code' => $ownedPractice->tracking_code,
+                'reference_year' => $ownedPractice->reference_year,
+                'deadline_at' => $ownedPractice->deadline_at,
+                'created_at' => $ownedPractice->created_at,
+                'updated_at' => $ownedPractice->updated_at,
+                'practice_type' => $ownedPractice->practiceType,
+                'procedure' => $ownedPractice->procedure,
+                'branch' => $ownedPractice->branch,
+                'status_history' => $ownedPractice->statusLogs->map(fn ($log) => [
+                    'old_status' => $log->old_status,
+                    'new_status' => $log->new_status,
+                    'created_at' => $log->created_at,
+                ]),
+            ],
+        ]);
+    }
+
     public function update(UpdatePracticeRequest $request, Practice $practice, UpdatePracticeAction $action): JsonResponse
     {
         $data = $request->validated();

@@ -49,6 +49,7 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::delete('/clients/{client}/documents/{document}', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'destroy'])->scopeBindings();
 
         // Practice routes
+        Route::get('/my-practices/{practice}', [App\Http\Controllers\Api\V1\PracticeController::class, 'showMine'])->name('my-practices.show');
         Route::apiResource('/practices', App\Http\Controllers\Api\V1\PracticeController::class);
         Route::post('/practices/{practice}/assign', [App\Http\Controllers\Api\V1\PracticeController::class, 'assignUsers']);
 
