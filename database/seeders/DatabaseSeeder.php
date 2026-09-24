@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Branch;
 use App\Models\ClientDocument;
 use App\Models\ClientProfile;
 use App\Models\Practice;
@@ -32,24 +33,24 @@ class DatabaseSeeder extends Seeder
     {
         $users = [
             [
-                'name'  => 'Super Admin',
+                'name' => 'Super Admin',
                 'email' => env('SEED_SUPERADMIN_EMAIL', 'superadmin@email.com'),
-                'role'  => 'superadmin',
+                'role' => 'superadmin',
             ],
             [
-                'name'  => 'Admin',
+                'name' => 'Admin',
                 'email' => env('SEED_ADMIN_EMAIL', 'admin@email.com'),
-                'role'  => 'admin',
+                'role' => 'admin',
             ],
             [
-                'name'  => 'Employee',
+                'name' => 'Employee',
                 'email' => env('SEED_EMPLOYEE_EMAIL', 'employee@email.com'),
-                'role'  => 'employee',
+                'role' => 'employee',
             ],
             [
-                'name'  => 'Client',
+                'name' => 'Client',
                 'email' => env('SEED_CLIENT_EMAIL', 'client@email.com'),
-                'role'  => 'cliente',
+                'role' => 'cliente',
             ],
         ];
 
@@ -57,8 +58,8 @@ class DatabaseSeeder extends Seeder
             $user = User::firstOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name'              => $data['name'],
-                    'password'          => Hash::make('password'),
+                    'name' => $data['name'],
+                    'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ]
             );
@@ -69,9 +70,10 @@ class DatabaseSeeder extends Seeder
 
     private function seedFakeData(): void
     {
-        $admin    = User::where('email', env('SEED_ADMIN_EMAIL', 'admin@email.com'))->first();
+        $mainBranchId = Branch::query()->whereNull('parent_id')->min('id');
+        $admin = User::where('email', env('SEED_ADMIN_EMAIL', 'admin@email.com'))->first();
         $employee = User::where('email', env('SEED_EMPLOYEE_EMAIL', 'employee@email.com'))->first();
-        $client   = User::where('email', env('SEED_CLIENT_EMAIL', 'client@email.com'))->first();
+        $client = User::where('email', env('SEED_CLIENT_EMAIL', 'client@email.com'))->first();
 
         // 3 employee aggiuntivi finti
         $employees = User::factory(3)->create(['password' => Hash::make('password')]);
@@ -80,12 +82,14 @@ class DatabaseSeeder extends Seeder
 
         // 10 clienti — uno è l'utente client reale, gli altri sono profili anonimi
         $clientProfile = ClientProfile::factory()->create([
-            'user_id'    => $client->id,
+            'user_id' => $client->id,
             'created_by' => $admin->id,
+            'branch_id' => $mainBranchId,
         ]);
 
         $otherProfiles = ClientProfile::factory(9)->create([
             'created_by' => $admin->id,
+            'branch_id' => $mainBranchId,
         ]);
 
         $allProfiles = $otherProfiles->push($clientProfile);
@@ -94,13 +98,14 @@ class DatabaseSeeder extends Seeder
         $allProfiles->each(function ($profile) use ($admin) {
             ClientDocument::factory(fake()->numberBetween(0, 2))->create([
                 'client_profile_id' => $profile->id,
-                'uploaded_by'       => $admin->id,
+                'uploaded_by' => $admin->id,
             ]);
         });
 
         // 15 pratiche distribuite tra i clienti
         $practices = Practice::factory(15)->create([
             'client_profile_id' => fn () => $allProfiles->random()->id,
+            'branch_id' => $mainBranchId,
         ]);
 
         // Assegna 1-2 employee ad ogni pratica
@@ -111,7 +116,7 @@ class DatabaseSeeder extends Seeder
             // 0-3 note per pratica
             PracticeNote::factory(fake()->numberBetween(0, 3))->create([
                 'practice_id' => $practice->id,
-                'user_id'     => $assigned->first()->id,
+                'user_id' => $assigned->first()->id,
             ]);
 
             // 0-2 documenti per pratica
@@ -123,7 +128,7 @@ class DatabaseSeeder extends Seeder
             // 1-2 log di stato
             PracticeStatusLog::factory(fake()->numberBetween(1, 2))->create([
                 'practice_id' => $practice->id,
-                'user_id'     => $admin->id,
+                'user_id' => $admin->id,
             ]);
         });
 

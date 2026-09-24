@@ -127,6 +127,7 @@ class AppointmentSeeder extends Seeder
 
             $appointment = Appointment::create([
                 'client_profile_id' => $client->id,
+                'branch_id' => $client->branch_id,
                 'assigned_user_id' => $employee->id,
                 'practice_type_id' => $practiceType->id,
                 'scheduled_at' => $scheduledAt,
@@ -142,6 +143,7 @@ class AppointmentSeeder extends Seeder
                 $practice = Practice::create([
                     'tracking_code' => Practice::uniqueTrackingCode(),
                     'client_profile_id' => $client->id,
+                    'branch_id' => $client->branch_id,
                     'type' => $practiceTypeName,
                     'practice_type_id' => $practiceType->id,
                     'status' => 'in_lavorazione',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Branch\CreateBranchAction;
 use App\Actions\Branch\DeleteBranchAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBranchRequest;
@@ -39,11 +40,11 @@ class BranchController extends Controller
         ]);
     }
 
-    public function store(StoreBranchRequest $request): JsonResponse
+    public function store(StoreBranchRequest $request, CreateBranchAction $action): JsonResponse
     {
         $this->authorize('create', Branch::class);
 
-        $branch = Branch::create($request->validated());
+        $branch = $action->execute($request->validated());
 
         return response()->json([
             'message' => 'Filiale creata.',

@@ -8,6 +8,7 @@ use App\Models\ClientProfile;
 use App\Models\Practice;
 use App\Models\PracticeType;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,6 +67,69 @@ class BranchManagementTest extends TestCase
             ->assertRedirect(route('branches.edit', $branch))
             ->assertSessionHas('success', 'Filiale creata.');
         $this->assertDatabaseHas('branches', ['name' => 'Sede Milano']);
+    }
+
+    public function test_creating_first_branch_keeps_existing_clients_practices_and_appointments_accessible(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create(['branch_id' => null]);
+        $practice = Practice::factory()->create(['client_profile_id' => $client->id, 'branch_id' => null]);
+        $appointment = Appointment::factory()->create(['client_profile_id' => $client->id, 'practice_id' => $practice->id, 'branch_id' => null]);
+
+        $this->actingAs($admin)->post(route('branches.store'), [
+            'name' => 'Sede Milano',
+            'address' => 'Via Roma 1',
+            'city' => 'Milano',
+            'province' => 'MI',
+            'postal_code' => '20100',
+        ])->assertRedirect();
+
+        $branch = Branch::query()->sole();
+        $this->assertDatabaseHas('client_profiles', ['id' => $client->id, 'branch_id' => $branch->id]);
+        $this->assertDatabaseHas('practices', ['id' => $practice->id, 'branch_id' => $branch->id]);
+        $this->assertDatabaseHas('appointments', ['id' => $appointment->id, 'branch_id' => $branch->id]);
+        $admin = $admin->fresh();
+        $this->assertSame(1, app(\App\Actions\Client\IndexClientAction::class)->execute(request(), $admin)->total());
+        $this->assertSame(1, app(\App\Actions\Practice\IndexPracticeAction::class)->execute(request(), $admin)->total());
+        $this->actingAs($admin)->get(route('clients.show', $client))->assertOk();
+        $this->actingAs($admin)->get(route('practices.show', $practice))->assertOk();
+    }
+
+    public function test_api_creation_of_first_branch_assigns_existing_records(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $client = ClientProfile::factory()->create(['branch_id' => null]);
+        $practice = Practice::factory()->create(['client_profile_id' => $client->id, 'branch_id' => null]);
+
+        $this->actingAs($admin, 'api')->postJson('/api/v1/branches', [
+            'name' => 'Sede Milano',
+            'address' => 'Via Roma 1',
+            'city' => 'Milano',
+            'province' => 'MI',
+            'postal_code' => '20100',
+        ])->assertCreated();
+
+        $branch = Branch::query()->sole();
+        $this->assertDatabaseHas('client_profiles', ['id' => $client->id, 'branch_id' => $branch->id]);
+        $this->assertDatabaseHas('practices', ['id' => $practice->id, 'branch_id' => $branch->id]);
+    }
+
+    public function test_local_demo_seeding_assigns_records_to_existing_branch(): void
+    {
+        $branch = Branch::factory()->create(['parent_id' => null]);
+        app()->detectEnvironment(fn (): string => 'local');
+
+        $this->seed(DatabaseSeeder::class);
+
+        $this->assertGreaterThan(0, ClientProfile::query()->count());
+        $this->assertGreaterThan(0, Practice::query()->count());
+        $this->assertGreaterThan(0, Appointment::query()->count());
+        $this->assertSame(0, ClientProfile::query()->whereNull('branch_id')->count());
+        $this->assertSame(0, Practice::query()->whereNull('branch_id')->count());
+        $this->assertSame(0, Appointment::query()->whereNull('branch_id')->count());
+        $this->assertSame($branch->id, ClientProfile::query()->firstOrFail()->branch_id);
     }
 
     public function test_admin_can_update_branch(): void

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Branch\CreateBranchAction;
 use App\Actions\Branch\DeleteBranchAction;
 use App\Http\Requests\StoreBranchRequest;
 use App\Http\Requests\UpdateBranchRequest;
@@ -97,9 +98,9 @@ class BranchController extends Controller
         ]);
     }
 
-    public function store(StoreBranchRequest $request)
+    public function store(StoreBranchRequest $request, CreateBranchAction $action)
     {
-        $branch = Branch::create($request->validated());
+        $branch = $action->execute($request->validated());
 
         return redirect()->route('branches.edit', $branch)
             ->with('success', 'Filiale creata.');

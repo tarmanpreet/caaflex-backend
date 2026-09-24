@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\MobileSyncGuard;
 use Illuminate\Support\Facades\Route;
 
 // API v1 routes
@@ -17,8 +18,9 @@ Route::prefix('v1')->name('api.')->group(function () {
     Route::post('/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware(['auth:api', 'active-user', 'access-token']);
 
     // Protected routes
-    Route::middleware(['auth:api', 'active-user', 'access-token'])->group(function () {
+    Route::middleware(['auth:api', 'active-user', 'access-token', MobileSyncGuard::class])->group(function () {
         Route::get('/me', [App\Http\Controllers\Api\V1\AuthController::class, 'me']);
+        Route::get('/sync/changes', App\Http\Controllers\Api\V1\MobileSyncController::class);
 
         // Account and security routes
         Route::put('/account/profile', [App\Http\Controllers\Api\V1\AccountController::class, 'updateProfile']);
