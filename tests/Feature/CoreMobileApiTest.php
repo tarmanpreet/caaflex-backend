@@ -31,7 +31,7 @@ class CoreMobileApiTest extends TestCase
     public function test_public_app_config_exposes_only_mobile_safe_configuration(): void
     {
         config([
-            'branding.name' => 'CAFlex',
+            'branding.name' => 'CAAFlex',
             'broadcasting.default' => 'reverb',
             'broadcasting.connections.reverb.key' => 'public-key',
             'broadcasting.connections.reverb.secret' => 'do-not-expose',
@@ -39,7 +39,7 @@ class CoreMobileApiTest extends TestCase
 
         $this->getJson('/api/v1/app-config')
             ->assertOk()
-            ->assertJsonPath('data.branding.name', 'CAFlex')
+            ->assertJsonPath('data.branding.name', 'CAAFlex')
             ->assertJsonPath('data.branding.logo_light_url', '/brand/caaflex-logo-light.png')
             ->assertJsonPath('data.realtime.enabled', true)
             ->assertJsonPath('data.realtime.key', 'public-key')

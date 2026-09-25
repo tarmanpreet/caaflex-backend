@@ -471,7 +471,7 @@ const workflow = [
                     <div data-reveal class="reveal">
                         <span class="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-sm font-bold text-cyan-100 backdrop-blur"><LockClosedIcon class="h-4 w-4" />Privacy dei dati</span>
                         <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">I dati sono tuoi. Restano sul tuo server.</h2>
-                        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">CAFlex conserva anagrafiche, pratiche e documenti nell’infrastruttura della tua organizzazione. I dati non vengono condivisi con altri clienti. Ruoli e permessi limitano l’accesso agli operatori autorizzati.</p>
+                        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">CAAFlex conserva anagrafiche, pratiche e documenti nell’infrastruttura della tua organizzazione. I dati non vengono condivisi con altri clienti. Ruoli e permessi limitano l’accesso agli operatori autorizzati.</p>
                     </div>
 
                     <div data-reveal class="reveal grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
