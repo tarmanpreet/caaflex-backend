@@ -19,6 +19,8 @@ use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\PublicPracticeStatusController;
 use App\Http\Controllers\UserAvailabilityController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\SetNexxworthEnglishLocale;
+use App\Support\NexxworthSeo;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [NexxworthSiteController::class, 'home'])->name('home');
@@ -27,9 +29,44 @@ Route::get('/servizi', [NexxworthSiteController::class, 'services'])->name('nexx
 Route::get('/collaborazioni', [NexxworthSiteController::class, 'partners'])->name('nexxworth.partners');
 Route::get('/contatti', [NexxworthSiteController::class, 'contact'])->name('nexxworth.contact');
 Route::get('/informativa-privacy', [NexxworthSiteController::class, 'privacy'])->name('nexxworth.privacy');
+Route::get('/stato-pratica', [PublicPracticeStatusController::class, 'nexxworthIndex'])->name('nexxworth.status');
+Route::post('/stato-pratica', [PublicPracticeStatusController::class, 'nexxworthLookup'])
+    ->middleware('throttle:10,1')->name('nexxworth.status.lookup');
 Route::post('/contatti', [NexxworthSiteController::class, 'submitContact'])
     ->middleware('throttle:5,1')
     ->name('nexxworth.contact.submit');
+
+Route::middleware(SetNexxworthEnglishLocale::class)->prefix('en')->name('nexxworth.en.')->group(function (): void {
+    Route::get('/', [NexxworthSiteController::class, 'englishHome'])->name('home');
+    Route::get('/about', [NexxworthSiteController::class, 'englishAbout'])->name('about');
+    Route::get('/services', [NexxworthSiteController::class, 'englishServices'])->name('services');
+    Route::get('/partners', [NexxworthSiteController::class, 'englishPartners'])->name('partners');
+    Route::get('/contact', [NexxworthSiteController::class, 'englishContact'])->name('contact');
+    Route::get('/privacy', [NexxworthSiteController::class, 'englishPrivacy'])->name('privacy');
+    Route::get('/check-status', [PublicPracticeStatusController::class, 'nexxworthIndex'])->name('status');
+    Route::post('/check-status', [PublicPracticeStatusController::class, 'nexxworthLookup'])
+        ->middleware('throttle:10,1')->name('status.lookup');
+    Route::post('/contact', [NexxworthSiteController::class, 'submitContact'])
+        ->middleware('throttle:5,1')
+        ->name('contact.submit');
+});
+
+Route::get('/sitemap.xml', function () {
+    abort_unless(config('branding.customer_code') === 'nexxworth', 404);
+
+    return response()->view('nexxworth-sitemap', ['pages' => NexxworthSeo::sitemap()])
+        ->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('nexxworth.sitemap');
+
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nAllow: /\n";
+
+    if (config('branding.customer_code') === 'nexxworth') {
+        $content .= 'Sitemap: '.route('nexxworth.sitemap')."\n";
+    }
+
+    return response($content)->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('robots');
 
 Route::get('/controlla-pratica', [PublicPracticeStatusController::class, 'index'])->name('practice-status.index');
 Route::post('/controlla-pratica', [PublicPracticeStatusController::class, 'lookup'])

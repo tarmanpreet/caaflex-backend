@@ -33,6 +33,14 @@ class LookupPracticeStatusRequest extends FormRequest
      */
     public function messages(): array
     {
+        if ($this->routeIs('nexxworth.en.status.lookup')) {
+            return [
+                'code.required' => 'Enter your tracking code.',
+                'code.size' => 'The code must contain exactly 10 characters.',
+                'code.regex' => 'Use letters and numbers only.',
+            ];
+        }
+
         return [
             'code.required' => 'Inserisci il codice della pratica.',
             'code.size' => 'Il codice deve contenere esattamente 10 caratteri.',

@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Mail\NexxworthContactMail;
+use App\Models\Practice;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -10,6 +12,8 @@ use Tests\TestCase;
 
 class NexxworthSiteTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_caaflex_remains_the_default_public_site(): void
     {
         $this->withoutVite();
@@ -24,6 +28,100 @@ class NexxworthSiteTest extends TestCase
         $this->get(route('nexxworth.partners'))->assertNotFound();
         $this->get(route('nexxworth.contact'))->assertNotFound();
         $this->get(route('nexxworth.privacy'))->assertNotFound();
+        $this->get(route('nexxworth.en.home'))->assertNotFound();
+        $this->get(route('nexxworth.status'))->assertNotFound();
+        $this->post(route('nexxworth.status.lookup'), ['code' => 'ABCDEFGHIJ'])->assertNotFound();
+        $this->get(route('nexxworth.sitemap'))->assertNotFound();
+        $this->get(route('robots'))->assertOk()->assertDontSee('Sitemap:');
+    }
+
+    public function test_english_pages_have_distinct_localized_metadata_and_alternates(): void
+    {
+        $this->withoutVite();
+        config()->set('branding.customer_code', 'nexxworth');
+
+        foreach (['home' => 'Home', 'about' => 'About', 'services' => 'Services', 'partners' => 'Partners', 'contact' => 'Contact', 'privacy' => 'Privacy'] as $key => $component) {
+            $route = "nexxworth.en.{$key}";
+            $italianRoute = $key === 'home' ? 'home' : "nexxworth.{$key}";
+
+            $this->get(route($route))
+                ->assertOk()
+                ->assertSee('<html lang="en">', false)
+                ->assertSee('<link rel="canonical" href="'.route($route).'">', false)
+                ->assertSee('<link rel="alternate" hreflang="it" href="'.route($italianRoute).'">', false)
+                ->assertSee('<link rel="alternate" hreflang="en" href="'.route($route).'">', false)
+                ->assertSee('<meta name="description"', false)
+                ->assertInertia(fn (Assert $page) => $page->component("Public/Nexxworth/En/{$component}"));
+
+            $this->get(route($italianRoute))
+                ->assertOk()
+                ->assertSee('<html lang="it">', false)
+                ->assertSee('<link rel="alternate" hreflang="en" href="'.route($route).'">', false);
+        }
+    }
+
+    public function test_sitemap_lists_both_languages_and_tracking_pages(): void
+    {
+        config()->set('branding.customer_code', 'nexxworth');
+
+        $response = $this->get(route('nexxworth.sitemap'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
+            ->assertSee(route('nexxworth.en.home'))
+            ->assertSee(route('nexxworth.en.status'))
+            ->assertSee(route('nexxworth.status'));
+
+        $xml = new \DOMDocument;
+        $this->assertTrue($xml->loadXML($response->getContent()));
+        $this->assertSame(14, $xml->getElementsByTagName('url')->length);
+
+        $this->get(route('robots'))
+            ->assertOk()
+            ->assertSee('Sitemap: '.route('nexxworth.sitemap'));
+    }
+
+    public function test_english_contact_form_returns_to_english_page(): void
+    {
+        $this->withoutMiddleware(ThrottleRequests::class);
+        Mail::fake();
+        config()->set('branding.customer_code', 'nexxworth');
+
+        $this->post(route('nexxworth.en.contact.submit'), [
+            'name' => 'Alex Smith',
+            'email' => 'alex@example.com',
+            'message' => 'I would like information about a visa application.',
+            'privacy_accepted' => true,
+        ])->assertRedirect(route('nexxworth.en.contact'))
+            ->assertSessionHas('success', 'Message sent. We will get back to you as soon as possible.');
+
+        Mail::assertSent(NexxworthContactMail::class);
+    }
+
+    public function test_nexxworth_tracking_uses_its_own_pages_and_exposes_only_status(): void
+    {
+        $this->withoutVite();
+        $this->withoutMiddleware(ThrottleRequests::class);
+        config()->set('branding.customer_code', 'nexxworth');
+        $practice = Practice::factory()->create(['status' => 'in_lavorazione']);
+
+        $this->get(route('nexxworth.status'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Public/Nexxworth/Status')->where('locale', 'it'));
+
+        $this->get(route('nexxworth.en.status'))
+            ->assertOk()
+            ->assertSee('<html lang="en">', false)
+            ->assertInertia(fn (Assert $page) => $page->component('Public/Nexxworth/Status')->where('locale', 'en'));
+
+        $this->post(route('nexxworth.en.status.lookup'), ['code' => strtolower($practice->tracking_code)])
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Public/Nexxworth/Status')
+                ->where('locale', 'en')
+                ->where('result.code', $practice->tracking_code)
+                ->where('result.status', 'in_lavorazione')
+                ->missing('result.client')
+                ->missing('result.documents'));
     }
 
     public function test_nexxworth_installation_serves_all_its_public_pages(): void

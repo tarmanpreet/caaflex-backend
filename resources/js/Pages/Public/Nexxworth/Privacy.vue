@@ -1,11 +1,9 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
 import NexxworthLayout from '@/Layouts/NexxworthLayout.vue';
 </script>
 
 <template>
     <NexxworthLayout>
-        <Head title="Informativa privacy"><meta name="description" content="Informazioni sul trattamento dei dati personali da parte di Nexxworth Consulting di Singh Kamaljeet." /></Head>
         <section class="bg-[#10223a] text-white"><div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20"><p class="text-xs font-bold uppercase tracking-[0.22em] text-[#ee938a]">Protezione dei dati</p><h1 class="mt-5 [font-family:Georgia,serif] text-5xl leading-tight tracking-tight sm:text-6xl">Informativa privacy</h1><p class="mt-5 max-w-2xl text-base leading-8 text-[#d2dfeb]">Informazioni sul trattamento dei dati personali ai sensi del Regolamento (UE) 2016/679.</p></div></section>
         <section class="mx-auto max-w-4xl px-5 py-16 sm:px-8 lg:py-20"><div class="space-y-10 rounded-[2rem] border border-[#e1e6e8] bg-white p-7 text-base leading-8 text-[#455b70] shadow-sm sm:p-12">
             <div><h2 class="text-2xl font-bold text-[#132b47]">Titolare del trattamento</h2><p class="mt-3">Nexxworth Consulting di Singh Kamaljeet, Via Cremona 29/A int. 3, 46100 Mantova (MN), P. IVA 02553520202. Per richieste relative ai dati personali puoi scrivere a <a href="mailto:ksd.servizi@gmail.com" class="font-semibold text-[#194a79] underline">ksd.servizi@gmail.com</a>.</p></div>
@@ -14,7 +12,7 @@ import NexxworthLayout from '@/Layouts/NexxworthLayout.vue';
             <div><h2 class="text-2xl font-bold text-[#132b47]">Destinatari e conservazione</h2><p class="mt-3">I dati possono essere accessibili a personale e collaboratori autorizzati e, quando necessario per il servizio richiesto o per obblighi di legge, ai professionisti e soggetti coinvolti nella pratica. Non sono destinati alla diffusione pubblica. Sono conservati per il tempo necessario alle finalità per cui sono stati raccolti e agli eventuali obblighi di legge.</p></div>
             <div><h2 class="text-2xl font-bold text-[#132b47]">I tuoi diritti</h2><p class="mt-3">Puoi chiedere accesso, rettifica, cancellazione o limitazione del trattamento dei tuoi dati, esercitare il diritto alla portabilità quando applicabile e opporti al trattamento nei casi previsti. Puoi inoltre proporre reclamo al <a href="https://www.garanteprivacy.it/" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#194a79] underline">Garante per la protezione dei dati personali</a>. Per esercitare i tuoi diritti, contatta il titolare all’indirizzo email indicato sopra.</p></div>
             <div><h2 class="text-2xl font-bold text-[#132b47]">Cookie e collegamenti esterni</h2><p class="mt-3">Questo sito utilizza le funzionalità tecniche necessarie alla navigazione e all’invio delle richieste. I collegamenti a servizi esterni, come mappe o WhatsApp, si aprono solo quando scegli di utilizzarli; tali servizi applicano le proprie informative.</p></div>
-            <div class="border-t border-[#e1e6e8] pt-8"><Link :href="route('nexxworth.contact')" class="inline-flex min-h-[44px] items-center rounded-full bg-[#194a79] px-6 py-2 text-sm font-bold text-white transition hover:bg-[#10223a]">Torna ai contatti</Link></div>
+            <div class="border-t border-[#e1e6e8] pt-8"><a :href="route('nexxworth.contact')" class="inline-flex min-h-[44px] items-center rounded-full bg-[#194a79] px-6 py-2 text-sm font-bold text-white transition hover:bg-[#10223a]">Torna ai contatti</a></div>
         </div></section>
     </NexxworthLayout>
 </template>
