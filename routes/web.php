@@ -6,6 +6,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientDocumentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NexxworthSiteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\PracticeController;
@@ -18,18 +19,17 @@ use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\PublicPracticeStatusController;
 use App\Http\Controllers\UserAvailabilityController;
 use App\Http\Controllers\UserController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->name('home');
+Route::get('/', [NexxworthSiteController::class, 'home'])->name('home');
+Route::get('/chi-siamo', [NexxworthSiteController::class, 'about'])->name('nexxworth.about');
+Route::get('/servizi', [NexxworthSiteController::class, 'services'])->name('nexxworth.services');
+Route::get('/collaborazioni', [NexxworthSiteController::class, 'partners'])->name('nexxworth.partners');
+Route::get('/contatti', [NexxworthSiteController::class, 'contact'])->name('nexxworth.contact');
+Route::get('/informativa-privacy', [NexxworthSiteController::class, 'privacy'])->name('nexxworth.privacy');
+Route::post('/contatti', [NexxworthSiteController::class, 'submitContact'])
+    ->middleware('throttle:5,1')
+    ->name('nexxworth.contact.submit');
 
 Route::get('/controlla-pratica', [PublicPracticeStatusController::class, 'index'])->name('practice-status.index');
 Route::post('/controlla-pratica', [PublicPracticeStatusController::class, 'lookup'])

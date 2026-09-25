@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'branding' => [
+                'customer_code' => config('branding.customer_code'),
                 'name' => config('branding.name'),
                 'logo_url' => config('branding.logo_url'),
                 'logo_light_url' => config('branding.logo_light_url'),

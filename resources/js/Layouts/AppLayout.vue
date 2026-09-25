@@ -3,6 +3,7 @@ import { computed, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Banner from '@/Components/Banner.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
 import Dropdown from '@/Components/Dropdown.vue';
@@ -47,6 +48,7 @@ const isCliente = computed(() => roles.value.includes('cliente'));
 const isAdmin = computed(() => roles.value.includes('admin') || roles.value.includes('superadmin'));
 const canCreatePractice = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 const canViewDeadlines = computed(() => page.props.auth.user?.permissions?.includes('practice-deadlines.view'));
+const isNexxworth = computed(() => page.props.branding.customer_code === 'nexxworth');
 
 watch(() => page.props.flash, (flash) => {
     if (flash?.success) {
@@ -92,9 +94,10 @@ const navItems = computed(() => {
                     <div class="flex h-full flex-col px-4 py-5">
                         <div class="mb-8 flex items-center gap-3 px-3">
                             <Link :href="route('dashboard')" class="flex items-center gap-3 overflow-hidden">
-                                <ApplicationMark class="h-12 w-12 shrink-0 drop-shadow-md" />
+                                <ApplicationLogo v-if="isNexxworth && !isCollapsed" class="h-14 w-[210px] object-contain object-left" />
+                                <ApplicationMark v-else class="h-12 w-12 shrink-0 drop-shadow-md" />
 
-                                <div v-if="!isCollapsed" class="min-w-0">
+                                <div v-if="!isCollapsed && !isNexxworth" class="min-w-0">
                                     <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">{{ $page.props.branding.name }}</p>
                                     <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Spazio di lavoro operativo</p>
                                 </div>
@@ -227,8 +230,9 @@ const navItems = computed(() => {
                 <aside class="relative flex w-[86vw] max-w-sm flex-col bg-surface-container-low px-4 py-5 shadow-2xl">
                     <div class="mb-8 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <ApplicationMark class="h-11 w-11 drop-shadow-md" />
-                            <div>
+                            <ApplicationLogo v-if="isNexxworth" class="h-14 w-[210px] object-contain object-left" />
+                            <ApplicationMark v-else class="h-11 w-11 drop-shadow-md" />
+                            <div v-if="!isNexxworth">
                                 <p class="font-headline text-lg font-extrabold text-on-surface">{{ $page.props.branding.name }}</p>
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Spazio di lavoro operativo</p>
                             </div>

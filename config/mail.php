@@ -112,7 +112,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => env('CUSTOMER_CODE') === 'nexxworth' ? 'Nexxworth Consulting' : env('MAIL_FROM_NAME', 'Example'),
     ],
 
 ];

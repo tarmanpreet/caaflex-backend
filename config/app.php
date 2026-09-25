@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('CUSTOMER_CODE') === 'nexxworth' ? 'Nexxworth Consulting' : env('APP_NAME', 'Laravel'),
 
     /*
     |--------------------------------------------------------------------------
