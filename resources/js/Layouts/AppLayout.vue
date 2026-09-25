@@ -92,9 +92,7 @@ const navItems = computed(() => {
                     <div class="flex h-full flex-col px-4 py-5">
                         <div class="mb-8 flex items-center gap-3 px-3">
                             <Link :href="route('dashboard')" class="flex items-center gap-3 overflow-hidden">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] bg-primary text-on-primary shadow-[0px_16px_30px_rgba(0,86,210,0.22)]">
-                                    <ApplicationMark class="h-7 w-7" />
-                                </div>
+                                <ApplicationMark class="h-12 w-12 shrink-0 drop-shadow-md" />
 
                                 <div v-if="!isCollapsed" class="min-w-0">
                                     <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">{{ $page.props.branding.name }}</p>
@@ -229,9 +227,7 @@ const navItems = computed(() => {
                 <aside class="relative flex w-[86vw] max-w-sm flex-col bg-surface-container-low px-4 py-5 shadow-2xl">
                     <div class="mb-8 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-primary text-on-primary">
-                                <ApplicationMark class="h-6 w-6" />
-                            </div>
+                            <ApplicationMark class="h-11 w-11 drop-shadow-md" />
                             <div>
                                 <p class="font-headline text-lg font-extrabold text-on-surface">{{ $page.props.branding.name }}</p>
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">Spazio di lavoro operativo</p>

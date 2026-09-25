@@ -79,9 +79,7 @@ const submit = () => {
         <header class="relative z-10 px-5 py-5 sm:px-8 sm:py-7">
             <nav class="mx-auto flex min-w-0 max-w-6xl items-center justify-between gap-3" aria-label="Navigazione controllo pratica">
                 <Link :href="route('home')" class="group flex min-h-[44px] items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-blue-500 text-white shadow-lg shadow-blue-500/20 transition duration-200 group-hover:scale-105 motion-reduce:transform-none">
-                        <ApplicationMark class="h-7 w-7" aria-hidden="true" />
-                    </span>
+                    <ApplicationMark class="h-10 w-10 drop-shadow-lg transition duration-200 group-hover:scale-105 motion-reduce:transform-none" aria-hidden="true" />
                     <span>
                         <span class="block text-sm font-bold">{{ $page.props.branding.name }}</span>
                         <span class="block text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Area pubblica</span>

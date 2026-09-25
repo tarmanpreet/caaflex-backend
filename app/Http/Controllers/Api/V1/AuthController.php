@@ -209,6 +209,7 @@ class AuthController extends Controller
             'branding' => [
                 'name' => config('branding.name'),
                 'logo_url' => config('branding.logo_url'),
+                'logo_light_url' => config('branding.logo_light_url'),
                 'mark_url' => config('branding.mark_url'),
                 'favicon_url' => config('branding.favicon_url'),
             ],

@@ -12,6 +12,17 @@ class BrandingTest extends TestCase
         $this->assertSame(config('app.name'), config('branding.name'));
     }
 
+    public function test_default_branding_uses_the_mobile_app_assets(): void
+    {
+        $this->assertSame('/brand/caaflex-logo.png', config('branding.logo_url'));
+        $this->assertSame('/brand/caaflex-logo-light.png', config('branding.logo_light_url'));
+        $this->assertSame('/brand/caaflex-mark.png', config('branding.mark_url'));
+        $this->assertSame('/brand/caaflex-mark.png', config('branding.favicon_url'));
+        $this->assertFileExists(public_path('brand/caaflex-logo.png'));
+        $this->assertFileExists(public_path('brand/caaflex-logo-light.png'));
+        $this->assertFileExists(public_path('brand/caaflex-mark.png'));
+    }
+
     public function test_branding_configuration_is_shared_with_inertia_pages(): void
     {
         $this->withoutVite();
@@ -19,6 +30,7 @@ class BrandingTest extends TestCase
         config()->set('branding', [
             'name' => 'Cliente Demo',
             'logo_url' => '/customer-brand/cliente-demo-logo.svg',
+            'logo_light_url' => '/customer-brand/cliente-demo-logo-light.svg',
             'mark_url' => '/customer-brand/cliente-demo-mark.svg',
             'favicon_url' => '/customer-brand/cliente-demo-favicon.ico',
         ]);
@@ -30,6 +42,7 @@ class BrandingTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('branding.name', 'Cliente Demo')
                 ->where('branding.logo_url', '/customer-brand/cliente-demo-logo.svg')
+                ->where('branding.logo_light_url', '/customer-brand/cliente-demo-logo-light.svg')
                 ->where('branding.mark_url', '/customer-brand/cliente-demo-mark.svg')
                 ->where('branding.favicon_url', '/customer-brand/cliente-demo-favicon.ico')
             );
