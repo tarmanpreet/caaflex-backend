@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LookupPracticeStatusRequest;
 use App\Models\Practice;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PublicPracticeStatusController extends Controller
 {
-    public function nexxworthIndex(): Response
+    public function nexxworthIndex(Request $request): Response
     {
         abort_unless(config('branding.customer_code') === 'nexxworth', 404);
 
         return Inertia::render('Public/Nexxworth/Status', [
-            'locale' => app()->getLocale() === 'en' ? 'en' : 'it',
+            'locale' => $request->routeIs('nexxworth.en.status') ? 'en' : 'it',
         ]);
     }
 
@@ -28,14 +29,16 @@ class PublicPracticeStatusController extends Controller
             ->where('tracking_code', $trackingCode)
             ->first();
 
+        $english = $request->routeIs('nexxworth.en.status.lookup');
+
         return Inertia::render('Public/Nexxworth/Status', [
-            'locale' => app()->getLocale() === 'en' ? 'en' : 'it',
+            'locale' => $english ? 'en' : 'it',
             'searchedCode' => $trackingCode,
             'result' => $practice ? [
                 'code' => $practice->tracking_code,
                 'status' => $practice->status,
             ] : null,
-            'lookupError' => $practice ? null : (app()->getLocale() === 'en'
+            'lookupError' => $practice ? null : ($english
                 ? 'No case was found with this code. Please check it and try again.'
                 : 'Nessuna pratica trovata con questo codice. Controllalo e riprova.'),
         ]);

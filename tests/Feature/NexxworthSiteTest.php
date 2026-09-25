@@ -122,6 +122,19 @@ class NexxworthSiteTest extends TestCase
                 ->where('result.status', 'in_lavorazione')
                 ->missing('result.client')
                 ->missing('result.documents'));
+
+        app()->setLocale('en');
+
+        $this->get(route('nexxworth.status'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Public/Nexxworth/Status')->where('locale', 'it'));
+
+        $this->post(route('nexxworth.status.lookup'), ['code' => 'ZZZZZZZZZZ'])
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Public/Nexxworth/Status')
+                ->where('locale', 'it')
+                ->where('lookupError', 'Nessuna pratica trovata con questo codice. Controllalo e riprova.'));
     }
 
     public function test_nexxworth_installation_serves_all_its_public_pages(): void
