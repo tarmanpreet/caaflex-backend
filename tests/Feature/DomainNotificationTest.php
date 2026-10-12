@@ -116,6 +116,7 @@ class DomainNotificationTest extends TestCase
         );
 
         Queue::assertPushed(SendExpoPushNotification::class, fn (SendExpoPushNotification $job): bool => $job->userId === $user->id
+            && $job->section === 'appointments'
             && $job->target === ['resource' => 'appointment', 'id' => $appointment->id]
         );
     }

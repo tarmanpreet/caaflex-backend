@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\ExpoPushToken;
+use App\Models\User;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
@@ -13,19 +15,30 @@ class SendExpoPushNotification implements ShouldQueue
 
     public int $tries = 3;
 
+    public string $section = '';
+
     /** @param array<string, mixed> $target */
     public function __construct(
         public int $userId,
         public string $title,
         public string $body,
         public array $target,
-    ) {}
+        string $section = '',
+    ) {
+        $this->section = $section;
+    }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(NotificationPreferenceService $preferences): void
     {
+        $user = User::query()->find($this->userId);
+
+        if (! $user || ! $user->is_active || ! in_array('broadcast', $preferences->channels($user, $this->section), true)) {
+            return;
+        }
+
         $tokens = ExpoPushToken::query()->where('user_id', $this->userId)->get();
 
         if ($tokens->isEmpty()) {

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ClientProfile;
+use App\Models\ExpoPushToken;
 use App\Models\User;
 use App\Notifications\PasswordResetCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -275,6 +276,61 @@ class SanctumAuthenticationTest extends TestCase
             ->assertOk();
 
         $this->assertNotNull(PersonalAccessToken::findToken($otherRefreshToken));
+    }
+
+    public function test_logout_revokes_only_the_current_users_specified_push_device(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $currentDevice = $this->pushToken($user, 'current-device');
+        $otherDevice = $this->pushToken($user, 'other-device');
+        $otherUsersDevice = $this->pushToken($otherUser, 'current-device');
+        $accessToken = $user->createToken('mobile-access', ['access'])->plainTextToken;
+
+        $this->withToken($accessToken)
+            ->postJson('/api/v1/logout', ['device_id' => 'current-device'])
+            ->assertOk();
+
+        $this->assertModelMissing($currentDevice);
+        $this->assertModelExists($otherDevice);
+        $this->assertModelExists($otherUsersDevice);
+    }
+
+    public function test_logout_without_device_id_preserves_push_registrations(): void
+    {
+        $user = User::factory()->create();
+        $device = $this->pushToken($user, 'current-device');
+        $accessToken = $user->createToken('mobile-access', ['access'])->plainTextToken;
+
+        $this->withToken($accessToken)->postJson('/api/v1/logout')->assertOk();
+
+        $this->assertModelExists($device);
+    }
+
+    public function test_logout_rejects_invalid_device_id_before_revoking_access(): void
+    {
+        $user = User::factory()->create();
+        $accessToken = $user->createToken('mobile-access', ['access'])->plainTextToken;
+
+        $this->withToken($accessToken)
+            ->postJson('/api/v1/logout', ['device_id' => ['invalid']])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('device_id');
+
+        $this->assertNotNull(PersonalAccessToken::findToken($accessToken));
+    }
+
+    private function pushToken(User $user, string $deviceId): ExpoPushToken
+    {
+        $token = 'ExpoPushToken['.$user->id.'_'.$deviceId.']';
+
+        return $user->expoPushTokens()->create([
+            'token' => $token,
+            'token_hash' => hash('sha256', $token),
+            'device_id' => $deviceId,
+            'platform' => 'android',
+            'last_registered_at' => now(),
+        ]);
     }
 
     public function test_me_requires_a_valid_token(): void

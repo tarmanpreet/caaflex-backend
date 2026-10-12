@@ -57,6 +57,7 @@ class NotificationManager
                         $title,
                         $body,
                         $this->target($subject, $section),
+                        $section,
                     );
                 }
             });

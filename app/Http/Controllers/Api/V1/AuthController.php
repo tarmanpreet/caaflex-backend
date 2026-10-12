@@ -113,7 +113,17 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'refresh_token' => ['nullable', 'string'],
+            'device_id' => ['nullable', 'string', 'max:255'],
+        ]);
+
         $user = $request->user();
+
+        if (filled($validated['device_id'] ?? null)) {
+            $user->expoPushTokens()->where('device_id', $validated['device_id'])->delete();
+        }
+
         $user->currentAccessToken()?->delete();
 
         if (filled($request->input('refresh_token'))) {
