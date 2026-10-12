@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserNotificationPreference;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ExpoPushTokenApiTest extends TestCase
@@ -18,7 +19,7 @@ class ExpoPushTokenApiTest extends TestCase
         $user = User::factory()->create();
         $token = 'ExpoPushToken[device_token_123]';
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', $this->payload($token));
 
         $response->assertCreated()
@@ -39,10 +40,10 @@ class ExpoPushTokenApiTest extends TestCase
         $user = User::factory()->create();
         $payload = $this->payload('ExponentPushToken[idempotent_token]');
 
-        $firstResponse = $this->actingAs($user, 'api')->postJson('/api/v1/push-tokens', $payload);
+        $firstResponse = $this->mobileSession($user)->postJson('/api/v1/push-tokens', $payload);
         $tokenId = $firstResponse->json('data.id');
 
-        $this->actingAs($user, 'api')
+        $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', [
                 ...$payload,
                 'device_name' => 'iPhone aggiornato',
@@ -60,11 +61,11 @@ class ExpoPushTokenApiTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user, 'api')
+        $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[old_token]'))
             ->assertCreated();
 
-        $this->actingAs($user, 'api')
+        $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[new_token]'))
             ->assertOk();
 
@@ -86,7 +87,7 @@ class ExpoPushTokenApiTest extends TestCase
             ]);
         }
 
-        $this->actingAs($user, 'api')
+        $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[disabled_token]'))
             ->assertStatus(409)
             ->assertJsonPath('message', 'Le notifiche in tempo reale sono disabilitate nelle preferenze.');
@@ -98,7 +99,7 @@ class ExpoPushTokenApiTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user, 'api')
+        $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', [
                 'token' => 'not-an-expo-token',
                 'device_id' => '',
@@ -113,7 +114,7 @@ class ExpoPushTokenApiTest extends TestCase
         $owner = User::factory()->create();
         $pushToken = $this->registerToken($owner, 'ExpoPushToken[revoke_token]');
 
-        $this->actingAs($owner, 'api')
+        $this->mobileSession($owner)
             ->deleteJson("/api/v1/push-tokens/{$pushToken->id}")
             ->assertOk()
             ->assertJsonPath('message', 'Token push revocato.');
@@ -134,7 +135,7 @@ class ExpoPushTokenApiTest extends TestCase
             'last_registered_at' => now(),
         ]);
 
-        $this->actingAs($otherUser, 'api')
+        $this->mobileSession($otherUser)
             ->deleteJson("/api/v1/push-tokens/{$pushToken->id}")
             ->assertNotFound();
 
@@ -145,6 +146,71 @@ class ExpoPushTokenApiTest extends TestCase
     {
         $this->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[guest_token]'))
             ->assertUnauthorized();
+    }
+
+    private array $accessTokens = [];
+
+    private function mobileSession(User $user): static
+    {
+        if (! isset($this->accessTokens[$user->id])) {
+            $sessionId = Str::uuid()->toString();
+            $this->accessTokens[$user->id] = $user->createToken('mobile-access:'.$sessionId, ['access'], now()->addHour())->plainTextToken;
+            $user->createToken('mobile-refresh:'.$sessionId, ['refresh'], now()->addDay());
+        }
+
+        $this->app['auth']->forgetGuards();
+
+        return $this->withToken($this->accessTokens[$user->id]);
+    }
+
+    public function test_registration_rejects_an_access_token_without_a_paired_mobile_session(): void
+    {
+        $user = User::factory()->create();
+        $access = $user->createToken('mobile-access:'.Str::uuid(), ['access'], now()->addHour())->plainTextToken;
+
+        $this->withToken($access)->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[no_session]'))
+            ->assertUnauthorized();
+
+        $this->assertDatabaseCount('expo_push_tokens', 0);
+    }
+
+    public function test_registration_rejects_a_refresh_session_owned_by_another_user(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $sessionId = Str::uuid()->toString();
+        $access = $user->createToken('mobile-access:'.$sessionId, ['access'], now()->addHour())->plainTextToken;
+        $other->createToken('mobile-refresh:'.$sessionId, ['refresh'], now()->addDay());
+
+        $this->withToken($access)->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[other_session]'))
+            ->assertUnauthorized();
+
+        $this->assertDatabaseCount('expo_push_tokens', 0);
+    }
+
+    public function test_registration_rejects_an_expired_refresh_session(): void
+    {
+        $user = User::factory()->create();
+        $sessionId = Str::uuid()->toString();
+        $access = $user->createToken('mobile-access:'.$sessionId, ['access'], now()->addHour())->plainTextToken;
+        $user->createToken('mobile-refresh:'.$sessionId, ['refresh'], now()->subMinute());
+
+        $this->withToken($access)->postJson('/api/v1/push-tokens', $this->payload('ExpoPushToken[expired_session]'))
+            ->assertUnauthorized();
+
+        $this->assertDatabaseCount('expo_push_tokens', 0);
+    }
+
+    public function test_registration_does_not_accept_client_supplied_session_identifier(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->mobileSession($user)->postJson('/api/v1/push-tokens', [
+            ...$this->payload('ExpoPushToken[session_owned]'),
+            'auth_session_id' => Str::uuid()->toString(),
+        ])->assertCreated();
+
+        $token = \Laravel\Sanctum\PersonalAccessToken::findToken($this->accessTokens[$user->id]);
+        $this->assertSame(Str::after($token->name, ':'), ExpoPushToken::query()->findOrFail($response->json('data.id'))->auth_session_id);
     }
 
     /** @return array<string, string> */
@@ -161,7 +227,7 @@ class ExpoPushTokenApiTest extends TestCase
 
     private function registerToken(User $user, string $token): ExpoPushToken
     {
-        $response = $this->actingAs($user, 'api')
+        $response = $this->mobileSession($user)
             ->postJson('/api/v1/push-tokens', $this->payload($token))
             ->assertCreated();
 

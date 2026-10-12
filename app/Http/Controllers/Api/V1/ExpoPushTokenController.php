@@ -6,6 +6,7 @@ use App\Actions\ExpoPushToken\RegisterExpoPushTokenAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreExpoPushTokenRequest;
 use App\Models\ExpoPushToken;
+use App\Services\MobilePushSessionService;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,11 @@ class ExpoPushTokenController extends Controller
         StoreExpoPushTokenRequest $request,
         RegisterExpoPushTokenAction $action,
         NotificationPreferenceService $preferences,
+        MobilePushSessionService $sessions,
     ): JsonResponse {
+        $sessionId = $sessions->currentSessionId($request->user());
+        abort_unless($sessionId, 401, 'Sessione mobile non valida.');
+
         $realtimeEnabled = collect($preferences->settings($request->user()))
             ->contains(fn (array $settings): bool => $settings['enabled'] && $settings['realtime_enabled']);
 
@@ -26,7 +31,7 @@ class ExpoPushTokenController extends Controller
             ], 409);
         }
 
-        $pushToken = $action->execute($request->user(), $request->validated());
+        $pushToken = $action->execute($request->user(), [...$request->validated(), 'auth_session_id' => $sessionId]);
 
         return response()->json([
             'message' => 'Token push registrato.',

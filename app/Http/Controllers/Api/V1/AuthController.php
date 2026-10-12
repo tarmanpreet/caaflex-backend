@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
 use App\Notifications\PasswordResetCode;
+use App\Services\MobilePushSessionService;
 use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,13 +71,13 @@ class AuthController extends Controller
         ]);
     }
 
-    public function refresh(Request $request): JsonResponse
+    public function refresh(Request $request, MobilePushSessionService $sessions): JsonResponse
     {
         $request->validate(['token' => ['required', 'string']]);
 
         [$id, $plain] = $this->splitToken($request->input('token'));
 
-        return DB::transaction(function () use ($id, $plain): JsonResponse {
+        return DB::transaction(function () use ($id, $plain, $sessions): JsonResponse {
             $token = PersonalAccessToken::query()
                 ->where('token', hash('sha256', $plain))
                 ->when($id, fn ($query) => $query->whereKey($id))
@@ -98,9 +99,18 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Token di refresh non valido.'], 401);
             }
 
-            $token->delete();
-
+            $previousSessionId = $sessions->sessionId($token->name, self::REFRESH_TOKEN_PREFIX);
             $tokens = $this->issueTokens($user);
+            $newAccessToken = PersonalAccessToken::findToken($tokens['access']);
+
+            if ($previousSessionId) {
+                $user->expoPushTokens()->where('auth_session_id', $previousSessionId)->update([
+                    'auth_session_id' => $sessions->sessionId($newAccessToken->name),
+                ]);
+                $user->tokens()->where('name', self::ACCESS_TOKEN_PREFIX.':'.$previousSessionId)->delete();
+            }
+
+            $token->delete();
 
             return response()->json([
                 'token_type' => 'Bearer',
@@ -111,7 +121,7 @@ class AuthController extends Controller
         });
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request, MobilePushSessionService $sessions): JsonResponse
     {
         $validated = $request->validate([
             'refresh_token' => ['nullable', 'string'],
@@ -124,7 +134,17 @@ class AuthController extends Controller
             $user->expoPushTokens()->where('device_id', $validated['device_id'])->delete();
         }
 
-        $user->currentAccessToken()?->delete();
+        $sessionId = $sessions->sessionId($user->currentAccessToken()?->name);
+
+        if ($sessionId) {
+            $user->expoPushTokens()->where('auth_session_id', $sessionId)->delete();
+            $user->tokens()->whereIn('name', [
+                self::ACCESS_TOKEN_PREFIX.':'.$sessionId,
+                self::REFRESH_TOKEN_PREFIX.':'.$sessionId,
+            ])->delete();
+        } else {
+            $user->currentAccessToken()?->delete();
+        }
 
         if (filled($request->input('refresh_token'))) {
             $refreshToken = PersonalAccessToken::findToken($request->input('refresh_token'));

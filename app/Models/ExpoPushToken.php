@@ -12,6 +12,7 @@ class ExpoPushToken extends Model
         'token',
         'token_hash',
         'device_id',
+        'auth_session_id',
         'platform',
         'device_name',
         'app_version',
@@ -21,6 +22,7 @@ class ExpoPushToken extends Model
     protected $hidden = [
         'token',
         'token_hash',
+        'auth_session_id',
     ];
 
     protected function casts(): array

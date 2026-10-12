@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\ExpoPushToken;
 use App\Models\User;
+use App\Services\MobilePushSessionService;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -31,7 +32,7 @@ class SendExpoPushNotification implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(NotificationPreferenceService $preferences): void
+    public function handle(NotificationPreferenceService $preferences, MobilePushSessionService $sessions): void
     {
         $user = User::query()->find($this->userId);
 
@@ -39,7 +40,10 @@ class SendExpoPushNotification implements ShouldQueue
             return;
         }
 
-        $tokens = ExpoPushToken::query()->where('user_id', $this->userId)->get();
+        $tokens = ExpoPushToken::query()
+            ->whereBelongsTo($user)
+            ->whereIn('auth_session_id', $sessions->activeSessionIds($user))
+            ->get();
 
         if ($tokens->isEmpty()) {
             return;

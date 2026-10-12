@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class RegisterExpoPushTokenAction
 {
-    /** @param array{token: string, device_id: string, platform: string, device_name?: ?string, app_version?: ?string} $data */
+    /** @param array{token: string, device_id: string, platform: string, auth_session_id: string, device_name?: ?string, app_version?: ?string} $data */
     public function execute(User $user, array $data): ExpoPushToken
     {
         $tokenHash = hash('sha256', $data['token']);

@@ -333,6 +333,39 @@ class SanctumAuthenticationTest extends TestCase
         ]);
     }
 
+    public function test_logout_revokes_session_and_push_even_without_device_or_refresh_payload(): void
+    {
+        $user = User::factory()->create(['password' => 'password']);
+        $login = $this->postJson('/api/v1/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+        $access = PersonalAccessToken::findToken($login->json('access_token'));
+        $device = $this->pushToken($user, 'session-device');
+        $device->update(['auth_session_id' => \Illuminate\Support\Str::after($access->name, ':')]);
+        $otherSession = $user->createToken('mobile-refresh:'.\Illuminate\Support\Str::uuid(), ['refresh'], now()->addDay());
+
+        $this->withToken($login->json('access_token'))->postJson('/api/v1/logout')->assertOk();
+
+        $this->assertModelMissing($device);
+        $this->assertNull(PersonalAccessToken::findToken($login->json('refresh_token')));
+        $this->assertNotNull(PersonalAccessToken::findToken($otherSession->plainTextToken));
+    }
+
+    public function test_refresh_transfers_push_device_to_the_rotated_session(): void
+    {
+        $user = User::factory()->create(['password' => 'password']);
+        $login = $this->postJson('/api/v1/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+        $access = PersonalAccessToken::findToken($login->json('access_token'));
+        $device = $this->pushToken($user, 'session-device');
+        $device->update(['auth_session_id' => \Illuminate\Support\Str::after($access->name, ':')]);
+
+        $refreshed = $this->postJson('/api/v1/tokens/refresh', ['token' => $login->json('refresh_token')])->assertOk();
+        $newAccess = PersonalAccessToken::findToken($refreshed->json('access_token'));
+
+        $this->assertSame(\Illuminate\Support\Str::after($newAccess->name, ':'), $device->fresh()->auth_session_id);
+        $this->assertNotSame($access->name, $newAccess->name);
+        $this->assertNull(PersonalAccessToken::findToken($login->json('access_token')));
+        $this->assertContains($device->fresh()->auth_session_id, app(\App\Services\MobilePushSessionService::class)->activeSessionIds($user));
+    }
+
     public function test_me_requires_a_valid_token(): void
     {
         $this->getJson('/api/v1/me')->assertUnauthorized();

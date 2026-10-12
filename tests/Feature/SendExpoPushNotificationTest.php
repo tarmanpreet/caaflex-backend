@@ -7,12 +7,14 @@ use App\Models\Appointment;
 use App\Models\ExpoPushToken;
 use App\Models\User;
 use App\Models\UserNotificationPreference;
+use App\Services\MobilePushSessionService;
 use App\Services\NotificationManager;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SendExpoPushNotificationTest extends TestCase
@@ -29,7 +31,7 @@ class SendExpoPushNotificationTest extends TestCase
             'enabled' => false,
         ]);
 
-        $job->handle(app(NotificationPreferenceService::class));
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertNothingSent();
     }
@@ -45,7 +47,7 @@ class SendExpoPushNotificationTest extends TestCase
             'realtime_enabled' => false,
         ]);
 
-        $job->handle(app(NotificationPreferenceService::class));
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertNothingSent();
     }
@@ -56,7 +58,7 @@ class SendExpoPushNotificationTest extends TestCase
         $job = $this->queuedPush($user);
         $user->update(['is_active' => false]);
 
-        $job->handle(app(NotificationPreferenceService::class));
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertNothingSent();
     }
@@ -67,7 +69,7 @@ class SendExpoPushNotificationTest extends TestCase
         $job = $this->queuedPush($user);
         $user->expoPushTokens()->delete();
 
-        $job->handle(app(NotificationPreferenceService::class));
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertNothingSent();
     }
@@ -78,7 +80,7 @@ class SendExpoPushNotificationTest extends TestCase
         $job = $this->queuedPush($user);
         $device = $user->expoPushTokens()->firstOrFail();
 
-        $job->handle(app(NotificationPreferenceService::class));
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertSent(fn ($request): bool => $request[0]['to'] === 'ExpoPushToken[queued-device]'
             && $request[0]['data']['target'] === $job->target);
@@ -92,7 +94,40 @@ class SendExpoPushNotificationTest extends TestCase
         $job = $this->queuedPush($user);
         $legacyJob = new SendExpoPushNotification($user->id, $job->title, $job->body, $job->target);
 
-        $legacyJob->handle(app(NotificationPreferenceService::class));
+        $legacyJob->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_queued_push_is_suppressed_after_session_refresh_token_is_revoked(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $job = $this->queuedPush($user);
+        $user->tokens()->delete();
+
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_queued_push_is_suppressed_when_session_expires(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $job = $this->queuedPush($user);
+        $user->tokens()->update(['expires_at' => now()->subMinute()]);
+
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_legacy_device_without_session_receives_no_push(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $job = $this->queuedPush($user);
+        $user->expoPushTokens()->update(['auth_session_id' => null]);
+
+        $job->handle(app(NotificationPreferenceService::class), app(MobilePushSessionService::class));
 
         Http::assertNothingSent();
     }
@@ -100,8 +135,11 @@ class SendExpoPushNotificationTest extends TestCase
     private function queuedPush(User $user): SendExpoPushNotification
     {
         $appointment = Appointment::factory()->create();
+        $sessionId = Str::uuid()->toString();
+        $user->createToken('mobile-refresh:'.$sessionId, ['refresh'], now()->addDay());
         ExpoPushToken::query()->create([
             'user_id' => $user->id,
+            'auth_session_id' => $sessionId,
             'token' => 'ExpoPushToken[queued-device]',
             'token_hash' => hash('sha256', 'ExpoPushToken[queued-device]'),
             'device_id' => 'queued-device',
