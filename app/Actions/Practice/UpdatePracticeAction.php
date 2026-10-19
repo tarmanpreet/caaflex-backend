@@ -50,6 +50,7 @@ class UpdatePracticeAction
             ->unique();
 
         if ($changedAssignedUserIds->isNotEmpty()) {
+            app(\App\Services\ActivityRecorder::class)->record(User::find($userId), $practice, 'practice.assigned', ['user_ids' => $newAssignedUserIds->all()]);
             $this->notifications->send(
                 User::query()->whereKey($changedAssignedUserIds)->get(),
                 'practices.assigned',

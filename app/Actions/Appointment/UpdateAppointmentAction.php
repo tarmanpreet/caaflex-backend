@@ -15,6 +15,21 @@ class UpdateAppointmentAction
 
     public function execute(array $data, Appointment $appointment, int $userId, array $allData = []): Appointment
     {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($data, $appointment, $userId, $allData) {
+            \App\Models\User::query()->whereIn('id', array_filter([$appointment->assigned_user_id, $data['assigned_user_id'] ?? null]))->orderBy('id')->lockForUpdate()->get();
+            $appointment = Appointment::query()->whereKey($appointment->id)->lockForUpdate()->firstOrFail();
+            $updatedAppointment = clone $appointment;
+            $updatedAppointment->fill(array_filter($data, fn ($v) => $v !== null));
+            if ($updatedAppointment->isDirty(['assigned_user_id', 'scheduled_at', 'duration_minutes', 'status'])) {
+                app(\App\Services\AppointmentAvailabilityService::class)->guardOverlap($updatedAppointment->only(['assigned_user_id', 'scheduled_at', 'duration_minutes', 'status']), $appointment->id);
+            }
+
+            return $this->update($data, $appointment, $userId, $allData);
+        });
+    }
+
+    private function update(array $data, Appointment $appointment, int $userId, array $allData): Appointment
+    {
         $oldStatus = $appointment->status;
         $oldAssignedUserId = $appointment->assigned_user_id;
         $oldScheduledAt = $appointment->scheduled_at?->copy();
@@ -42,7 +57,7 @@ class UpdateAppointmentAction
         if ($oldAssignedUserId !== $appointment->assigned_user_id) {
             $oldAssignee = $oldAssignedUserId ? User::query()->find($oldAssignedUserId) : null;
             $this->notifications->send(
-                $baseRecipients->push($oldAssignee)->filter(),
+                $baseRecipients->concat([$oldAssignee])->filter(),
                 'appointments.assigned',
                 'appointments',
                 'Assegnazione appuntamento modificata',

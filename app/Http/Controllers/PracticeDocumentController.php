@@ -39,6 +39,9 @@ class PracticeDocumentController extends Controller
     {
         $this->authorize('downloadDocument', [$practice, $document]);
 
+        abort_unless(Storage::disk('local')->exists($document->disk_path), 404, 'Documento non disponibile.');
+        app(\App\Services\ActivityRecorder::class)->record(auth()->user(), $document, 'document.downloaded');
+
         return Storage::disk('local')->download($document->disk_path, $document->original_name);
     }
 

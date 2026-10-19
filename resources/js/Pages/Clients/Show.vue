@@ -197,6 +197,7 @@ const statusBadgeClass = (status) => {
             </h2>
         </template>
 
+        <div class="flex flex-wrap gap-3 px-4 pt-6"><Link :href="route('family.profile',client.id)" class="min-h-12 rounded-xl border px-4 py-3 text-blue-700 dark:text-blue-300">Familiari, deleghe e storico</Link><Link :href="route('booking.index',{client_profile_id:client.id})" class="min-h-12 rounded-xl bg-blue-600 px-4 py-3 text-white">Prenota un orario disponibile</Link></div>
         <div class="py-12">
             <div class="w-full space-y-6">
 

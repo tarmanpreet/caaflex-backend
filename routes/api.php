@@ -38,6 +38,18 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::match(['get', 'post'], '/broadcasting/auth', [Illuminate\Broadcasting\BroadcastController::class, 'authenticate']);
 
         // Client routes
+
+        Route::get('/booking/options', [App\Http\Controllers\Api\V1\BookingController::class, 'options']);
+        Route::get('/booking/slots', [App\Http\Controllers\Api\V1\BookingController::class, 'slots']);
+        Route::post('/booking', [App\Http\Controllers\Api\V1\BookingController::class, 'store']);
+        Route::post('/booking/{appointment}/reschedule', [App\Http\Controllers\Api\V1\BookingController::class, 'reschedule']);
+
+        Route::get('/family', [App\Http\Controllers\Api\V1\FamilyController::class, 'index']);
+        Route::get('/family/clients/{client}', [App\Http\Controllers\Api\V1\FamilyController::class, 'profile']);
+        Route::post('/family/clients/{client}/delegations', [App\Http\Controllers\Api\V1\FamilyController::class, 'grant']);
+        Route::post('/family/delegations/{delegation}/accept', [App\Http\Controllers\Api\V1\FamilyController::class, 'accept']);
+        Route::delete('/family/clients/{client}/delegations/{delegation}', [App\Http\Controllers\Api\V1\FamilyController::class, 'revoke']);
+        Route::get('/family/clients/{client}/documents/{document}/download', [App\Http\Controllers\Api\V1\FamilyController::class, 'download']);
         Route::get('/clients/search', [App\Http\Controllers\Api\V1\ClientController::class, 'search'])->name('clients.search');
         Route::apiResource('/clients', App\Http\Controllers\Api\V1\ClientController::class);
 
@@ -51,6 +63,18 @@ Route::prefix('v1')->name('api.')->group(function () {
         Route::delete('/clients/{client}/documents/{document}', [App\Http\Controllers\Api\V1\ClientDocumentController::class, 'destroy'])->scopeBindings();
 
         // Practice routes
+
+        Route::get('/operations/search', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'search']);
+        Route::get('/operations', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'index']);
+        Route::post('/operations/bulk', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'bulk']);
+        Route::post('/practices/{practice}/workspace/renew', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'renew']);
+
+        Route::get('/practices/{practice}/workspace', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'index']);
+        Route::post('/practices/{practice}/workspace/messages', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'message']);
+        Route::post('/practices/{practice}/workspace/requests', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'storeRequest']);
+        Route::post('/practices/{practice}/workspace/requests/{documentRequest}/documents', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'upload']);
+        Route::patch('/practices/{practice}/workspace/requests/{documentRequest}/documents/{document}/review', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'review']);
+        Route::get('/practices/{practice}/workspace/documents/{document}/download', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'download']);
         Route::get('/my-practices/{practice}', [App\Http\Controllers\Api\V1\PracticeController::class, 'showMine'])->name('my-practices.show');
         Route::apiResource('/practices', App\Http\Controllers\Api\V1\PracticeController::class);
         Route::post('/practices/{practice}/assign', [App\Http\Controllers\Api\V1\PracticeController::class, 'assignUsers']);

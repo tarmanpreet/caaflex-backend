@@ -91,6 +91,21 @@ Route::middleware([
     Route::put('/settings/notifications', [NotificationSettingsController::class, 'update'])->name('notification-settings.update');
 
     Route::resource('clients', ClientController::class);
+    Route::get('/booking', App\Http\Controllers\BookingController::class)->name('booking.index');
+    Route::get('/booking/options', [App\Http\Controllers\Api\V1\BookingController::class, 'options'])->name('booking.options');
+    Route::get('/booking/slots', [App\Http\Controllers\Api\V1\BookingController::class, 'slots'])->name('booking.slots');
+    Route::post('/booking', [App\Http\Controllers\Api\V1\BookingController::class, 'store'])->name('booking.store');
+    Route::post('/booking/{appointment}/reschedule', [App\Http\Controllers\Api\V1\BookingController::class, 'reschedule'])->name('booking.reschedule');
+
+    Route::get('/family', App\Http\Controllers\FamilyController::class)->name('family.index');
+    Route::get('/family/data', [App\Http\Controllers\Api\V1\FamilyController::class, 'index'])->name('family.data');
+    Route::get('/family/clients/{client}', App\Http\Controllers\FamilyController::class)->name('family.profile');
+    Route::get('/family/clients/{client}/data', [App\Http\Controllers\Api\V1\FamilyController::class, 'profile'])->name('family.profile.data');
+    Route::post('/family/clients/{client}/delegations', [App\Http\Controllers\Api\V1\FamilyController::class, 'grant'])->name('family.grant');
+    Route::post('/family/delegations/{delegation}/accept', [App\Http\Controllers\Api\V1\FamilyController::class, 'accept'])->name('family.accept');
+    Route::delete('/family/clients/{client}/delegations/{delegation}', [App\Http\Controllers\Api\V1\FamilyController::class, 'revoke'])->name('family.revoke');
+    Route::get('/family/clients/{client}/documents/{document}/download', [App\Http\Controllers\Api\V1\FamilyController::class, 'download'])->name('family.download');
+
     Route::get('/clients-search', [ClientController::class, 'search'])->name('clients.search');
     Route::post('/clients/{client}/invite-user', [ClientController::class, 'inviteUser'])->name('clients.invite-user');
     Route::resource('appointments', AppointmentController::class)->except(['create', 'edit']);
@@ -98,6 +113,21 @@ Route::middleware([
     Route::get('/appointments-practices', [AppointmentController::class, 'practicesForModal'])->name('appointments.practicesForModal');
     Route::get('/appointments-calendar', [AppointmentController::class, 'calendarEvents'])->name('appointments.calendarEvents');
     Route::resource('practices', PracticeController::class)->except(['edit']);
+    Route::get('/search', [App\Http\Controllers\PracticeOperationsController::class, 'searchView'])->name('search.index');
+    Route::get('/operations', App\Http\Controllers\PracticeOperationsController::class)->name('operations.index');
+    Route::get('/operations/data', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'index'])->name('operations.data');
+    Route::get('/operations/search', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'search'])->name('operations.search');
+    Route::post('/operations/bulk', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'bulk'])->name('operations.bulk');
+    Route::post('/practices/{practice}/workspace/renew', [App\Http\Controllers\Api\V1\PracticeOperationsController::class, 'renew'])->name('practices.workspace.renew');
+
+    Route::get('/practices/{practice}/workspace', App\Http\Controllers\PracticeWorkspaceController::class)->name('practices.workspace');
+    Route::get('/practices/{practice}/workspace/data', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'index'])->name('practices.workspace.data');
+    Route::post('/practices/{practice}/workspace/messages', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'message'])->name('practices.workspace.messages');
+    Route::post('/practices/{practice}/workspace/requests', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'storeRequest'])->name('practices.workspace.requests');
+    Route::post('/practices/{practice}/workspace/requests/{documentRequest}/documents', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'upload'])->name('practices.workspace.upload');
+    Route::patch('/practices/{practice}/workspace/requests/{documentRequest}/documents/{document}/review', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'review'])->name('practices.workspace.review');
+    Route::get('/practices/{practice}/workspace/documents/{document}/download', [App\Http\Controllers\Api\V1\PracticeWorkspaceController::class, 'download'])->name('practices.workspace.download');
+
     Route::get('/deadlines', PracticeDeadlineIndexController::class)->name('deadlines.index');
     Route::post('/practices/{practice}/assign', [PracticeController::class, 'assignUsers'])->name('practices.assign');
 

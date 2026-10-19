@@ -35,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
             PracticeDeadline::class, PracticeNote::class] as $model) {
             $model::observe(MobileSyncObserver::class);
         }
+        foreach ([ClientProfile::class, Practice::class, ClientDocument::class, PracticeDocument::class] as $model) {
+            $model::observe(\App\Observers\ActivityObserver::class);
+        }
         // ClientProfile uses ClientPolicy (non-standard name: would be ClientProfilePolicy by convention)
         Gate::policy(ClientProfile::class, ClientPolicy::class);
 

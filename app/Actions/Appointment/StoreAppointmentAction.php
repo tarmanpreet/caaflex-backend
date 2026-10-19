@@ -16,6 +16,15 @@ class StoreAppointmentAction
 
     public function execute(array $data, int $createdBy): Appointment
     {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($data, $createdBy) {
+            app(\App\Services\AppointmentAvailabilityService::class)->guardOverlap($data);
+
+            return $this->create($data, $createdBy);
+        });
+    }
+
+    private function create(array $data, int $createdBy): Appointment
+    {
         if (! isset($data['branch_id'])) {
             $data['branch_id'] = ClientProfile::query()
                 ->whereKey($data['client_profile_id'])

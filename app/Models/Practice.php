@@ -40,6 +40,7 @@ class Practice extends Model
         'practice_type_id',
         'status',
         'reference_year',
+        'renewal_of_id',
         'notes',
         'created_by',
         'deadline_at',

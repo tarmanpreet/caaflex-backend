@@ -370,6 +370,7 @@ const completionPercentage = computed(() => {
 
 <template>
     <AppLayout title="Dettaglio Pratica">
+        <div class="mx-auto max-w-7xl px-4 pt-4"><Link :href="route('practices.workspace', practice.id)" class="inline-flex min-h-12 items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white">Documenti richiesti e messaggi</Link></div>
         <template #header>
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>

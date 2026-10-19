@@ -24,12 +24,14 @@ class PracticeDocument extends Model
         'file_size',
         'description',
         'expires_on',
+        'document_request_id', 'review_status', 'review_reason', 'reviewed_by', 'reviewed_at',
     ];
 
     protected function casts(): array
     {
         return [
             'expires_on' => 'date',
+            'reviewed_at' => 'datetime',
         ];
     }
 

@@ -46,7 +46,6 @@ const userInitials = computed(() => userName.value.split(' ').map((part) => part
 const roles = computed(() => page.props.auth.user?.roles || []);
 const isCliente = computed(() => roles.value.includes('cliente'));
 const isAdmin = computed(() => roles.value.includes('admin') || roles.value.includes('superadmin'));
-const canCreatePractice = computed(() => page.props.auth.user?.permissions?.includes('practices.create'));
 const canViewDeadlines = computed(() => page.props.auth.user?.permissions?.includes('practice-deadlines.view'));
 const isNexxworth = computed(() => page.props.branding.customer_code === 'nexxworth');
 
@@ -65,6 +64,10 @@ const navItems = computed(() => {
 
     return [
         { name: 'Pannello', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
+        { name: 'Familiari e deleghe', icon: UserGroupIcon, route: route('family.index'), active: route().current('family.*'), show: true },
+        { name: 'Prenota un orario', icon: CalendarDaysIcon, route: route('booking.index'), active: route().current('booking.*'), show: true },
+        { name: 'Ricerca', icon: FolderOpenIcon, route: route('search.index'), active: route().current('search.index'), show: true },
+        { name: 'Lavorazioni', icon: ClipboardDocumentListIcon, route: route('operations.index'), active: route().current('operations.*'), show: !isCliente.value },
         { name: 'Clienti', icon: UserGroupIcon, route: route('clients.index'), active: route().current('clients.*'), show: !isCliente.value },
         { name: 'Pratiche', icon: FolderOpenIcon, route: route('practices.index'), active: route().current('practices.*'), show: !isCliente.value },
         { name: 'Step', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },
@@ -125,14 +128,6 @@ const navItems = computed(() => {
                         </nav>
 
                         <div class="mt-6 space-y-3">
-                            <Link
-                                v-if="canCreatePractice"
-                                :href="route('practices.create')"
-                                class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition duration-200 hover:bg-primary-dim focus-visible:outline-none"
-                            >
-                                <PlusIcon class="h-5 w-5" />
-                                <span v-if="!isCollapsed">Nuova pratica</span>
-                            </Link>
 
                             <div class="flex items-center justify-between rounded-xl border border-outline-variant/35 bg-surface-container-low px-2 py-2">
                                 <button type="button" @click="toggleSidebar" class="flex min-h-[40px] items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-lowest hover:text-primary" :aria-label="isCollapsed ? 'Espandi navigazione' : 'Compatta navigazione'">
@@ -263,10 +258,6 @@ const navItems = computed(() => {
                     </nav>
 
                     <div class="mt-auto space-y-3 pt-6">
-                        <Link v-if="canCreatePractice" :href="route('practices.create')" class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-on-primary">
-                            <PlusIcon class="h-5 w-5" />
-                            Nuova pratica
-                        </Link>
 
                         <button type="button" @click="toggleDark" class="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/35 bg-surface-container-lowest px-4 py-3 text-sm font-semibold text-on-surface-variant">
                             <SunIcon v-if="isDark" class="h-5 w-5" />

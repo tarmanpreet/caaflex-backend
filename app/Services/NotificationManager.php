@@ -46,7 +46,7 @@ class NotificationManager
                     'body' => $body,
                     'subject_type' => $subject->getMorphClass(),
                     'subject_id' => $subject->getKey(),
-                    'target' => $this->target($subject, $section),
+                    'target' => $this->target($subject, $section, $eventKey),
                     'action_url' => $actionUrl,
                     'occurred_at' => ($occurredAt ?? now())->toIso8601String(),
                 ], $channels));
@@ -56,7 +56,7 @@ class NotificationManager
                         $user->id,
                         $title,
                         $body,
-                        $this->target($subject, $section),
+                        $this->target($subject, $section, $eventKey),
                         $section,
                     );
                 }
@@ -64,16 +64,17 @@ class NotificationManager
     }
 
     /** @return array<string, mixed> */
-    private function target(Model $subject, string $section): array
+    private function target(Model $subject, string $section, ?string $eventKey = null): array
     {
         return match ($subject->getMorphClass()) {
+            \App\Models\ClientProfile::class => ['resource' => 'family', 'id' => $subject->getKey()],
             \App\Models\Appointment::class => [
                 'resource' => 'appointment',
                 'id' => $subject->getKey(),
             ],
             \App\Models\Practice::class => [
                 'resource' => 'practice',
-                'id' => $subject->getKey(),
+                'id' => $subject->getKey(), 'section' => str_starts_with($eventKey ?? '', 'practices.document-') || $eventKey === 'practices.message' ? 'workspace' : null,
             ],
             \App\Models\PracticeDeadline::class => [
                 'resource' => 'practice',
