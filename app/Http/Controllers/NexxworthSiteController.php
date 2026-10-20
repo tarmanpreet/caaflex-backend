@@ -27,6 +27,13 @@ class NexxworthSiteController extends Controller
         ]);
     }
 
+    public function calculator(): Response
+    {
+        abort_unless(config('branding.customer_code') !== 'nexxworth', 404);
+
+        return Inertia::render('Calculator');
+    }
+
     public function about(): Response
     {
         return $this->renderPage('About');

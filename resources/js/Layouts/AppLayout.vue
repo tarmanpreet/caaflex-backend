@@ -76,7 +76,8 @@ const navItems = computed(() => {
         { name: 'Appuntamenti', icon: CalendarDaysIcon, route: route('appointments.index'), active: route().current('appointments.*'), show: !isCliente.value },
         { name: 'Filiali', icon: BuildingOfficeIcon, route: route('branches.index'), active: route().current('branches.*'), show: isAdmin.value },
          { name: 'Auto-Conferma', icon: Cog6ToothIcon, route: route('auto-confirm-slots.index'), active: route().current('auto-confirm-slots.*'), show: isAdmin.value },
-         { name: 'Utenti', icon: UsersIcon, route: route('users.index'), active: route().current('users.*'), show: isAdmin.value },
+         { name: 'Presenze e assenze', icon: ClockIcon, route: route('employees.index'), active: route().current('employees.*'), show: !isCliente.value },
+        { name: 'Utenti', icon: UsersIcon, route: route('users.index'), active: route().current('users.*'), show: isAdmin.value },
     ];
 });
 </script>

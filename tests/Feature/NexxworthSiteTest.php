@@ -23,6 +23,10 @@ class NexxworthSiteTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->component('Welcome'));
 
+        $this->get(route('caaflex.calculator'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Calculator'));
+
         $this->get(route('nexxworth.about'))->assertNotFound();
         $this->get(route('nexxworth.services'))->assertNotFound();
         $this->get(route('nexxworth.partners'))->assertNotFound();
@@ -33,6 +37,13 @@ class NexxworthSiteTest extends TestCase
         $this->post(route('nexxworth.status.lookup'), ['code' => 'ABCDEFGHIJ'])->assertNotFound();
         $this->get(route('nexxworth.sitemap'))->assertNotFound();
         $this->get(route('robots'))->assertOk()->assertDontSee('Sitemap:');
+    }
+
+    public function test_caaflex_calculator_is_not_available_on_the_customer_site(): void
+    {
+        config()->set('branding.customer_code', 'nexxworth');
+
+        $this->get(route('caaflex.calculator'))->assertNotFound();
     }
 
     public function test_english_pages_have_distinct_localized_metadata_and_alternates(): void

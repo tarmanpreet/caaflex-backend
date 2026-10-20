@@ -24,6 +24,7 @@ use App\Support\NexxworthSeo;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [NexxworthSiteController::class, 'home'])->name('home');
+Route::get('/preventivatore', [NexxworthSiteController::class, 'calculator'])->name('caaflex.calculator');
 Route::get('/chi-siamo', [NexxworthSiteController::class, 'about'])->name('nexxworth.about');
 Route::get('/servizi', [NexxworthSiteController::class, 'services'])->name('nexxworth.services');
 Route::get('/collaborazioni', [NexxworthSiteController::class, 'partners'])->name('nexxworth.partners');
@@ -87,6 +88,16 @@ Route::middleware([
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::get('/employees', [App\Http\Controllers\EmployeeAttendanceController::class, 'index'])->name('employees.index');
+    Route::post('/employees/clock-in', [App\Http\Controllers\EmployeeAttendanceController::class, 'clockIn'])->name('employees.clockIn');
+    Route::post('/employees/clock-out', [App\Http\Controllers\EmployeeAttendanceController::class, 'clockOut'])->name('employees.clockOut');
+    Route::post('/employees/absences', [App\Http\Controllers\EmployeeAttendanceController::class, 'store'])->name('employees.store');
+    Route::patch('/employees/absences/{absence}', [App\Http\Controllers\EmployeeAttendanceController::class, 'update'])->name('employees.update');
+    Route::post('/employees/absences/{absence}/cancel', [App\Http\Controllers\EmployeeAttendanceController::class, 'cancel'])->name('employees.cancel');
+    Route::post('/employees/absences/{absence}/review', [App\Http\Controllers\EmployeeAttendanceController::class, 'review'])->name('employees.review');
+    Route::post('/employees/sessions', [App\Http\Controllers\EmployeeAttendanceController::class, 'manual'])->name('employees.manual');
+    Route::patch('/employees/sessions/{session}', [App\Http\Controllers\EmployeeAttendanceController::class, 'correct'])->name('employees.correct');
+
     Route::get('/settings/notifications', [NotificationSettingsController::class, 'show'])->name('notification-settings.show');
     Route::put('/settings/notifications', [NotificationSettingsController::class, 'update'])->name('notification-settings.update');
 

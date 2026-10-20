@@ -7,10 +7,7 @@ import {
     BuildingOffice2Icon,
     CalendarDaysIcon,
     CheckCircleIcon,
-    ChevronRightIcon,
     ClipboardDocumentCheckIcon,
-    ClockIcon,
-    DocumentMagnifyingGlassIcon,
     DocumentTextIcon,
     LockClosedIcon,
     ShieldCheckIcon,
@@ -18,298 +15,113 @@ import {
     UserGroupIcon,
     UsersIcon,
 } from '@heroicons/vue/24/outline';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-
-defineProps({
-    canLogin: Boolean,
-    canRegister: Boolean,
-});
-
-const hero = ref(null);
-let observer;
-
-const handlePointerMove = (event) => {
-    if (!hero.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
-    }
-
-    const bounds = hero.value.getBoundingClientRect();
-    hero.value.style.setProperty('--pointer-x', `${event.clientX - bounds.left}px`);
-    hero.value.style.setProperty('--pointer-y', `${event.clientY - bounds.top}px`);
-};
-
-onMounted(() => {
-    const revealElements = document.querySelectorAll('[data-reveal]');
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        revealElements.forEach(element => element.classList.add('is-visible'));
-        return;
-    }
-
-    observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15, rootMargin: '0px 0px -60px' });
-
-    revealElements.forEach(element => observer.observe(element));
-});
-
-onBeforeUnmount(() => observer?.disconnect());
+import { ref } from 'vue';
 
 const features = [
     {
         icon: BuildingOffice2Icon,
         eyebrow: 'Organizzazione',
-        title: 'Filiali davvero gerarchiche',
-        description: 'La sede principale governa l’intera rete. Ogni filiale accede solo al proprio ramo e ai livelli sottostanti.',
+        title: 'Sedi organizzate, rete coordinata',
+        description: 'Ogni filiale lavora nel proprio ramo. La sede principale mantiene una visione della rete.',
         accent: 'blue',
     },
     {
         icon: ClipboardDocumentCheckIcon,
         eyebrow: 'Operatività',
-        title: 'Pratiche sotto controllo',
-        description: 'Stati, step, documenti, note e responsabili riuniti in un flusso chiaro e sempre aggiornato.',
+        title: 'Pratiche leggibili, passo dopo passo',
+        description: 'Stati, step, documenti, note e responsabili raccolti nello stesso flusso.',
         accent: 'amber',
     },
     {
         icon: UsersIcon,
         eyebrow: 'Relazioni',
-        title: 'Un cliente, tutto il contesto',
-        description: 'Anagrafica, storico e documenti restano connessi, protetti e immediatamente disponibili agli operatori autorizzati.',
+        title: 'Clienti, con tutto il contesto',
+        description: 'Anagrafica, storico e documenti collegati, disponibili agli operatori autorizzati.',
         accent: 'cyan',
     },
     {
         icon: CalendarDaysIcon,
         eyebrow: 'Tempo',
-        title: 'Agenda che lavora con te',
-        description: 'Appuntamenti, disponibilità e conferme convivono con le pratiche per ridurre attese e passaggi manuali.',
+        title: 'Un’agenda collegata al lavoro',
+        description: 'Appuntamenti e disponibilità coordinati con le pratiche.',
         accent: 'violet',
     },
 ];
 
 const workflow = [
-    { number: '01', title: 'Accogli il cliente', text: 'Crea o ritrova subito il profilo nella filiale corretta.' },
-    { number: '02', title: 'Avvia la pratica', text: 'Assegna tipo, procedura, responsabili e step in pochi passaggi.' },
-    { number: '03', title: 'Lavora in squadra', text: 'Documenti, note e attività restano leggibili da chi ne ha davvero bisogno.' },
-    { number: '04', title: 'Chiudi con sicurezza', text: 'Lo storico conserva ogni passaggio e rende il lavoro verificabile.' },
+    { number: '01', title: 'Configuriamo', text: 'Definiamo organizzazione, utenze, sedi e configurazione del servizio.' },
+    { number: '02', title: 'Formiamo', text: 'Formazione iniziale sul flusso operativo. Programma e durata sono concordati nell’offerta.' },
+    { number: '03', title: 'Presentiamo', text: 'Una landing standard inclusa, anche con Start. Il dominio lo acquisti e lo rinnovi tu.' },
 ];
+
+const faq = [
+    { question: 'La landing è inclusa anche nel piano Start?', answer: 'Sì, una pagina standard per organizzazione, senza costo aggiuntivo. Il costo di acquisto e rinnovo del dominio resta al cliente. Contenuti e perimetro della pagina sono concordati durante l’avvio.' },
+    { question: 'Come viene definito il costo del primo anno?', answer: 'Il primo anno comprende l’attivazione e i canoni per le sedi previste. L’importo dell’attivazione, le modalità di pagamento e le eventuali condizioni Partner vengono specificati nell’offerta. IVA e dominio sono esclusi.' },
+    { question: 'Posso aggiungere sedi anche con Start?', answer: 'Sì. Ogni sede aggiuntiva costa 25 €/mese in entrambi i piani. La sede principale è pagata con il canone del piano. Il prezzo delle sedi non modifica automaticamente le utenze concordate.' },
+    { question: 'Quante utenze comprende Team?', answer: 'Il numero di utenze e la configurazione per ciascuna sede sono indicati nell’offerta. Non viene promesso un numero illimitato di operatori.' },
+    { question: 'Che formazione è prevista?', answer: 'Formazione iniziale sull’utilizzo di CAAFLEX, inclusa nell’attivazione. Sessioni, durata e partecipanti sono concordati. Non è un corso fiscale o abilitante.' },
+    { question: 'Che cosa copre il backup?', answer: 'Il perimetro, la frequenza e la conservazione delle copie vengono specificati nel piano di servizio. I backup operativi non sono presentati come conservazione digitale a norma.' },
+    { question: 'CAAFLEX sostituisce il software per gli invii fiscali?', answer: 'Questa proposta riguarda l’organizzazione operativa di clienti, pratiche, documenti e appuntamenti. Invii telematici e integrazioni specifiche devono essere verificati espressamente prima dell’acquisto.' },
+];
+
+const demo = ref({ name: '', organization: '', contact: '', operators: '', branches: '', plan: 'Da valutare', notes: '' });
+const demoText = ref('');
+const demoCopyStatus = ref('');
+const prepareDemo = () => {
+    demoText.value = `Richiesta demo CAAFLEX\nReferente: ${demo.value.name}\nOrganizzazione: ${demo.value.organization}\nRecapito: ${demo.value.contact}\nOperatori: ${demo.value.operators || 'da definire'}\nSedi: ${demo.value.branches || 'da definire'}\nPiano: ${demo.value.plan}\nDa organizzare meglio: ${demo.value.notes || 'da definire'}`;
+    demoCopyStatus.value = '';
+};
+const copyDemo = async () => {
+    try {
+        await navigator.clipboard.writeText(demoText.value);
+        demoCopyStatus.value = 'Testo copiato.';
+    } catch {
+        demoCopyStatus.value = 'Seleziona e copia il testo preparato.';
+    }
+};
 </script>
 
 <template>
-    <Head title="Il gestionale per CAF moderni">
-        <meta name="description" content="Gestisci clienti, pratiche e appuntamenti sul tuo server. I dati restano della tua organizzazione e non sono condivisi con altri clienti." />
+    <Head title="Più ordine. Più servizio.">
+        <meta name="description" content="CAAFLEX: clienti, pratiche, documenti e agenda per CAF e CAAF. Formazione iniziale nell’attivazione, server e backup nel canone, landing inclusa." />
     </Head>
 
     <div class="min-h-screen overflow-x-hidden bg-slate-950 font-sans text-white selection:bg-amber-300 selection:text-slate-950">
         <a href="#top" class="fixed left-4 top-4 z-[60] -translate-y-24 rounded-xl bg-white px-4 py-3 font-semibold text-slate-950 shadow-xl transition focus:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transition-none">
             Vai al contenuto principale
         </a>
-        <header class="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
-            <nav class="mx-auto flex min-h-[64px] max-w-7xl items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-950/70 px-4 shadow-2xl shadow-slate-950/20 backdrop-blur-xl sm:px-6" aria-label="Navigazione principale">
-                <a href="#top" class="group flex min-h-[44px] items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
-                    <ApplicationLogo light class="h-12 w-[205px] object-contain drop-shadow-lg transition duration-300 group-hover:scale-105 motion-reduce:transform-none" />
-                </a>
-
-                <div class="hidden items-center gap-7 text-sm font-medium text-slate-300 md:flex">
-                    <a href="#funzionalita" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Funzionalità</a>
-                    <a href="#metodo" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Come funziona</a>
-                    <a href="#sicurezza" class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Privacy dei dati</a>
-                    <Link :href="route('practice-status.index')" prefetch class="rounded-lg py-3 transition duration-200 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Controlla pratica</Link>
+        <header class="fixed inset-x-0 top-0 z-50 border-b border-slate-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-6 lg:px-8">
+            <nav class="mx-auto flex min-h-[60px] max-w-7xl items-center justify-between gap-4" aria-label="Navigazione principale">
+                <a href="#top" class="inline-flex min-h-11 items-center rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><ApplicationLogo class="h-12 w-[190px] object-contain" /></a>
+                <div class="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
+                    <a href="#funzionalita" class="hover:text-blue-700">Funzionalità</a>
+                    <a href="#prezzi" class="hover:text-blue-700">Prezzi</a>
+                    <a href="#metodo" class="hover:text-blue-700">Avvio</a>
+                    <a href="#faq" class="hover:text-blue-700">Domande</a>
+                    <Link :href="route('caaflex.calculator')" class="hover:text-blue-700">Preventivatore</Link>
                 </div>
-
-                <div v-if="canLogin" class="flex items-center gap-2">
-                    <Link
-                        v-if="$page.props.auth.user"
-                        :href="route('dashboard')"
-                        prefetch
-                        class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none"
-                    >
-                        <span class="hidden min-[400px]:inline">Vai alla dashboard</span>
-                        <span class="min-[400px]:hidden">Pannello</span>
-                        <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
-                    </Link>
-                    <template v-else>
-                        <Link :href="route('login')" prefetch class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-white transition duration-200 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:px-4">
-                            Accedi
-                        </Link>
-                        <Link v-if="canRegister" :href="route('register')" prefetch class="hidden min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:inline-flex">
-                            Inizia ora
-                            <ArrowRightIcon class="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                    </template>
-                </div>
+                <a href="#demo" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:px-5">Richiedi la demo</a>
             </nav>
         </header>
 
         <main id="top">
-            <section ref="hero" class="hero-grid relative isolate min-h-screen overflow-hidden px-5 pb-20 pt-36 sm:px-8 lg:px-12 lg:pb-28 lg:pt-44" @pointermove="handlePointerMove">
-                <div class="pointer-glow absolute inset-0 -z-10" aria-hidden="true"></div>
-                <div class="orb orb-blue absolute -left-24 top-32 -z-20 h-80 w-80 rounded-full bg-blue-600/30 blur-3xl" aria-hidden="true"></div>
-                <div class="orb orb-cyan absolute -right-20 top-20 -z-20 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" aria-hidden="true"></div>
-                <div class="orb orb-amber absolute bottom-0 left-1/3 -z-20 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" aria-hidden="true"></div>
-
-                <div class="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
-                    <div class="relative z-10 text-center lg:text-left">
-                        <div class="hero-enter hero-delay-1 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 shadow-lg shadow-cyan-950/20 backdrop-blur">
-                            <SparklesIcon class="h-4 w-4" aria-hidden="true" />
-                            Il lavoro del CAF, finalmente connesso
-                        </div>
-
-                        <h1 class="hero-enter hero-delay-2 mt-7 text-balance text-5xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:text-6xl lg:text-7xl">
-                            Ogni pratica al posto giusto.
-                            <span class="mt-2 block bg-gradient-to-r from-cyan-300 via-blue-300 to-amber-200 bg-clip-text text-transparent">Ogni filiale, in perfetto controllo.</span>
-                        </h1>
-
-                        <p class="hero-enter hero-delay-3 mx-auto mt-7 max-w-2xl text-pretty text-lg leading-8 text-slate-300 lg:mx-0 lg:max-w-xl">
-                            Un unico spazio per coordinare clienti, pratiche, appuntamenti e documenti. Più chiarezza per gli operatori, più velocità per i cittadini, più controllo per tutta la rete.
-                        </p>
-
-                        <div class="hero-enter hero-delay-4 mx-auto mt-7 flex max-w-xl items-start gap-4 rounded-2xl border border-cyan-300/35 bg-slate-900/80 p-4 text-left shadow-lg shadow-cyan-950/20 lg:mx-0">
-                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-300/15 text-cyan-200"><ShieldCheckIcon class="h-6 w-6" aria-hidden="true" /></span>
-                            <div>
-                                <p class="text-base font-bold text-white">I tuoi dati restano tuoi, sul tuo server.</p>
-                                <p class="mt-1 text-sm leading-6 text-slate-300">Pratiche e documenti restano nell’infrastruttura della tua organizzazione e non sono condivisi con altri clienti.</p>
-                            </div>
-                        </div>
-
-                        <div class="hero-enter hero-delay-4 mt-9 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-2.5 lg:justify-start">
-                            <Link
-                                v-if="$page.props.auth.user"
-                                :href="route('dashboard')"
-                                prefetch
-                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
-                            >
-                                <span class="sm:hidden">Apri il tuo spazio di lavoro</span>
-                                <span class="hidden sm:inline">Spazio di lavoro</span>
-                                <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
-                            </Link>
-                            <Link
-                                v-else-if="canLogin"
-                                :href="route('login')"
-                                prefetch
-                                class="cta-shine inline-flex min-h-[52px] items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white shadow-xl shadow-blue-500/25 transition duration-200 hover:-translate-y-1 hover:shadow-blue-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
-                            >
-                                <span class="sm:hidden">Accedi al gestionale</span>
-                                <span class="hidden sm:inline">Accedi</span>
-                                <ArrowRightIcon class="h-5 w-5" aria-hidden="true" />
-                            </Link>
-                            <Link
-                                :href="route('practice-status.index')"
-                                prefetch
-                                class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-6 font-semibold text-cyan-50 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-cyan-300/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:px-5 sm:text-sm"
-                            >
-                                <DocumentMagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
-                                <span class="sm:hidden">Controlla pratica</span>
-                                <span class="hidden sm:inline">Stato pratica</span>
-                            </Link>
-                            <a href="#funzionalita" class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 font-semibold text-white backdrop-blur transition duration-200 hover:border-white/30 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:min-h-[48px] sm:flex-none sm:whitespace-nowrap sm:rounded-xl sm:border-transparent sm:bg-transparent sm:px-3 sm:text-sm sm:text-slate-300 sm:backdrop-blur-0 sm:hover:border-transparent sm:hover:bg-white/5 sm:hover:text-white">
-                                <span class="sm:hidden">Scopri la piattaforma</span>
-                                <span class="hidden sm:inline">Scopri</span>
-                                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-                            </a>
-                        </div>
-
-                        <div class="hero-enter hero-delay-5 mt-9 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-slate-400 lg:justify-start">
-                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Dati separati per filiale</span>
-                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Flussi tracciabili</span>
-                            <span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-400" />Portale cliente</span>
-                        </div>
+            <section class="relative isolate overflow-hidden bg-white px-5 pb-20 pt-36 text-slate-950 sm:px-8 lg:px-12 lg:pb-28 lg:pt-44">
+                <div class="pointer-events-none absolute -right-40 -top-20 -z-10 h-[45rem] w-[45rem] rounded-full bg-cyan-100/70 blur-3xl" aria-hidden="true"></div>
+                <div class="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[0.94fr_1.06fr] lg:gap-16">
+                    <div class="relative z-10">
+                        <p class="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700"><SparklesIcon class="h-4 w-4" aria-hidden="true" />Il gestionale operativo per CAF e CAAF</p>
+                        <h1 class="mt-8 text-balance text-5xl font-black leading-[1.02] tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-7xl">Più ordine.<br>Più servizio.<span class="mt-2 block bg-gradient-to-r from-blue-700 to-cyan-500 bg-clip-text text-transparent">Parti con un metodo.</span></h1>
+                        <p class="mt-7 max-w-xl text-pretty text-lg leading-8 text-slate-600">Clienti, pratiche, documenti e appuntamenti nello stesso spazio. Un avvio accompagnato, dal singolo ufficio alla rete di sedi.</p>
+                        <div class="mt-9 flex flex-wrap gap-3"><a href="#demo" class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 font-bold text-white shadow-xl shadow-blue-500/20 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Richiedi la demo <ArrowRightIcon class="h-5 w-5" /></a><a href="#prezzi" class="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-slate-300 bg-white px-6 font-bold text-slate-800 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Scopri i prezzi</a></div>
+                        <div class="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-slate-600"><span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-600" />Formazione iniziale</span><span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-600" />Server e backup</span><span class="inline-flex items-center gap-2"><CheckCircleIcon class="h-5 w-5 text-emerald-600" />Landing inclusa</span></div>
                     </div>
-
-                    <div class="hero-enter hero-delay-3 relative mx-auto w-full max-w-3xl lg:mx-0">
-                        <div class="dashboard-shell relative rounded-[28px] border border-white/15 bg-white/10 p-2 shadow-[0_35px_100px_-30px_rgba(37,99,235,0.55)] backdrop-blur-xl sm:p-3">
-                            <div class="overflow-hidden rounded-[22px] border border-white/10 bg-slate-900/95">
-                                <div class="flex h-11 items-center gap-2 border-b border-white/10 px-4">
-                                    <span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-amber-300"></span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                                    <span class="ml-3 h-5 flex-1 rounded-md bg-white/5"></span>
-                                </div>
-
-                                <div class="grid min-h-[430px] grid-cols-[64px_1fr] sm:grid-cols-[150px_1fr]">
-                                    <aside class="border-r border-white/10 bg-slate-950/60 p-3 sm:p-4">
-                                        <div class="mb-6 hidden items-center gap-2 sm:flex">
-                                            <span class="grid h-8 w-8 place-items-center rounded-lg bg-blue-500"><BuildingOffice2Icon class="h-4 w-4" /></span>
-                                            <span class="text-xs font-bold">Spazio CAF</span>
-                                        </div>
-                                        <div class="grid gap-2">
-                                            <div v-for="(item, index) in ['Pannello', 'Pratiche', 'Clienti', 'Agenda']" :key="item" :class="index === 0 ? 'bg-blue-500/15 text-blue-200' : 'text-slate-500'" class="flex h-9 items-center gap-2 rounded-lg px-2 text-[11px] font-medium sm:px-3">
-                                                <span class="h-4 w-4 rounded bg-current opacity-20"></span>
-                                                <span class="hidden sm:inline">{{ item }}</span>
-                                            </div>
-                                        </div>
-                                    </aside>
-
-                                    <div class="p-3 sm:p-5">
-                                        <div class="flex items-center justify-between gap-3">
-                                            <div>
-                                                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Panoramica operativa</p>
-                                                <p class="mt-1 text-base font-bold sm:text-xl">Buongiorno, Martina</p>
-                                            </div>
-                                            <div class="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-amber-200 to-amber-400 text-xs font-black text-slate-900">MR</div>
-                                        </div>
-
-                                        <div class="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                                            <div v-for="stat in [{ value: '128', label: 'Attive', color: 'text-cyan-300' }, { value: '24', label: 'Step', color: 'text-amber-300' }, { value: '91%', label: 'Efficienza', color: 'text-emerald-300' }]" :key="stat.label" class="rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-3">
-                                                <p :class="stat.color" class="text-lg font-black sm:text-2xl">{{ stat.value }}</p>
-                                                <p class="mt-1 text-[9px] text-slate-500 sm:text-[11px]">{{ stat.label }}</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-3 grid gap-3 sm:grid-cols-[1.3fr_0.7fr]">
-                                            <div class="rounded-xl border border-white/10 bg-white/[0.04] p-3">
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-[11px] font-semibold text-slate-300">Carico pratiche</span>
-                                                    <span class="text-[9px] text-emerald-300">+12% questo mese</span>
-                                                </div>
-                                                <div class="mt-4 flex h-24 items-end gap-2">
-                                                    <span v-for="(height, index) in [38, 62, 48, 78, 58, 88, 70, 96]" :key="index" class="chart-bar flex-1 rounded-t bg-gradient-to-t from-blue-600 to-cyan-300" :style="{ height: `${height}%`, animationDelay: `${index * 80}ms` }"></span>
-                                                </div>
-                                            </div>
-
-                                            <div class="hidden rounded-xl border border-white/10 bg-white/[0.04] p-3 sm:block">
-                                                <p class="text-[11px] font-semibold text-slate-300">Rete filiali</p>
-                                                <div class="mt-4 grid gap-2 text-[9px] text-slate-400">
-                                                    <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-blue-400"></span>Sede centrale</div>
-                                                    <div class="ml-3 flex items-center gap-2 border-l border-blue-400/30 pl-3"><span class="h-2 w-2 rounded-full bg-cyan-400"></span>Milano Nord</div>
-                                                    <div class="ml-3 flex items-center gap-2 border-l border-blue-400/30 pl-3"><span class="h-2 w-2 rounded-full bg-amber-300"></span>Monza Centro</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
-                                            <div class="flex items-center justify-between"><span class="text-[11px] font-semibold text-slate-300">Attività recenti</span><span class="text-[9px] text-blue-300">Vedi tutte</span></div>
-                                            <div class="mt-3 grid gap-2">
-                                                <div v-for="row in [{ name: 'Rossi Mario', type: '730', state: 'In lavorazione' }, { name: 'Bianchi Sara', type: 'ISEE', state: 'Documenti ricevuti' }]" :key="row.name" class="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg bg-slate-950/45 px-3 py-2">
-                                                    <div class="min-w-0"><p class="truncate text-[10px] font-semibold text-slate-200">{{ row.name }}</p><p class="mt-0.5 text-[8px] text-slate-500">{{ row.type }} · {{ row.state }}</p></div>
-                                                    <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="relative rounded-[32px] border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50 p-6 shadow-[0_30px_80px_-40px_rgba(37,99,235,0.35)] sm:p-9">
+                        <div class="absolute -right-2 -top-2 h-20 w-20 rounded-full bg-cyan-200/60 blur-2xl" aria-hidden="true"></div>
+                        <div class="relative"><span class="text-xs font-black uppercase tracking-[0.22em] text-blue-700">Un unico ritmo per tutta l’organizzazione</span><h2 class="mt-4 max-w-md text-balance text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Ogni informazione collegata a quella giusta.</h2><p class="mt-4 max-w-md text-base leading-7 text-slate-600">Un percorso operativo, senza informazioni sparse tra persone e sedi.</p></div>
+                        <div class="relative mt-9 grid gap-3 sm:grid-cols-2">
+                            <div v-for="(item, index) in [{ icon: UsersIcon, title: 'Clienti', text: 'Anagrafica e storico', color: 'bg-cyan-100 text-cyan-700' }, { icon: ClipboardDocumentCheckIcon, title: 'Pratiche', text: 'Step e responsabili', color: 'bg-blue-100 text-blue-700' }, { icon: DocumentTextIcon, title: 'Documenti', text: 'Allegati e note', color: 'bg-amber-100 text-amber-700' }, { icon: CalendarDaysIcon, title: 'Agenda', text: 'Appuntamenti', color: 'bg-emerald-100 text-emerald-700' }]" :key="item.title" class="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none"><span :class="item.color" class="grid h-12 w-12 shrink-0 place-items-center rounded-xl"><component :is="item.icon" class="h-6 w-6" aria-hidden="true" /></span><span><strong class="block text-base text-slate-950">{{ item.title }}</strong><span class="block text-sm text-slate-500">{{ item.text }}</span></span><span class="sr-only">{{ index + 1 }}</span></div>
                         </div>
-
-                        <div class="float-card float-card-left absolute -left-5 top-20 hidden items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-xl sm:flex">
-                            <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400/15 text-emerald-300"><ShieldCheckIcon class="h-5 w-5" /></span>
-                            <span><span class="block text-xs font-bold">Accesso protetto</span><span class="block text-[10px] text-slate-400">Visibilità per filiale</span></span>
-                        </div>
-                        <div class="float-card float-card-right absolute -right-3 bottom-12 hidden items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-3 shadow-2xl backdrop-blur-xl sm:flex">
-                            <span class="grid h-10 w-10 place-items-center rounded-xl bg-amber-300/15 text-amber-200"><ClockIcon class="h-5 w-5" /></span>
-                            <span><span class="block text-xs font-bold">Step gestito</span><span class="block text-[10px] text-slate-400">Promemoria automatico</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mx-auto mt-20 max-w-7xl border-y border-white/10 py-6">
-                    <p class="text-center text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Un unico ritmo per tutta l’organizzazione</p>
-                    <div class="mt-5 grid grid-cols-2 gap-4 text-center text-sm font-semibold text-slate-300 sm:grid-cols-4">
-                        <span>Clienti connessi</span><span>Pratiche tracciate</span><span>Filiali coordinate</span><span>Step presidiati</span>
+                        <div class="relative mt-6 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800"><span class="h-2.5 w-2.5 rounded-full bg-cyan-500"></span>Una visione chiara, dalla sede alla rete.</div>
                     </div>
                 </div>
             </section>
@@ -344,7 +156,7 @@ const workflow = [
                     <div data-reveal class="reveal mx-auto max-w-3xl text-center">
                         <span class="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700"><SparklesIcon class="h-4 w-4" />Tutto ciò che serve, senza rumore</span>
                         <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">Il lavoro complesso diventa un flusso naturale.</h2>
-                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">Ogni modulo nasce per togliere attrito alle attività quotidiane e restituire una visione completa, dalla singola pratica all’intera rete di filiali.</p>
+                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">Anagrafica, pratiche, documenti e appuntamenti si ritrovano nello stesso percorso operativo, dalla singola sede alla rete di filiali.</p>
                     </div>
 
                     <div class="mt-16 grid gap-5 md:grid-cols-2">
@@ -371,6 +183,19 @@ const workflow = [
                 </div>
             </section>
 
+            <section id="prezzi" class="bg-slate-950 px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+                <div class="mx-auto max-w-7xl">
+                    <div class="max-w-3xl"><p class="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">Una proposta leggibile</p><h2 class="mt-5 text-balance text-4xl font-black tracking-tight sm:text-5xl">Scegli la dimensione del tuo CAF.</h2><p class="mt-6 text-lg leading-8 text-slate-300">Entrambi i piani includono server, backup e una landing page standard per organizzazione. La formazione iniziale è compresa nell’attivazione.</p></div>
+                    <div class="mt-12 grid gap-6 lg:grid-cols-2">
+                        <article class="rounded-[28px] border border-white/15 bg-white/5 p-7 sm:p-9"><span class="rounded-full bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-cyan-200">Start · una utenza</span><h3 class="mt-7 text-3xl font-black">CAAFLEX Start</h3><p class="mt-4 text-5xl font-black">25 €<span class="text-lg font-normal text-slate-400"> /mese</span></p><p class="mt-5 min-h-[3rem] text-slate-300">Canone della sede principale, una utenza. Ogni sede aggiuntiva: +25 €/mese.</p><ul class="mt-7 grid gap-3 border-t border-white/10 pt-7 text-sm text-slate-200"><li>✓ Clienti, pratiche, documenti e agenda</li><li>✓ Server e backup nel canone</li><li>✓ Una landing page standard inclusa</li><li>✓ Formazione iniziale nell’attivazione</li></ul><p class="mt-7 border-t border-white/10 pt-7 text-slate-300">Attivazione con formazione iniziale. Condizioni economiche definite nell’offerta.</p><a href="#demo" class="mt-7 inline-flex min-h-12 items-center rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-5 font-bold text-cyan-100 hover:bg-cyan-300/20">Parliamo di Start</a></article>
+                        <article class="rounded-[28px] border border-cyan-300/40 bg-gradient-to-br from-blue-950 to-slate-900 p-7 shadow-2xl shadow-blue-950/30 sm:p-9"><span class="rounded-full bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-widest text-cyan-200">Più operatori · più sedi</span><h3 class="mt-7 text-3xl font-black">CAAFLEX Team & Rete</h3><p class="mt-4 text-5xl font-black">50 €<span class="text-lg font-normal text-slate-400"> /mese</span></p><p class="mt-5 min-h-[3rem] text-slate-300">Oppure <strong class="text-white">500 €/anno anticipati</strong> sul canone base: 100 € in meno rispetto a 12 canoni mensili.</p><ul class="mt-7 grid gap-3 border-t border-white/10 pt-7 text-sm text-slate-200"><li>✓ Sede principale: 50 €/mese</li><li>✓ Ruoli e visibilità per filiale</li><li>✓ Server, backup e una landing inclusi</li><li>✓ Formazione iniziale nell’attivazione</li></ul><p class="mt-7 border-t border-white/10 pt-7 text-slate-300">Attivazione con formazione iniziale. Condizioni economiche definite nell’offerta.</p><a href="#demo" class="mt-7 inline-flex min-h-12 items-center rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-5 font-bold text-white hover:brightness-110">Parliamo di Team</a></article>
+                    </div>
+                    <div class="mt-7 rounded-2xl border border-white/10 bg-white/5 p-6"><h3 class="text-xl font-bold">Ogni sede in più: 25 €/mese.</h3><p class="mt-2 text-sm leading-6 text-slate-300">Vale sia per Start sia per Team. La sede principale è pagata con il canone del piano. Utenze e configurazione nell’offerta; una landing per organizzazione.</p></div>
+                    <p class="mt-5 text-xs leading-6 text-slate-400">Prezzi IVA esclusa. Attivazione una tantum. Annuale Team riferito al solo canone base: le filiali restano a 25 €/mese ciascuna. Acquisto e rinnovo del dominio a carico del cliente. Piano di servizio, spazio, backup, formazione e assistenza definiti nell’offerta. Partner Visibilità subordinato a una collaborazione pubblicitaria concordata per iscritto.</p>
+                    <Link :href="route('caaflex.calculator')" class="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/20 px-6 font-bold hover:bg-white/10">Apri il preventivatore <ArrowRightIcon class="h-5 w-5" /></Link>
+                </div>
+            </section>
+
             <section id="metodo" class="light-method relative isolate overflow-hidden px-5 py-24 text-slate-950 sm:px-8 lg:px-12 lg:py-32">
                 <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
                     <div class="light-method-glow absolute -right-44 top-0 h-[45rem] w-[45rem] rounded-full"></div>
@@ -387,11 +212,11 @@ const workflow = [
                 </div>
                 <div class="relative mx-auto grid max-w-7xl gap-16 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
                     <div data-reveal class="reveal lg:sticky lg:top-28">
-                        <span class="text-sm font-black uppercase tracking-[0.2em] text-blue-600">Dal primo contatto alla chiusura</span>
-                        <h2 class="mt-5 text-balance text-4xl font-black tracking-[-0.04em] sm:text-5xl">Un metodo semplice. Una squadra più veloce.</h2>
-                        <p class="mt-6 text-lg leading-8 text-slate-600">Il gestionale accompagna il lavoro senza imporre rigidità: ogni informazione arriva nel momento giusto, alla persona giusta.</p>
+                        <span class="text-sm font-black uppercase tracking-[0.2em] text-blue-600">Non solo installazione</span>
+                        <h2 class="mt-5 text-balance text-4xl font-black tracking-[-0.04em] sm:text-5xl">Ti accompagniamo nell’avvio.</h2>
+                        <p class="mt-6 text-lg leading-8 text-slate-600">Partiamo dal tuo modo di lavorare: configurazione, formazione iniziale e presenza online sono parte della proposta.</p>
                         <div class="mt-8 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                            <div class="flex items-start gap-3"><ShieldCheckIcon class="mt-0.5 h-6 w-6 shrink-0 text-blue-600" /><p class="text-sm leading-6 text-blue-900"><strong>La gerarchia segue l’organizzazione:</strong> i padri vedono il proprio ramo completo, i figli non risalgono mai verso dati superiori o paralleli.</p></div>
+                            <div class="flex items-start gap-3"><ShieldCheckIcon class="mt-0.5 h-6 w-6 shrink-0 text-blue-600" /><p class="text-sm leading-6 text-blue-900"><strong>Partner Visibilità:</strong> le condizioni dell’attivazione vengono definite nell’offerta. Canali, attività e durata della collaborazione sono concordati per iscritto, senza obblighi di recensioni positive.</p></div>
                         </div>
                     </div>
 
@@ -470,12 +295,12 @@ const workflow = [
                 <div class="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1fr_0.85fr]">
                     <div data-reveal class="reveal">
                         <span class="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-sm font-bold text-cyan-100 backdrop-blur"><LockClosedIcon class="h-4 w-4" />Privacy dei dati</span>
-                        <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">I dati sono tuoi. Restano sul tuo server.</h2>
-                        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">CAAFlex conserva anagrafiche, pratiche e documenti nell’infrastruttura della tua organizzazione. I dati non vengono condivisi con altri clienti. Ruoli e permessi limitano l’accesso agli operatori autorizzati.</p>
+                        <h2 class="mt-6 text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">Il servizio include server e backup.</h2>
+                        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">Ruoli e permessi limitano l’accesso agli operatori autorizzati. Spazio, frequenza e conservazione dei backup vengono specificati nel piano di servizio dell’offerta.</p>
                     </div>
 
                     <div data-reveal class="reveal grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                        <div v-for="item in [{ icon: ShieldCheckIcon, title: 'Filiali isolate', text: 'Nessuna visibilità verso padri o rami fratelli.' }, { icon: UserGroupIcon, title: 'Responsabilità chiare', text: 'Azioni e pratiche restano associate agli operatori.' }, { icon: DocumentTextIcon, title: 'Storico completo', text: 'Documenti, note e stati conservano il contesto.' }]" :key="item.title" class="flex items-start gap-4 rounded-2xl border border-cyan-200/15 bg-slate-900/60 p-5 shadow-[0_20px_60px_-30px_rgba(34,211,238,0.35)] backdrop-blur-xl transition duration-300 hover:border-cyan-200/35 hover:bg-slate-900/75">
+                        <div v-for="item in [{ icon: ShieldCheckIcon, title: 'Visibilità per filiale', text: 'Ogni filiale lavora nel proprio ramo.' }, { icon: UserGroupIcon, title: 'Operatori autorizzati', text: 'Il contesto è disponibile a chi lavora sulla pratica.' }, { icon: DocumentTextIcon, title: 'Piano di servizio', text: 'Backup e assistenza sono definiti nell’offerta.' }]" :key="item.title" class="flex items-start gap-4 rounded-2xl border border-cyan-200/15 bg-slate-900/60 p-5 shadow-[0_20px_60px_-30px_rgba(34,211,238,0.35)] backdrop-blur-xl transition duration-300 hover:border-cyan-200/35 hover:bg-slate-900/75">
                             <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-300/15 text-cyan-200"><component :is="item.icon" class="h-5 w-5" /></span>
                             <span><strong class="block text-base text-white">{{ item.title }}</strong><span class="mt-1 block text-sm leading-6 text-slate-300">{{ item.text }}</span></span>
                         </div>
@@ -483,21 +308,21 @@ const workflow = [
                 </div>
             </section>
 
-            <section class="bg-slate-950 px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
-                <div data-reveal class="reveal relative mx-auto max-w-6xl overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.03] px-6 py-14 text-center shadow-2xl backdrop-blur-xl sm:px-12 sm:py-20">
-                    <div class="absolute inset-x-0 top-0 mx-auto h-40 w-2/3 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true"></div>
-                    <div class="relative">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-amber-300 px-4 py-2 text-sm font-black text-slate-950"><SparklesIcon class="h-4 w-4" />Il prossimo passo è più semplice</span>
-                        <h2 class="mx-auto mt-7 max-w-4xl text-balance text-4xl font-black tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">Porta ordine nella rete. Libera tempo per le persone.</h2>
-                        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Entra nello spazio di lavoro e trasforma ogni attività quotidiana in un processo più chiaro, coordinato e sicuro.</p>
-                        <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-                            <Link v-if="$page.props.auth.user" :href="route('dashboard')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Vai alla dashboard<ArrowRightIcon class="h-5 w-5" /></Link>
-                            <Link v-else-if="canLogin" :href="route('login')" prefetch class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-7 font-bold text-slate-950 transition duration-200 hover:-translate-y-1 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 motion-reduce:transform-none">Accedi al gestionale<ArrowRightIcon class="h-5 w-5" /></Link>
-                            <Link v-if="!$page.props.auth.user && canRegister" :href="route('register')" prefetch class="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-7 font-bold text-white transition duration-200 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">Crea un account</Link>
-                        </div>
+            <section id="faq" class="bg-slate-50 px-5 py-24 text-slate-950 sm:px-8 lg:px-12">
+                <div class="mx-auto max-w-5xl"><p class="text-sm font-black uppercase tracking-[0.2em] text-blue-600">Prima di scegliere</p><h2 class="mt-5 text-4xl font-black tracking-tight sm:text-5xl">Le risposte essenziali.</h2><div class="mt-9 divide-y divide-slate-200"> <details v-for="item in faq" :key="item.question" class="group py-5"><summary class="cursor-pointer text-lg font-bold marker:text-blue-600">{{ item.question }}</summary><p class="mt-4 max-w-3xl leading-7 text-slate-600">{{ item.answer }}</p></details></div></div>
+            </section>
+
+            <section id="demo" class="bg-slate-950 px-5 py-24 sm:px-8 lg:px-12">
+                <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+                    <div><p class="text-sm font-black uppercase tracking-[0.2em] text-cyan-300">Vediamolo nel tuo contesto</p><h2 class="mt-5 text-4xl font-black tracking-tight sm:text-5xl">Raccontaci il tuo ufficio.</h2><p class="mt-5 text-lg leading-8 text-slate-300">Quante persone lavorano sulle pratiche? Quante sedi gestite? Prepariamo una demo sul flusso utile al tuo CAF.</p><p class="mt-5 text-sm leading-6 text-slate-400">Questa pagina prepara il testo della richiesta sul tuo dispositivo. Non invia dati automaticamente e non li salva su un server. L’invio avviene soltanto dal canale che scegli.</p></div>
+                    <div class="rounded-[28px] border border-white/10 bg-slate-900 p-6 sm:p-8">
+                        <form class="grid gap-5 sm:grid-cols-2" @submit.prevent="prepareDemo"><label class="text-sm font-semibold">Nome del referente<input v-model="demo.name" required type="text" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white" /></label><label class="text-sm font-semibold">Organizzazione<input v-model="demo.organization" required type="text" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white" /></label><label class="text-sm font-semibold sm:col-span-2">Recapito per la risposta<input v-model="demo.contact" required type="text" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white" /></label><label class="text-sm font-semibold">Numero operatori<input v-model="demo.operators" min="1" type="number" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white" /></label><label class="text-sm font-semibold">Numero sedi<input v-model="demo.branches" min="1" type="number" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white" /></label><label class="text-sm font-semibold sm:col-span-2">Piano di interesse<select v-model="demo.plan" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white"><option>Da valutare</option><option>Start</option><option>Team</option></select></label><label class="text-sm font-semibold sm:col-span-2">Cosa vuoi organizzare meglio?<textarea v-model="demo.notes" rows="3" class="mt-2 w-full rounded-xl border-slate-600 bg-slate-950 text-white"></textarea></label><button type="submit" class="min-h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-6 font-bold text-white sm:col-span-2">Prepara la richiesta demo</button></form>
+                        <div v-if="demoText" class="mt-7 rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-5"><p class="font-bold text-cyan-100">Testo pronto. Non è stato inviato.</p><pre class="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{{ demoText }}</pre><button type="button" class="mt-4 rounded-xl border border-cyan-300/30 px-4 py-2 text-sm font-bold text-cyan-100" @click="copyDemo">Copia il testo</button><p v-if="demoCopyStatus" class="mt-2 text-sm text-cyan-200" role="status">{{ demoCopyStatus }}</p></div>
                     </div>
                 </div>
             </section>
+
+
         </main>
 
         <footer class="border-t border-white/10 bg-slate-950 px-5 py-8 sm:px-8">
@@ -732,12 +557,7 @@ const workflow = [
 .cta-shine { position: relative; }
 .cta-shine:hover::before { transform: translateX(130%) skewX(-20deg); }
 
-.reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 700ms cubic-bezier(.16, 1, .3, 1), transform 700ms cubic-bezier(.16, 1, .3, 1);
-}
-.reveal.is-visible { opacity: 1; transform: translateY(0); }
+.reveal { opacity: 1; transform: none; }
 
 @keyframes hero-enter {
     from { opacity: 0; transform: translateY(24px); }

@@ -19,6 +19,16 @@ Route::prefix('v1')->name('api.')->group(function () {
 
     // Protected routes
     Route::middleware(['auth:api', 'active-user', 'access-token', MobileSyncGuard::class])->group(function () {
+        Route::get('/employees', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'index'])->name('employees.index');
+        Route::post('/employees/clock-in', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'clockIn'])->name('employees.clockIn');
+        Route::post('/employees/clock-out', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'clockOut'])->name('employees.clockOut');
+        Route::post('/employees/absences', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'store'])->name('employees.store');
+        Route::patch('/employees/absences/{absence}', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'update'])->name('employees.update');
+        Route::post('/employees/absences/{absence}/cancel', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'cancel'])->name('employees.cancel');
+        Route::post('/employees/absences/{absence}/review', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'review'])->name('employees.review');
+        Route::post('/employees/sessions', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'manual'])->name('employees.manual');
+        Route::patch('/employees/sessions/{session}', [App\Http\Controllers\Api\V1\EmployeeAttendanceController::class, 'correct'])->name('employees.correct');
+
         Route::get('/me', [App\Http\Controllers\Api\V1\AuthController::class, 'me']);
         Route::get('/sync/changes', App\Http\Controllers\Api\V1\MobileSyncController::class);
 
