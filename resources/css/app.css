@@ -41,7 +41,7 @@
        bug). These reference the --color-* tokens, which .dark redefines on
        <html>, so the component adapts to light/dark automatically. */
     --ms-font-size: 0.875rem;
-    --ms-line-height: 1.25rem;
+    --ms-line-height: 1.428571;
     --ms-bg: var(--color-surface-container-lowest);
     --ms-bg-disabled: var(--color-surface-container);
     --ms-border-width: 1px;
@@ -63,7 +63,7 @@
     --ms-dropdown-radius: 0.75rem;
     --ms-dropdown-border-width: 1px;
     --ms-option-font-size: 0.875rem;
-    --ms-option-line-height: 1.25rem;
+    --ms-option-line-height: 1.428571;
     --ms-option-py: 0.625rem;
     --ms-option-px: 0.875rem;
     --ms-option-color-pointed: var(--color-on-surface);
@@ -290,7 +290,7 @@
     @apply font-medium text-primary decoration-primary underline-offset-4 transition duration-200 hover:text-primary-dim;
   }
 
-  .app-shell input:not([type='checkbox']):not([type='radio']):not([type='color']),
+  .app-shell input:not([type='checkbox']):not([type='radio']):not([type='color']):not(.multiselect-search):not(.multiselect-tags-search):not(.multiselect-fake-input),
   .app-shell textarea {
     border-color: var(--color-outline-variant);
     background-color: var(--color-surface-container-lowest);
@@ -347,6 +347,11 @@
     transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
   }
 
+  .multiselect.is-active {
+    border-color: var(--ms-border-color-active);
+    box-shadow: 0 0 0 var(--ms-ring-width) var(--ms-ring-color);
+  }
+
   .multiselect:hover:not(.is-disabled):not(.is-active) {
     border-color: var(--color-outline);
   }
@@ -357,11 +362,27 @@
     box-shadow: 0 18px 45px rgba(8, 13, 24, 0.22);
   }
 
-  .multiselect-search,
-  .multiselect-tags-search {
+  /* Search belongs to the composite control: only its outer shell draws focus. */
+  .multiselect input.multiselect-search,
+  .multiselect input.multiselect-tags-search,
+  .multiselect input.multiselect-search:focus,
+  .multiselect input.multiselect-tags-search:focus {
+    min-height: 0;
     border: 0;
-    background-color: transparent;
+    outline: none;
+    background: transparent;
     box-shadow: none;
+    padding-block: 0;
+    font: inherit;
+    color: inherit;
+  }
+
+  .multiselect input.multiselect-search {
+    padding-right: calc(1.25rem + var(--ms-px) * 3);
+  }
+
+  .multiselect input.multiselect-tags-search {
+    padding-inline: 0;
   }
 
   .app-shell main > .py-12 {
