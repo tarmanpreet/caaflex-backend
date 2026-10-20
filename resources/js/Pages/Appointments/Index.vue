@@ -837,6 +837,7 @@ async function selectMiniDate(day) {
                                 <Multiselect
                                     v-model="createForm.practice_type_id"
                                     :options="(practiceTypes ?? []).map((t) => ({ value: t.id, label: t.name }))"
+                                    :append-to-body="true"
                                     mode="single"
                                     :searchable="true"
                                     value-prop="value"
@@ -859,6 +860,7 @@ async function selectMiniDate(day) {
                                     v-else
                                     v-model="createForm.practice_id"
                                     :options="[{ value: null, label: 'Nuova pratica' }, ...modalPractices.map((p) => ({ value: p.id, label: '#' + p.id + ' · ' + p.type + ' · ' + p.reference_year }))]"
+                                    :append-to-body="true"
                                     mode="single"
                                     :searchable="true"
                                     value-prop="value"
@@ -952,6 +954,7 @@ async function selectMiniDate(day) {
                                 <Multiselect
                                     v-model="createForm.assigned_user_id"
                                     :options="[{ value: null, label: 'Nessuno' }, ...(users ?? []).map((u) => ({ value: u.id, label: u.name }))]"
+                                    :append-to-body="true"
                                     mode="single"
                                     :searchable="true"
                                     value-prop="value"
@@ -971,6 +974,7 @@ async function selectMiniDate(day) {
                                 <Multiselect
                                     v-model="createForm.branch_id"
                                     :options="[{ value: null, label: 'Nessuna' }, ...(branches ?? []).map((b) => ({ value: b.id, label: b.name + ' - ' + b.city + ' (' + b.province + ')' }))]"
+                                    :append-to-body="true"
                                     mode="single"
                                     :searchable="true"
                                     value-prop="value"

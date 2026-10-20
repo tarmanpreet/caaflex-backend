@@ -180,6 +180,7 @@ const deleteAppointment = () => {
                             <Multiselect
                                 v-model="form.branch_id"
                                 :options="[{ value: null, label: 'Nessuna' }, ...(branches ?? []).map(b => ({ value: b.id, label: b.name + ' - ' + b.city + ' (' + b.province + ')' }))]"
+                                :append-to-body="true"
                                 mode="single"
                                 :searchable="true"
                                 value-prop="value"
