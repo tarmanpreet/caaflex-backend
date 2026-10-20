@@ -77,7 +77,7 @@ const submit = () => form.put(route('notification-settings.update'), {
                     <button
                         type="button"
                         :disabled="!browserNotificationsSupported || browserNotificationsDenied || browserNotificationsEnabled"
-                        class="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-xl px-4 text-sm font-bold transition disabled:cursor-not-allowed"
+                        class="app-button inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-xl px-4 text-sm font-bold transition disabled:cursor-not-allowed"
                         :class="browserNotificationsEnabled
                             ? 'bg-primary-container text-on-primary-container'
                             : 'bg-secondary-container text-on-secondary-container hover:brightness-95 disabled:opacity-60'"
@@ -137,7 +137,7 @@ const submit = () => form.put(route('notification-settings.update'), {
                             :class="form.sections[section.key].reminder_offsets.includes(option.value)
                                 ? 'border-primary bg-primary-container text-on-primary-container'
                                 : 'border-outline-variant/50 bg-surface-container-lowest text-on-surface-variant'"
-                            class="min-h-[42px] rounded-xl border px-4 py-2 text-sm font-semibold transition disabled:opacity-50"
+                            class="app-button min-h-[42px] rounded-xl border px-4 py-2 text-sm font-semibold transition disabled:opacity-50"
                             @click="toggleReminder(section.key, option.value)"
                         >
                             {{ option.label }}

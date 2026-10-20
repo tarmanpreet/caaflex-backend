@@ -105,7 +105,7 @@ const statCards = computed(() => [
                 <Link
                     v-if="canCreate"
                     :href="route('practices.create')"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-5 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.18)]"
+                    class="app-button inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-5 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.18)]"
                 >
                     <PlusIcon class="h-5 w-5" />
                     Nuova pratica
@@ -114,7 +114,7 @@ const statCards = computed(() => [
         </template>
 
         <div class="space-y-8">
-            <div class="flex flex-wrap gap-3" role="tablist" aria-label="Viste pratiche"><button role="tab" :aria-selected="tab==='practices'" class="min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='practices'">Pratiche</button><button v-if="operations?.can_assign" role="tab" :aria-selected="tab==='workload'" class="min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='workload'">Carico di lavoro</button></div>
+            <div class="flex flex-wrap gap-3" role="tablist" aria-label="Viste pratiche"><button role="tab" :aria-selected="tab==='practices'" class="app-button min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='practices'">Pratiche</button><button v-if="operations?.can_assign" role="tab" :aria-selected="tab==='workload'" class="app-button min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='workload'">Carico di lavoro</button></div>
             <p v-if="bulkSuccess" role="status" class="text-green-700 dark:text-green-300">{{bulkSuccess}}</p><p v-if="bulkError && !showActions" role="alert" class="text-red-700 dark:text-red-300">{{bulkError}}</p>
             <section v-if="tab==='workload'" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><article v-for="worker in operations?.workload" :key="worker.id" class="rounded-2xl bg-surface-container-lowest p-5 text-on-surface"><h3 class="font-semibold">{{worker.name}}</h3><dl class="mt-4 grid grid-cols-3 gap-3"><div><dt>Aperte</dt><dd class="text-2xl">{{worker.open_count}}</dd></div><div><dt>Scadute</dt><dd class="text-2xl text-red-600">{{worker.overdue_count}}</dd></div><div><dt>Ferme da 7 giorni</dt><dd class="text-2xl">{{worker.stalled_count}}</dd></div></dl></article></section>
             <div v-show="tab==='practices'" class="space-y-8">
@@ -129,7 +129,7 @@ const statCards = computed(() => [
                 >
                     <div class="flex items-center justify-between gap-2">
                         <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">{{ card.label }}</p>
-                        <button
+                        <button class="app-button"
                             type="button"
                             @click="filterByStatus(card.status)"
                             :class="[
@@ -151,7 +151,7 @@ const statCards = computed(() => [
                 </div>
             </section>
 
-            <div v-if="operations?.can_bulk" class="flex flex-wrap items-center gap-3"><button class="min-h-12 rounded-xl border px-4 dark:text-white" @click="selectPage">Seleziona / deseleziona pagina</button><span class="text-sm dark:text-gray-200">{{selected.length}} selezionate · massimo 100</span><button :disabled="!selected.length" class="min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" @click="showActions=true;bulkError=''">Azioni</button></div>
+            <div v-if="operations?.can_bulk" class="flex flex-wrap items-center gap-3"><button class="app-button min-h-12 rounded-xl border px-4 dark:text-white" @click="selectPage">Seleziona / deseleziona pagina</button><span class="text-sm dark:text-gray-200">{{selected.length}} selezionate · massimo 100</span><button :disabled="!selected.length" class="app-button min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" @click="showActions=true;bulkError=''">Azioni</button></div>
             <UiSectionCard title="Archivio pratiche" eyebrow="Vista operativa" :padded="false">
                 <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                     <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -168,13 +168,13 @@ const statCards = computed(() => [
                                 >
                         </div>
                         <div class="flex flex-col gap-2 sm:flex-row">
-                            <button type="button" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" :aria-expanded="showAdvancedFilters" aria-controls="advanced-practice-filters" @click="showAdvancedFilters = !showAdvancedFilters">
+                            <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" :aria-expanded="showAdvancedFilters" aria-controls="advanced-practice-filters" @click="showAdvancedFilters = !showAdvancedFilters">
                                 <AdjustmentsHorizontalIcon class="h-5 w-5" />
                                 Filtri
                                 <span v-if="activeFilterCount" class="rounded-md bg-primary px-2 py-0.5 text-xs text-on-primary">{{ activeFilterCount }}</span>
                                 <ChevronDownIcon :class="['h-4 w-4 transition-transform', showAdvancedFilters ? 'rotate-180' : '']" />
                             </button>
-                            <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-on-primary transition hover:bg-primary-dim" @click="performSearch">Cerca</button>
+                            <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-on-primary transition hover:bg-primary-dim" @click="performSearch">Cerca</button>
                         </div>
                     </div>
                     <div v-show="showAdvancedFilters" id="advanced-practice-filters" class="mt-3 grid gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
@@ -209,7 +209,7 @@ const statCards = computed(() => [
                                 </option>
                             </select>
                         </div>
-                        <button type="button" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface disabled:pointer-events-none disabled:opacity-40" :disabled="!activeFilterCount" @click="resetFilters">
+                        <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface disabled:pointer-events-none disabled:opacity-40" :disabled="!activeFilterCount" @click="resetFilters">
                             <XMarkIcon class="h-5 w-5" />
                             Azzera
                         </button>
@@ -267,6 +267,6 @@ const statCards = computed(() => [
             </UiSectionCard>
             </div>
         </div>
-        <ConfirmationModal :show="showActions" @close="!bulkBusy && (showActions=false)"><template #title>Azioni su {{selected.length}} pratiche selezionate</template><template #content><div class="space-y-4"><label class="block">Operazione<select v-model="bulkAction" aria-label="Operazione" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option value="status">Cambia stato</option><option v-if="operations?.can_assign" value="assign">Assegna operatori</option></select></label><label v-if="bulkAction==='status'" class="block">Nuovo stato<select v-model="bulkStatus" aria-label="Nuovo stato" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option v-for="(label,value) in states" :key="value" :value="value">{{label}}</option></select></label><fieldset v-else><legend>Sostituisci gli operatori assegnati</legend><label v-for="worker in operations?.operators" :key="worker.id" class="flex min-h-12 items-center gap-3"><input v-model="bulkOperators" type="checkbox" :value="worker.id" />{{worker.name}}</label></fieldset><p v-if="bulkError" role="alert" class="text-red-600">{{bulkError}}</p></div></template><template #footer><button class="min-h-12 px-4" :disabled="bulkBusy" @click="showActions=false">Annulla</button><button class="min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" :disabled="bulkBusy || (bulkAction==='assign'&&!bulkOperators.length)" @click="applyBulk">{{bulkBusy?'Applicazione…':'Applica a '+selected.length+' pratiche'}}</button></template></ConfirmationModal>
+        <ConfirmationModal :show="showActions" @close="!bulkBusy && (showActions=false)"><template #title>Azioni su {{selected.length}} pratiche selezionate</template><template #content><div class="space-y-4"><label class="block">Operazione<select v-model="bulkAction" aria-label="Operazione" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option value="status">Cambia stato</option><option v-if="operations?.can_assign" value="assign">Assegna operatori</option></select></label><label v-if="bulkAction==='status'" class="block">Nuovo stato<select v-model="bulkStatus" aria-label="Nuovo stato" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option v-for="(label,value) in states" :key="value" :value="value">{{label}}</option></select></label><fieldset v-else><legend>Sostituisci gli operatori assegnati</legend><label v-for="worker in operations?.operators" :key="worker.id" class="flex min-h-12 items-center gap-3"><input v-model="bulkOperators" type="checkbox" :value="worker.id" />{{worker.name}}</label></fieldset><p v-if="bulkError" role="alert" class="text-red-600">{{bulkError}}</p></div></template><template #footer><button class="app-button min-h-12 px-4" :disabled="bulkBusy" @click="showActions=false">Annulla</button><button class="app-button min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" :disabled="bulkBusy || (bulkAction==='assign'&&!bulkOperators.length)" @click="applyBulk">{{bulkBusy?'Applicazione…':'Applica a '+selected.length+' pratiche'}}</button></template></ConfirmationModal>
     </AppLayout>
 </template>

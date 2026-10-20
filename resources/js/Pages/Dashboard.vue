@@ -156,7 +156,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : 'â€
             <section class="grid gap-8 lg:grid-cols-12">
                 <UiSectionCard class="lg:col-span-8" title="Step in primo piano" eyebrow="Focus di giornata">
                     <template #actions>
-                        <Link :href="route('deadlines.index')" class="inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none">
+                        <Link :href="route('deadlines.index')" class="app-button inline-flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none">
                             Vedi tutte
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
@@ -203,7 +203,7 @@ const practiceStatusLabel = (status) => status ? status.replace(/_/g, ' ') : 'â€
                                         <Link
                                             v-if="item.practice.id"
                                             :href="route('practices.show', item.practice.id) + '#steps'"
-                                            class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-surface-container-low px-3 font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
+                                            class="app-button inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-surface-container-low px-3 font-bold text-primary transition hover:bg-primary hover:text-on-primary focus-visible:outline-none"
                                         >
                                             Apri step
                                             <ArrowUpRightIcon class="h-4 w-4" />

@@ -47,7 +47,7 @@ const contentId = `dialog-modal-content-${componentId}`;
             </div>
         </div>
 
-        <div class="flex flex-row flex-wrap justify-end gap-3 border-t border-outline-variant/35 bg-surface-container-low px-6 py-4 text-end">
+        <div class="app-page-actions border-t sm:justify-end border-outline-variant/35 bg-surface-container-low px-6 py-4 text-end">
             <slot name="footer" />
         </div>
     </Modal>

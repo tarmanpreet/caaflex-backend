@@ -42,7 +42,7 @@ const contentId = `confirmation-modal-content-${componentId}`;
             </div>
         </div>
 
-        <div class="flex flex-row flex-wrap justify-end gap-3 border-t border-outline-variant/35 bg-surface-container-low px-6 py-4">
+        <div class="app-page-actions sm:justify-end border-t border-outline-variant/35 bg-surface-container-low px-6 py-4">
             <slot name="footer" />
         </div>
     </Modal>

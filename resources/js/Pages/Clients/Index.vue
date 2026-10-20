@@ -56,7 +56,7 @@ const onSort = ({ key, dir }) => {
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione clienti</h1>
                     <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Consulta e gestisci l’anagrafica dei clienti visibili nella tua rete.</p>
                 </div>
-                <Link v-if="canCreate" :href="route('clients.create')" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
+                <Link v-if="canCreate" :href="route('clients.create')" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
                     <PlusIcon class="h-5 w-5" />
                     Nuovo cliente
                 </Link>
@@ -84,7 +84,7 @@ const onSort = ({ key, dir }) => {
                             <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option>
                         </select>
                     </div>
-                    <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
+                    <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
                 </div>
             </div>
 

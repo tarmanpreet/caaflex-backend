@@ -66,7 +66,12 @@ const deleteAppointment = () => {
             </h2>
         </template>
 
-        <div class="py-12">
+        <template #actions>
+            <Link :href="route('appointments.index')" class="app-action-link">Torna agli appuntamenti</Link>
+            <DangerButton v-if="canDelete" @click="confirmingDelete = true">Elimina appuntamento</DangerButton>
+        </template>
+
+        <div>
             <div class="w-full space-y-6">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -200,7 +205,7 @@ const deleteAppointment = () => {
                         </div>
                     </div>
 
-                    <div class="mt-6 flex items-center justify-end gap-3">
+                    <div class="app-form-actions">
                         <SecondaryButton type="button" @click="router.get(route('appointments.index'))">
                             Torna alla lista
                         </SecondaryButton>
@@ -210,11 +215,7 @@ const deleteAppointment = () => {
                     </div>
                 </div>
 
-                <div v-if="canDelete" class="flex justify-end">
-                    <DangerButton @click="confirmingDelete = true">
-                        Elimina Appuntamento
-                    </DangerButton>
-                </div>
+
             </div>
         </div>
 

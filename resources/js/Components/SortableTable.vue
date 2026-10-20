@@ -190,7 +190,7 @@ const totalCols = computed(() => props.columns.length + (slots.actions ? 1 : 0))
                         </slot>
                     </td>
 
-                    <td v-if="slots.actions" class="sticky right-0 z-10 min-w-[112px] border-l border-outline-variant/25 bg-inherit px-5 py-4 text-right align-middle shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">
+                    <td v-if="slots.actions" class="sticky right-0 z-10 min-w-[112px] border-l border-outline-variant/25 bg-surface-container-lowest px-5 py-4 text-right align-middle shadow-[-12px_0_18px_-18px_rgba(15,23,42,0.8)]">
                         <slot name="actions" :row="row" />
                     </td>
                 </tr>

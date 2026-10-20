@@ -370,7 +370,6 @@ const completionPercentage = computed(() => {
 
 <template>
     <AppLayout title="Dettaglio Pratica">
-        <div class="mx-auto max-w-7xl px-4 pt-4"><Link :href="route('practices.workspace', practice.id)" class="inline-flex min-h-12 items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white">Documenti richiesti e messaggi</Link></div>
         <template #header>
             <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
@@ -387,18 +386,19 @@ const completionPercentage = computed(() => {
                     </p>
                 </div>
 
-                <div class="flex flex-wrap gap-3">
-                    <button
-                        v-if="canUploadDocument"
-                        type="button"
-                        @click="openUpload"
-                        class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-5 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.18)]"
-                    >
-                        <DocumentArrowUpIcon class="h-5 w-5" />
-                        Carica documenti
-                    </button>
-                </div>
+
             </div>
+        </template>
+
+        <template #actions>
+            <Link :href="route('practices.workspace', practice.id)" class="app-action-link">Documenti richiesti e messaggi</Link>
+            <SecondaryButton v-if="canUploadDocument" @click="openUpload"><DocumentArrowUpIcon class="h-5 w-5" />Carica documenti</SecondaryButton>
+            <SecondaryButton v-if="canUpdate && !editMode" @click="editMode = true"><PencilSquareIcon class="h-5 w-5" />Modifica pratica</SecondaryButton>
+            <template v-if="editMode">
+                <SecondaryButton @click="cancelEdit" :disabled="editForm.processing">Annulla</SecondaryButton>
+                <PrimaryButton @click="submitEdit" :disabled="editForm.processing">{{ editForm.processing ? 'Salvataggio…' : 'Salva modifiche' }}</PrimaryButton>
+            </template>
+            <DangerButton v-if="canDelete && !editMode" @click="confirmingPracticeDelete = true">Elimina pratica</DangerButton>
         </template>
 
         <section v-if="practice" class="px-4 pb-12 lg:px-0">
@@ -588,35 +588,7 @@ const completionPercentage = computed(() => {
                         </div>
                     </div>
 
-                    <!-- Action Card -->
-                    <div class="bg-primary/5 rounded-2xl p-6 border border-primary/10">
-                        <h3 class="text-sm font-bold text-primary-dim mb-2">Azioni Rapide</h3>
-                        <div class="space-y-3">
-                            <button
-                                v-if="canUpdate && !editMode"
-                                @click="editMode = true"
-                                class="w-full px-4 py-3 bg-surface-container-lowest text-on-surface font-semibold rounded-xl shadow-sm border border-outline-variant/10 hover:bg-surface-container transition-all flex items-center justify-center"
-                            >
-                                <PencilSquareIcon class="h-5 w-5 mr-2" />
-                                Modifica Pratica
-                            </button>
 
-                            <template v-if="editMode">
-                                <div class="flex gap-3">
-                                    <SecondaryButton @click="cancelEdit" :disabled="editForm.processing" class="flex-1">
-                                        Annulla
-                                    </SecondaryButton>
-                                    <PrimaryButton @click="submitEdit" :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing" class="flex-1">
-                                        Salva
-                                    </PrimaryButton>
-                                </div>
-                            </template>
-
-                            <DangerButton v-if="canDelete && !editMode" @click="confirmingPracticeDelete = true" class="w-full justify-center">
-                                Elimina Pratica
-                            </DangerButton>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Right Side: Tabs Section -->
@@ -624,7 +596,7 @@ const completionPercentage = computed(() => {
                     <div class="bg-surface-container-lowest rounded-2xl shadow-sm shadow-blue-900/5 ring-1 ring-outline-variant/10 overflow-hidden flex flex-col h-full">
                         <!-- Tabs Header -->
                         <div ref="tabsHeader" class="flex items-center px-6 pt-6 border-b border-outline-variant/10 bg-surface-container-low/30 overflow-x-auto">
-                            <button
+                            <button class="app-button"
                                 v-for="tab in tabs"
                                 :key="tab.key"
                                 :data-tab-key="tab.key"
@@ -700,7 +672,7 @@ const completionPercentage = computed(() => {
                                                     <input :id="`practice-document-expiration-${index}`" v-model="item.expires_on" type="date" class="app-input block min-h-[44px] w-full rounded-xl">
                                                     <InputError :message="docForm.errors[`expires_on.${index}`]" class="mt-1" />
                                                 </div>
-                                                <button @click="removeFile(index)" type="button" class="min-h-[44px] rounded-xl bg-error-container/20 px-4 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-container/30">
+                                                <button @click="removeFile(index)" type="button" class="app-button min-h-[44px] rounded-xl bg-error-container/20 px-4 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-container/30">
                                                     Rimuovi
                                                 </button>
                                             </div>
@@ -763,7 +735,7 @@ const completionPercentage = computed(() => {
                                                         <a :href="route('practices.documents.download', [practice.id, doc.id])" class="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-on-surface-variant transition-colors hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" :aria-label="`Scarica ${doc.original_name}`">
                                                             <DocumentArrowDownIcon class="h-5 w-5" />
                                                         </a>
-                                                        <button v-if="canDeleteDocument" @click="confirmDocDelete(doc)" class="min-h-[44px] rounded-lg px-3 text-on-surface-variant transition-colors hover:bg-error/5 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">
+                                                        <button v-if="canDeleteDocument" @click="confirmDocDelete(doc)" class="app-button min-h-[44px] rounded-lg px-3 text-on-surface-variant transition-colors hover:bg-error/5 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">
                                                             Elimina
                                                         </button>
                                                     </div>

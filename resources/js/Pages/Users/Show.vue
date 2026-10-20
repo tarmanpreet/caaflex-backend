@@ -131,7 +131,6 @@ const statusBadgeClass = (status) => {
                 <Link :href="route('users.index')" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 text-sm">
                     &larr; Utenti
                 </Link>
-                <Link :href="route('employees.index',{user_id:user.id})" class="inline-flex min-h-12 items-center rounded-xl bg-blue-100 px-4 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-100">Presenze, assenze e referenti</Link>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     {{ user?.name }}
                 </h2>
@@ -148,34 +147,21 @@ const statusBadgeClass = (status) => {
             </div>
         </template>
 
-        <div class="py-12" v-if="user">
+        <template #actions>
+            <Link v-if="userRole !== 'cliente'" :href="route('employees.index', {user_id: user.id})" class="app-action-link">Presenze, assenze e referenti</Link>
+            <Link v-if="canManageAvailabilities" :href="route('users.availabilities.index', user.id)" class="app-action-link">Gestisci disponibilità</Link>
+            <SecondaryButton v-if="canUpdate && !isSelf" @click="toggleActive">{{ user.is_active ? 'Disattiva utente' : 'Attiva utente' }}</SecondaryButton>
+            <DangerButton v-if="canDelete" @click="confirmingUserDelete = true">Elimina utente</DangerButton>
+        </template>
+
+        <div v-if="user">
             <div class="w-full space-y-6">
 
                 <!-- Section 1: Edit Form -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Dati Utente</h3>
-                        <!-- Admin Actions -->
-                        <div class="flex items-center gap-2">
-                            <Link
-                                v-if="canManageAvailabilities"
-                                :href="route('users.availabilities.index', user.id)"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                            >
-                                Gestisci Disponibilità
-                            </Link>
-                            <template v-if="canUpdate && !isSelf">
-                                <DangerButton v-if="user?.is_active" @click="toggleActive">
-                                    Disattiva Utente
-                                </DangerButton>
-                                <PrimaryButton v-else @click="toggleActive" class="bg-green-600 hover:bg-green-700 focus:ring-green-500 active:bg-green-800">
-                                    Attiva Utente
-                                </PrimaryButton>
-                            </template>
-                            <DangerButton v-if="canDelete" @click="confirmingUserDelete = true">
-                                Elimina Utente
-                            </DangerButton>
-                        </div>
+
                     </div>
                     <form @submit.prevent="submitEdit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -268,9 +254,9 @@ const statusBadgeClass = (status) => {
                         </div>
 
                         <!-- Save Button -->
-                        <div v-if="canUpdate" class="md:col-span-2 flex justify-end">
+                        <div v-if="canUpdate" class="app-form-actions md:col-span-2">
                             <PrimaryButton type="submit" :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">
-                                Salva Modifiche
+                                Salva modifiche
                             </PrimaryButton>
                         </div>
                     </form>
@@ -283,7 +269,7 @@ const statusBadgeClass = (status) => {
                             Pratiche in gestione
                             <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">({{ activePractices?.total ?? 0 }})</span>
                         </h3>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                             <input
                                 type="text"
                                 v-model="activeSearch"
@@ -293,7 +279,7 @@ const statusBadgeClass = (status) => {
                             />
                             <button
                                 @click="searchActive"
-                                class="inline-flex items-center px-3 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                class="app-button app-action-link"
                             >
                                 Cerca
                             </button>
@@ -342,7 +328,7 @@ const statusBadgeClass = (status) => {
                             Pratiche chiuse
                             <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">({{ closedPractices?.total ?? 0 }})</span>
                         </h3>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                             <input
                                 type="text"
                                 v-model="closedSearch"
@@ -352,7 +338,7 @@ const statusBadgeClass = (status) => {
                             />
                             <button
                                 @click="searchClosed"
-                                class="inline-flex items-center px-3 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                class="app-button app-action-link"
                             >
                                 Cerca
                             </button>

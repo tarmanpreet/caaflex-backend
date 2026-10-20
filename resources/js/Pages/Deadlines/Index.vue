@@ -217,7 +217,7 @@ const completeStep = (deadline) => {
             <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
                     <div class="flex flex-wrap gap-2" aria-label="Filtri rapidi">
-                        <button
+                        <button class="app-button"
                             v-for="filter in quickFilters"
                             :key="filter.key"
                             type="button"
@@ -253,7 +253,7 @@ const completeStep = (deadline) => {
 
                         <button
                             type="button"
-                            class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition duration-200 hover:bg-surface-container-highest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 motion-reduce:transition-none"
+                            class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition duration-200 hover:bg-surface-container-highest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 motion-reduce:transition-none"
                             aria-controls="advanced-deadline-filters"
                             :aria-expanded="showAdvancedFilters"
                             @click="showAdvancedFilters = !showAdvancedFilters"
@@ -264,7 +264,7 @@ const completeStep = (deadline) => {
                             <ChevronDownIcon :class="['h-4 w-4 transition-transform duration-200 motion-reduce:transition-none', showAdvancedFilters ? 'rotate-180' : '']" />
                         </button>
 
-                        <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-on-primary transition duration-200 hover:bg-primary-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 motion-reduce:transition-none" @click="performSearch">
+                        <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-on-primary transition duration-200 hover:bg-primary-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 motion-reduce:transition-none" @click="performSearch">
                             Cerca
                         </button>
                     </div>
@@ -303,7 +303,7 @@ const completeStep = (deadline) => {
 
                     <button
                         type="button"
-                        class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition duration-200 hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none"
+                        class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition duration-200 hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none"
                         :disabled="activeFilterCount === 0"
                         @click="resetFilters"
                     >
@@ -325,7 +325,7 @@ const completeStep = (deadline) => {
             >
                 <template #cell-title="{ row }">
                     <div class="min-w-[180px]">
-                        <button v-if="row.can_update" type="button" class="inline-flex min-h-[44px] items-center text-left font-semibold text-on-surface transition hover:text-primary focus-visible:outline-none focus-visible:underline" @click="openEditModal(row)">
+                        <button v-if="row.can_update" type="button" class="app-button inline-flex min-h-[44px] items-center text-left font-semibold text-on-surface transition hover:text-primary focus-visible:outline-none focus-visible:underline" @click="openEditModal(row)">
                             {{ row.title }}
                         </button>
                         <Link v-else :href="route('practices.show', row.practice_id) + '#steps'" class="font-semibold text-on-surface transition hover:text-primary">
@@ -357,7 +357,7 @@ const completeStep = (deadline) => {
                         <button
                             v-if="row.can_update && !['completed', 'cancelled'].includes(row.status)"
                             type="button"
-                            class="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-primary/25 bg-primary/5 px-3 text-xs font-bold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="app-button inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-primary/25 bg-primary/5 px-3 text-xs font-bold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                             :disabled="completingStepId === row.id"
                             :aria-label="`Completa lo step ${row.title}`"
                             @click="completeStep(row)"

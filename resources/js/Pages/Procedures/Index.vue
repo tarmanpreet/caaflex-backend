@@ -91,7 +91,7 @@ const deleteProcedure = () => {
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Procedure</h1>
                     <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Configura procedure, note predefinite e tempistiche degli step.</p>
                 </div>
-                <Link v-if="canCreate" :href="route('procedures.create')" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
+                <Link v-if="canCreate" :href="route('procedures.create')" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:bg-primary-dim">
                     <PlusIcon class="h-5 w-5" />
                     Nuova procedura
                 </Link>
@@ -113,7 +113,7 @@ const deleteProcedure = () => {
                             class="h-11 w-full rounded-xl border-0 bg-surface-container-high pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
                         >
                     </div>
-                    <button type="button" class="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
+                    <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
                 </div>
             </div>
 

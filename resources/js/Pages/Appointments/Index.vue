@@ -396,7 +396,7 @@ async function selectMiniDate(day) {
                     v-if="canCreate"
                     type="button"
                     @click="openCreateModal"
-                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-5 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.18)] hover:scale-[1.02] active:scale-95 transition-all"
+                    class="app-button inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-primary to-primary-dim px-5 py-3 text-sm font-bold text-on-primary shadow-[0px_20px_40px_rgba(0,86,210,0.18)] hover:scale-[1.02] active:scale-95 transition-all"
                 >
                     <PlusIcon class="h-5 w-5" />
                     Nuovo appuntamento
@@ -488,14 +488,14 @@ async function selectMiniDate(day) {
                                     <button 
                                         type="button" 
                                         @click="applyFilter" 
-                                        class="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary-dim active:scale-95"
+                                        class="app-button flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary-dim active:scale-95"
                                     >
                                         Applica
                                     </button>
                                     <button 
                                         type="button" 
                                         @click="resetFilter" 
-                                        class="rounded-xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-highest"
+                                        class="app-button rounded-xl bg-surface-container-high px-4 py-2.5 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-highest"
                                     >
                                         Azzera
                                     </button>
@@ -537,7 +537,7 @@ async function selectMiniDate(day) {
                         <!-- View Toggle -->
                         <div class="flex items-center justify-between">
                             <div class="inline-flex rounded-2xl bg-surface-container-low p-1 ring-1 ring-outline-variant/10">
-                                <button
+                                <button class="app-button"
                                     type="button"
                                     @click="currentTab = 'calendario'"
                                     :class="[
@@ -549,7 +549,7 @@ async function selectMiniDate(day) {
                                 >
                                     Calendario
                                 </button>
-                                <button
+                                <button class="app-button"
                                     type="button"
                                     @click="currentTab = 'lista'"
                                     :class="[
@@ -702,9 +702,9 @@ async function selectMiniDate(day) {
                     <div class="absolute inset-0 bg-on-surface/30 backdrop-blur-sm" @click="detailModal = false"></div>
                     
                     <!-- Modal Content -->
-                    <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-surface-container-lowest shadow-[0px_24px_60px_rgba(12,15,16,0.2)] ring-1 ring-outline-variant/10 transition-all">
+                    <div role="dialog" aria-modal="true" aria-label="Dettaglio appuntamento" class="relative flex max-h-[calc(100dvh-2rem)] w-full flex-col max-w-lg transform overflow-hidden rounded-2xl bg-surface-container-lowest shadow-[0px_24px_60px_rgba(12,15,16,0.2)] ring-1 ring-outline-variant/10 transition-all">
                         <!-- Header -->
-                        <div class="flex items-center justify-between border-b border-outline-variant/10 bg-surface-container-low/80 px-6 py-4">
+                        <div class="flex shrink-0 items-center justify-between border-b border-outline-variant/10 bg-surface-container-low/80 px-6 py-4">
                             <div>
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Dettaglio</p>
                                 <h3 class="mt-1 font-headline text-xl font-bold text-on-surface">
@@ -713,14 +713,14 @@ async function selectMiniDate(day) {
                             </div>
                             <button 
                                 @click="detailModal = false" 
-                                class="rounded-xl p-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                                type="button" aria-label="Chiudi dettaglio appuntamento" class="app-icon-button"
                             >
                                 <XMarkIcon class="h-5 w-5" />
                             </button>
                         </div>
 
                         <!-- Body -->
-                        <div v-if="detailAppointment" class="p-6 space-y-5">
+                        <div v-if="detailAppointment" class="min-h-0 flex-1 overflow-y-auto p-6 space-y-5">
                             <!-- Title Card -->
                             <div class="rounded-xl bg-surface-container-low p-4">
                                 <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant mb-2">Titolo</p>
@@ -766,16 +766,16 @@ async function selectMiniDate(day) {
                         </div>
 
                         <!-- Footer -->
-                        <div class="flex items-center justify-end gap-3 border-t border-outline-variant/10 bg-surface-container-low/50 px-6 py-4">
+                        <div class="app-page-actions shrink-0 border-t sm:justify-end border-outline-variant/10 bg-surface-container-low/50 px-6 py-4">
                             <button 
                                 @click="detailModal = false" 
-                                class="rounded-xl px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all"
+                                class="app-button rounded-xl px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all"
                             >
                                 Chiudi
                             </button>
                             <button 
                                 @click="goToDetail" 
-                                class="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary-dim transition-all"
+                                class="app-button rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-primary-dim transition-all"
                             >
                                 Apri scheda
                             </button>
@@ -800,9 +800,9 @@ async function selectMiniDate(day) {
                     <div class="absolute inset-0 bg-on-surface/30 backdrop-blur-sm" @click="createModal = false"></div>
                     
                     <!-- Modal Content -->
-                    <div class="relative w-full max-w-2xl transform overflow-hidden rounded-2xl bg-surface-container-lowest shadow-[0px_24px_60px_rgba(12,15,16,0.2)] ring-1 ring-outline-variant/10 transition-all">
+                    <div role="dialog" aria-modal="true" aria-label="Nuovo appuntamento" class="relative flex max-h-[calc(100dvh-2rem)] w-full flex-col max-w-2xl transform overflow-hidden rounded-2xl bg-surface-container-lowest shadow-[0px_24px_60px_rgba(12,15,16,0.2)] ring-1 ring-outline-variant/10 transition-all">
                         <!-- Header -->
-                        <div class="flex items-center justify-between border-b border-outline-variant/10 bg-surface-container-low/80 px-6 py-4">
+                        <div class="flex shrink-0 items-center justify-between border-b border-outline-variant/10 bg-surface-container-low/80 px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dim text-white">
                                     <PlusIcon class="h-5 w-5" />
@@ -816,14 +816,14 @@ async function selectMiniDate(day) {
                             </div>
                             <button 
                                 @click="createModal = false; createForm.reset(); modalPractices = []" 
-                                class="rounded-xl p-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                                type="button" aria-label="Chiudi nuovo appuntamento" class="app-icon-button"
                             >
                                 <XMarkIcon class="h-5 w-5" />
                             </button>
                         </div>
 
                         <!-- Body -->
-                        <div class="max-h-[70vh] overflow-y-auto p-6 space-y-5">
+                        <div class="min-h-0 flex-1 overflow-y-auto p-6 space-y-5">
                             <!-- Client -->
                             <div>
                                 <InputLabel for="cm_client" value="Cliente" class="mb-2" />
@@ -1002,11 +1002,11 @@ async function selectMiniDate(day) {
                         <div class="flex items-center justify-end gap-3 border-t border-outline-variant/10 bg-surface-container-low/50 px-6 py-4">
                             <button 
                                 @click="createModal = false; createForm.reset(); modalPractices = []" 
-                                class="rounded-xl px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all"
+                                class="app-button rounded-xl px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all"
                             >
                                 Annulla
                             </button>
-                            <button 
+                            <button class="app-button"
                                 @click="submitCreate" 
                                 :disabled="createForm.processing"
                                 :class="[

@@ -180,8 +180,49 @@
     @apply flex flex-col gap-3 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between;
   }
 
+  /* One size for text commands; icon buttons, date cells and selectable cards
+     keep their own layout. Long labels may wrap instead of being clipped. */
+  .app-shell .app-button,
+  [role="dialog"] .app-button {
+    display: inline-flex;
+    min-height: 44px;
+    min-width: 44px;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: center;
+  }
+
+  .app-page-actions {
+    @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch;
+  }
+
+  .app-page-actions > * {
+    @apply max-w-full;
+  }
+
+  .app-page-actions > :is(button, a) {
+    margin-inline: 0;
+  }
+
+  .app-action-link {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-center text-sm font-semibold text-on-surface shadow-sm transition duration-200 hover:border-outline hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .app-form-actions {
+    @apply mt-6 flex flex-col gap-3 border-t border-outline-variant/35 pt-4 sm:flex-row sm:items-center sm:justify-end;
+  }
+
   .app-icon-button {
-    @apply inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-on-surface-variant transition duration-200 hover:bg-surface-container-low hover:text-primary focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-on-surface-variant transition duration-200 hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-40;
   }
 
   .app-shell button,

@@ -100,7 +100,7 @@ const navItems = computed(() => {
                                 <ApplicationLogo v-if="isNexxworth && !isCollapsed" class="h-14 w-[210px] object-contain object-left" />
                                 <ApplicationMark v-else class="h-12 w-12 shrink-0 drop-shadow-md" />
 
-                                <div v-if="!isCollapsed && !isNexxworth" class="min-w-0">
+                                <div v-if="!isCollapsed && !isNexxworth" class="min-w-0 flex-1">
                                     <p class="truncate font-headline text-lg font-extrabold tracking-tight text-on-surface">{{ $page.props.branding.name }}</p>
                                     <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Spazio di lavoro operativo</p>
                                 </div>
@@ -202,7 +202,7 @@ const navItems = computed(() => {
                     <main class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                         <section class="mb-6 overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest px-5 py-5 shadow-sm sm:px-6 sm:py-6">
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{{ $page.props.branding.name }}</p>
                                     <div class="mt-2">
                                         <slot name="header">
@@ -211,6 +211,9 @@ const navItems = computed(() => {
                                     </div>
                                 </div>
 
+                            </div>
+                            <div v-if="$slots.actions" role="group" aria-label="Azioni pagina" class="app-page-actions mt-5 border-t border-outline-variant/35 pt-4">
+                                <slot name="actions" />
                             </div>
                         </section>
 

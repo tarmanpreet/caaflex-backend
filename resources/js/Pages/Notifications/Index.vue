@@ -55,7 +55,7 @@ const formatDate = (value) => value
                         <option value="read">Lette</option>
                     </select>
                 </div>
-                <button type="button" class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container" @click="markAllAsRead">
+                <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container" @click="markAllAsRead">
                     <CheckIcon class="h-5 w-5" /> Segna tutte come lette
                 </button>
             </form>
@@ -74,7 +74,7 @@ const formatDate = (value) => value
                     v-else
                     :key="notification.id"
                     type="button"
-                    class="flex w-full items-start gap-4 border-b border-outline-variant/25 px-5 py-5 text-left transition last:border-0 hover:bg-surface-container-low sm:px-6"
+                    class="app-button flex w-full items-start gap-4 border-b border-outline-variant/25 px-5 py-5 text-left transition last:border-0 hover:bg-surface-container-low sm:px-6"
                     @click="openNotification(notification)"
                 >
                     <span :class="notification.read_at ? 'bg-surface-container-high' : 'bg-primary'" class="mt-2 h-3 w-3 shrink-0 rounded-full" />

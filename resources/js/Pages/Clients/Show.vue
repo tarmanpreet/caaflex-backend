@@ -197,36 +197,20 @@ const statusBadgeClass = (status) => {
             </h2>
         </template>
 
-        <div class="flex flex-wrap gap-3 px-4 pt-6"><Link :href="route('family.profile',client.id)" class="min-h-12 rounded-xl border px-4 py-3 text-blue-700 dark:text-blue-300">Familiari, deleghe e storico</Link><Link :href="route('booking.index',{client_profile_id:client.id})" class="min-h-12 rounded-xl bg-blue-600 px-4 py-3 text-white">Prenota un orario disponibile</Link></div>
-        <div class="py-12">
+        <template #actions>
+            <Link :href="route('family.profile', client.id)" class="app-action-link">Familiari, deleghe e storico</Link>
+            <Link :href="route('booking.index', {client_profile_id: client.id})" class="app-action-link">Prenota un orario disponibile</Link>
+            <SecondaryButton v-if="canEditClient && !editMode" @click="editMode = true">Modifica cliente</SecondaryButton>
+            <DangerButton v-if="canDeleteClient && !editMode" @click="confirmingClientDelete = true">Elimina cliente</DangerButton>
+        </template>
+        <div>
             <div class="w-full space-y-6">
 
                 <!-- Profile Section -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informazioni cliente</h3>
-                        <div class="flex items-center gap-3">
-                            <template v-if="!editMode">
-                                <DangerButton v-if="canDeleteClient" @click="confirmingClientDelete = true">
-                                    Elimina cliente
-                                </DangerButton>
-                                <button
-                                    v-if="canEditClient"
-                                    @click="editMode = true"
-                                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:bg-gray-900/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
-                                >
-                                    Modifica
-                                </button>
-                            </template>
-                            <template v-else>
-                                <SecondaryButton @click="cancelEdit" :disabled="editForm.processing">
-                                    Annulla
-                                </SecondaryButton>
-                                <PrimaryButton @click="submitEdit" :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">
-                                    Salva
-                                </PrimaryButton>
-                            </template>
-                        </div>
+
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
@@ -347,6 +331,10 @@ const statusBadgeClass = (status) => {
                         </div>
 
                     </div>
+                    <div v-if="editMode" class="app-form-actions">
+                        <SecondaryButton @click="cancelEdit" :disabled="editForm.processing">Annulla</SecondaryButton>
+                        <PrimaryButton @click="submitEdit" :disabled="editForm.processing">{{ editForm.processing ? 'Salvataggio…' : 'Salva modifiche' }}</PrimaryButton>
+                    </div>
                 </div>
 
                 <!-- Account Utente Section -->
@@ -363,7 +351,7 @@ const statusBadgeClass = (status) => {
                             type="button"
                             :disabled="inviteForm.processing"
                             @click="submitInvite"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50"
+                            class="app-button app-action-link"
                         >
                             Invita utente
                         </button>
@@ -495,12 +483,12 @@ const statusBadgeClass = (status) => {
                             </template>
                             <template #actions="{ row }">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button v-if="canUploadDocument" type="button" class="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" @click="editingDocumentExpiration = row">
+                                    <button v-if="canUploadDocument" type="button" class="app-button inline-flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" @click="editingDocumentExpiration = row">
                                         <CalendarDaysIcon class="h-4 w-4" />
                                         Validità
                                     </button>
                                     <a :href="route('clients.documents.download', [client.id, row.id])" class="inline-flex min-h-[44px] items-center rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">Scarica</a>
-                                    <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Elimina</button>
+                                    <button v-if="canDeleteDocument" @click="confirmDocDelete(row)" class="app-button min-h-[44px] rounded-xl px-3 text-sm font-semibold text-error transition-colors hover:bg-error-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30">Elimina</button>
                                 </div>
                             </template>
                         </SortableTable>
@@ -511,7 +499,7 @@ const statusBadgeClass = (status) => {
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pratiche</h3>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                             <input
                                 type="text"
                                 v-model="practiceSearch"
@@ -521,7 +509,7 @@ const statusBadgeClass = (status) => {
                             />
                             <button
                                 @click="searchPractices"
-                                class="inline-flex items-center px-3 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                class="app-button app-action-link"
                             >
                                 Cerca
                             </button>
