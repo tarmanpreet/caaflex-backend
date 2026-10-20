@@ -196,7 +196,7 @@ const statusBadgeClass = (status) => {
                         <!-- Ruolo -->
                         <div>
                             <InputLabel for="role" value="Ruolo" />
-                            <select
+                            <SearchableSelect
                                 v-if="canUpdate"
                                 id="role"
                                 v-model="editForm.role"
@@ -204,7 +204,7 @@ const statusBadgeClass = (status) => {
                                 required
                             >
                                 <option v-for="r in availableRoles" :key="r" :value="r">{{ roleLabel(r) }}</option>
-                            </select>
+                            </SearchableSelect>
                             <p v-else class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ roleLabel(user.roles?.[0]?.name) || '—' }}</p>
                             <InputError :message="editForm.errors.role" class="mt-2" />
                         </div>

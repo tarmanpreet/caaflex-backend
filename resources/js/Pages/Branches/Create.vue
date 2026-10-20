@@ -46,7 +46,7 @@ const submitForm = () => {
                     <template #form>
                         <div v-if="hasBranches" class="col-span-6">
                             <InputLabel for="parent_id" value="Filiale superiore" />
-                            <select
+                            <SearchableSelect
                                 id="parent_id"
                                 v-model="form.parent_id"
                                 required
@@ -56,7 +56,7 @@ const submitForm = () => {
                                 <option v-for="branch in parentBranches" :key="branch.id" :value="branch.id">
                                     {{ branch.name }}
                                 </option>
-                            </select>
+                            </SearchableSelect>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">La nuova filiale vedrà solo i propri dati e quelli delle filiali create sotto di essa.</p>
                             <InputError :message="form.errors.parent_id" class="mt-2" />
                         </div>

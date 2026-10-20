@@ -180,7 +180,7 @@ const statCards = computed(() => [
                     <div v-show="showAdvancedFilters" id="advanced-practice-filters" class="mt-3 grid gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
                         <div>
                             <label for="practice-status-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Stato</label>
-                            <select
+                            <SearchableSelect
                                 id="practice-status-filter"
                                 v-model="statusFilter"
                                 class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
@@ -193,11 +193,11 @@ const statCards = computed(() => [
                                 <option value="completata">Completata</option>
                                 <option value="annullata">Annullata</option>
                                 <option value="sospesa">Sospesa</option>
-                            </select>
+                            </SearchableSelect>
                         </div>
                         <div>
                             <label for="practice-type-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Tipo pratica</label>
-                            <select
+                            <SearchableSelect
                                 id="practice-type-filter"
                                 v-model="practiceTypeFilter"
                                 class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
@@ -207,7 +207,7 @@ const statCards = computed(() => [
                                 <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.id">
                                     {{ practiceType.name }}
                                 </option>
-                            </select>
+                            </SearchableSelect>
                         </div>
                         <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-high hover:text-on-surface disabled:pointer-events-none disabled:opacity-40" :disabled="!activeFilterCount" @click="resetFilters">
                             <XMarkIcon class="h-5 w-5" />
@@ -267,6 +267,6 @@ const statCards = computed(() => [
             </UiSectionCard>
             </div>
         </div>
-        <ConfirmationModal :show="showActions" @close="!bulkBusy && (showActions=false)"><template #title>Azioni su {{selected.length}} pratiche selezionate</template><template #content><div class="space-y-4"><label class="block">Operazione<select v-model="bulkAction" aria-label="Operazione" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option value="status">Cambia stato</option><option v-if="operations?.can_assign" value="assign">Assegna operatori</option></select></label><label v-if="bulkAction==='status'" class="block">Nuovo stato<select v-model="bulkStatus" aria-label="Nuovo stato" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option v-for="(label,value) in states" :key="value" :value="value">{{label}}</option></select></label><fieldset v-else><legend>Sostituisci gli operatori assegnati</legend><label v-for="worker in operations?.operators" :key="worker.id" class="flex min-h-12 items-center gap-3"><input v-model="bulkOperators" type="checkbox" :value="worker.id" />{{worker.name}}</label></fieldset><p v-if="bulkError" role="alert" class="text-red-600">{{bulkError}}</p></div></template><template #footer><button class="app-button min-h-12 px-4" :disabled="bulkBusy" @click="showActions=false">Annulla</button><button class="app-button min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" :disabled="bulkBusy || (bulkAction==='assign'&&!bulkOperators.length)" @click="applyBulk">{{bulkBusy?'Applicazione…':'Applica a '+selected.length+' pratiche'}}</button></template></ConfirmationModal>
+        <ConfirmationModal :show="showActions" @close="!bulkBusy && (showActions=false)"><template #title>Azioni su {{selected.length}} pratiche selezionate</template><template #content><div class="space-y-4"><label class="block">Operazione<SearchableSelect v-model="bulkAction" aria-label="Operazione" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option value="status">Cambia stato</option><option v-if="operations?.can_assign" value="assign">Assegna operatori</option></SearchableSelect></label><label v-if="bulkAction==='status'" class="block">Nuovo stato<SearchableSelect v-model="bulkStatus" aria-label="Nuovo stato" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option v-for="(label,value) in states" :key="value" :value="value">{{label}}</option></SearchableSelect></label><fieldset v-else><legend>Sostituisci gli operatori assegnati</legend><label v-for="worker in operations?.operators" :key="worker.id" class="flex min-h-12 items-center gap-3"><input v-model="bulkOperators" type="checkbox" :value="worker.id" />{{worker.name}}</label></fieldset><p v-if="bulkError" role="alert" class="text-red-600">{{bulkError}}</p></div></template><template #footer><button class="app-button min-h-12 px-4" :disabled="bulkBusy" @click="showActions=false">Annulla</button><button class="app-button min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" :disabled="bulkBusy || (bulkAction==='assign'&&!bulkOperators.length)" @click="applyBulk">{{bulkBusy?'Applicazione…':'Applica a '+selected.length+' pratiche'}}</button></template></ConfirmationModal>
     </AppLayout>
 </template>

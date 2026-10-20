@@ -45,15 +45,15 @@ const formatDate = (value) => value
         <div class="grid gap-5">
             <form class="app-toolbar" @change="applyFilters">
                 <div class="grid flex-1 gap-3 sm:grid-cols-2">
-                    <select name="section" class="app-select" :value="filters.section ?? ''">
+                    <SearchableSelect name="section" class="app-select" :value="filters.section ?? ''">
                         <option value="">Tutte le sezioni</option>
                         <option v-for="(label, key) in sections" :key="key" :value="key">{{ label }}</option>
-                    </select>
-                    <select name="status" class="app-select" :value="filters.status ?? ''">
+                    </SearchableSelect>
+                    <SearchableSelect name="status" class="app-select" :value="filters.status ?? ''">
                         <option value="">Lette e non lette</option>
                         <option value="unread">Non lette</option>
                         <option value="read">Lette</option>
-                    </select>
+                    </SearchableSelect>
                 </div>
                 <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container" @click="markAllAsRead">
                     <CheckIcon class="h-5 w-5" /> Segna tutte come lette

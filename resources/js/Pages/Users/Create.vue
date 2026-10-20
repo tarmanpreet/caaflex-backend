@@ -115,7 +115,7 @@ const submit = () => {
                         <!-- Ruolo -->
                         <div>
                             <InputLabel for="role" value="Ruolo" />
-                            <select
+                            <SearchableSelect
                                 id="role"
                                 v-model="form.role"
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface py-2 px-3 focus:ring-2 focus:ring-primary/25"
@@ -123,7 +123,7 @@ const submit = () => {
                             >
                                 <option value="" disabled>Seleziona un ruolo...</option>
                                 <option v-for="r in assignableRoles" :key="r" :value="r">{{ roleLabel(r) }}</option>
-                            </select>
+                            </SearchableSelect>
                             <InputError :message="form.errors.role" class="mt-2" />
                         </div>
 

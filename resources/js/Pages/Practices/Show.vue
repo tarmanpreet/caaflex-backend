@@ -474,27 +474,27 @@ const completionPercentage = computed(() => {
                         <div v-if="editMode" class="mt-6 pt-6 border-t border-outline-variant/10 space-y-4">
                             <div>
                                 <InputLabel for="edit-type" value="Tipo" />
-                                <select id="edit-type" v-model="editForm.type" class="app-select mt-1 block w-full">
+                                <SearchableSelect id="edit-type" v-model="editForm.type" class="app-select mt-1 block w-full">
                                     <option v-if="editForm.type && !(practiceTypes ?? []).some((practiceType) => practiceType.name === editForm.type)" :value="editForm.type">{{ editForm.type }}</option>
                                     <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.name">{{ practiceType.name }}</option>
-                                </select>
+                                </SearchableSelect>
                                 <InputError :message="editForm.errors.type" class="mt-1" />
                             </div>
 
                             <div>
                                 <InputLabel for="edit-procedure" value="Procedura" />
-                                <select id="edit-procedure" v-model="editForm.procedure_id" class="app-select mt-1 block w-full">
+                                <SearchableSelect id="edit-procedure" v-model="editForm.procedure_id" class="app-select mt-1 block w-full">
                                     <option :value="null">-- Seleziona procedura --</option>
                                     <option v-for="proc in filteredProcedures" :key="proc.id" :value="proc.id">{{ proc.name }}</option>
-                                </select>
+                                </SearchableSelect>
                                 <InputError :message="editForm.errors.procedure_id" class="mt-1" />
                             </div>
 
                             <div>
                                 <InputLabel for="edit-status" value="Stato" />
-                                <select id="edit-status" v-model="editForm.status" class="app-select mt-1 block w-full">
+                                <SearchableSelect id="edit-status" v-model="editForm.status" class="app-select mt-1 block w-full">
                                     <option v-for="s in STATUSES" :key="s" :value="s">{{ s.replace(/_/g, ' ') }}</option>
-                                </select>
+                                </SearchableSelect>
                                 <InputError :message="editForm.errors.status" class="mt-1" />
                             </div>
 

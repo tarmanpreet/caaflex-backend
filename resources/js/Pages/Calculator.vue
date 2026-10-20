@@ -86,11 +86,11 @@ const copy = async () => {
                     <form class="print-hide grid gap-5 rounded-[28px] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60 sm:grid-cols-2 sm:p-8" @submit.prevent>
                         <label class="field sm:col-span-2">Cliente / organizzazione<input v-model="form.client" type="text" autocomplete="organization" /></label>
                         <label class="field sm:col-span-2">Referente commerciale e recapiti<input v-model="form.seller" type="text" autocomplete="off" /></label>
-                        <label class="field">Piano<select v-model="form.plan" @change="!team && (form.billing = 'monthly')"><option value="Start">Start</option><option value="Team">Team & Rete</option></select></label>
-                        <label class="field">Pagamento canone<select v-model="form.billing" :disabled="!team"><option value="monthly">Mensile</option><option value="annual">Annuale Team</option></select></label>
+                        <label class="field">Piano<SearchableSelect v-model="form.plan" @change="!team && (form.billing = 'monthly')"><option value="Start">Start</option><option value="Team">Team & Rete</option></SearchableSelect></label>
+                        <label class="field">Pagamento canone<SearchableSelect v-model="form.billing" :disabled="!team"><option value="monthly">Mensile</option><option value="annual">Annuale Team</option></SearchableSelect></label>
                         <label class="field">Sedi totali<input v-model.number="form.branches" type="number" min="1" max="1000" step="1" /></label>
                         <label class="field">Utenze Team concordate<input v-model="form.users" type="text" :disabled="!team" :placeholder="team ? 'Da definire nell’offerta' : '1 utenza inclusa'" /></label>
-                        <label class="field">Attivazione<select v-model="form.partner"><option value="no">Standard</option><option value="yes">Partner Visibilità · accordo scritto</option></select></label>
+                        <label class="field">Attivazione<SearchableSelect v-model="form.partner"><option value="no">Standard</option><option value="yes">Partner Visibilità · accordo scritto</option></SearchableSelect></label>
                         <label class="field">Data prevista di avvio<input v-model="form.startDate" type="date" /></label>
                         <label class="field sm:col-span-2">Programma / durata formazione concordata<input v-model="form.training" type="text" /></label>
                         <label class="field sm:col-span-2">Riferimento piano di servizio e condizioni<input v-model="form.service" type="text" /></label>

@@ -56,7 +56,7 @@ const submitForm = () => {
                         <!-- Tipo Pratica -->
                         <div class="col-span-6">
                             <InputLabel for="procedure_type_id" value="Tipo Pratica" />
-                            <select
+                            <SearchableSelect
                                 id="procedure_type_id"
                                 v-model="form.procedure_type_id"
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
@@ -66,7 +66,7 @@ const submitForm = () => {
                                 <option v-for="type in procedureTypes" :key="type.id" :value="type.id">
                                     {{ type.name }}
                                 </option>
-                            </select>
+                            </SearchableSelect>
                             <InputError :message="form.errors.procedure_type_id" class="mt-2" />
                         </div>
 

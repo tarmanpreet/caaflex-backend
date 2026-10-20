@@ -165,7 +165,7 @@ const steps = [
                             <template #step-2>
                                 <div class="col-span-6">
                                     <InputLabel for="type" value="Tipo" />
-                                    <select 
+                                    <SearchableSelect
                                         id="type"
                                         v-model="form.type" 
                                         class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
@@ -175,13 +175,13 @@ const steps = [
                                         <option v-for="practiceType in practiceTypes ?? []" :key="practiceType.id" :value="practiceType.name">
                                             {{ practiceType.name }}
                                         </option>
-                                    </select>
+                                    </SearchableSelect>
                                     <InputError :message="form.errors.type" class="mt-2" />
                                 </div>
 
                                 <div class="col-span-6">
                                     <InputLabel for="procedure_id" value="Procedura" />
-                                    <select 
+                                    <SearchableSelect
                                         id="procedure_id"
                                         v-model="form.procedure_id" 
                                         class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
@@ -191,7 +191,7 @@ const steps = [
                                         <option v-for="procedure in filteredProcedures" :key="procedure.id" :value="procedure.id">
                                             {{ procedure.name }}
                                         </option>
-                                    </select>
+                                    </SearchableSelect>
                                     <InputError :message="form.errors.procedure_id" class="mt-2" />
                                 </div>
 
@@ -227,14 +227,14 @@ const steps = [
                             <template #step-3>
                                 <div class="col-span-6">
                                     <InputLabel for="status" value="Stato" />
-                                    <select 
+                                    <SearchableSelect
                                         id="status"
                                         v-model="form.status" 
                                         class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25" 
                                         required
                                     >
                                         <option v-for="s in STATUSES" :key="s" :value="s">{{ formatStatus(s) }}</option>
-                                    </select>
+                                    </SearchableSelect>
                                     <InputError :message="form.errors.status" class="mt-2" />
                                 </div>
 

@@ -46,7 +46,7 @@ const submitForm = () => {
                     <template #form>
                         <div class="col-span-6">
                             <InputLabel for="parent_id" value="Filiale superiore" />
-                            <select
+                            <SearchableSelect
                                 id="parent_id"
                                 v-model="form.parent_id"
                                 :disabled="branch.parent_id === null"
@@ -57,7 +57,7 @@ const submitForm = () => {
                                 <option v-for="parentBranch in parentBranches" :key="parentBranch.id" :value="parentBranch.id">
                                     {{ parentBranch.name }}
                                 </option>
-                            </select>
+                            </SearchableSelect>
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 {{ branch.parent_id === null ? 'La filiale principale non può essere spostata.' : 'Puoi spostare la filiale senza creare cicli nella gerarchia.' }}
                             </p>

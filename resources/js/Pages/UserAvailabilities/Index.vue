@@ -107,7 +107,7 @@ const deleteAvailability = () => {
                         <!-- Day -->
                         <div>
                             <InputLabel for="day_of_week" value="Giorno" />
-                            <select
+                            <SearchableSelect
                                 id="day_of_week"
                                 v-model="form.day_of_week"
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface py-2 px-3 focus:ring-2 focus:ring-primary/25"
@@ -115,7 +115,7 @@ const deleteAvailability = () => {
                             >
                                 <option value="" disabled>Seleziona giorno</option>
                                 <option v-for="(label, key) in days" :key="key" :value="key">{{ label }}</option>
-                            </select>
+                            </SearchableSelect>
                             <InputError :message="form.errors.day_of_week" class="mt-2" />
                         </div>
 

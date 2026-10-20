@@ -277,28 +277,28 @@ const completeStep = (deadline) => {
                 >
                     <div>
                         <label for="deadline-status-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Stato</label>
-                        <select id="deadline-status-filter" v-model="statusFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="timingFilter = ''; performSearch()">
+                        <SearchableSelect id="deadline-status-filter" v-model="statusFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="timingFilter = ''; performSearch()">
                             <option value="">Tutti gli stati</option>
                             <option v-for="(label, status) in statusLabels" :key="status" :value="status">{{ label }}</option>
-                        </select>
+                        </SearchableSelect>
                     </div>
 
                     <div>
                         <label for="deadline-priority-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Priorità</label>
-                        <select id="deadline-priority-filter" v-model="priorityFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="performSearch">
+                        <SearchableSelect id="deadline-priority-filter" v-model="priorityFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="performSearch">
                             <option value="">Tutte le priorità</option>
                             <option v-for="(config, priority) in priorityConfig" :key="priority" :value="priority">{{ config.label }}</option>
-                        </select>
+                        </SearchableSelect>
                     </div>
 
                     <div>
                         <label for="deadline-timing-filter" class="mb-1.5 block text-xs font-semibold text-on-surface-variant">Periodo</label>
-                        <select id="deadline-timing-filter" v-model="timingFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="statusFilter = ''; performSearch()">
+                        <SearchableSelect id="deadline-timing-filter" v-model="timingFilter" class="h-11 w-full rounded-xl border-0 bg-surface-container-lowest px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="statusFilter = ''; performSearch()">
                             <option value="">Tutte le date</option>
                             <option value="open">Aperte</option>
                             <option value="overdue">Scadute</option>
                             <option value="upcoming">In arrivo</option>
-                        </select>
+                        </SearchableSelect>
                     </div>
 
                     <button
@@ -409,26 +409,26 @@ const completeStep = (deadline) => {
 
                     <div>
                         <InputLabel for="global_deadline_status" value="Stato" />
-                        <select id="global_deadline_status" v-model="editForm.status" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
+                        <SearchableSelect id="global_deadline_status" v-model="editForm.status" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
                             <option v-for="(label, status) in statusLabels" :key="status" :value="status">{{ label }}</option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="editForm.errors.status" class="mt-1" />
                     </div>
 
                     <div>
                         <InputLabel for="global_deadline_priority" value="Priorità" />
-                        <select id="global_deadline_priority" v-model="editForm.priority" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
+                        <SearchableSelect id="global_deadline_priority" v-model="editForm.priority" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
                             <option v-for="(config, priority) in priorityConfig" :key="priority" :value="Number(priority)">{{ config.label }}</option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="editForm.errors.priority" class="mt-1" />
                     </div>
 
                     <div>
                         <InputLabel for="global_deadline_user" value="Assegnatario" />
-                        <select id="global_deadline_user" v-model="editForm.user_id" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
+                        <SearchableSelect id="global_deadline_user" v-model="editForm.user_id" class="app-input mt-1 block min-h-[44px] w-full rounded-xl">
                             <option :value="null">Non assegnata</option>
                             <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                        </select>
+                        </SearchableSelect>
                         <p class="mt-1 text-xs text-on-surface-variant">Sono disponibili tutti gli utenti operativi.</p>
                         <InputError :message="editForm.errors.user_id" class="mt-1" />
                     </div>

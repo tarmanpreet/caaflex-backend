@@ -121,7 +121,7 @@ const offsetSummary = (template) => {
 
                     <div>
                         <InputLabel :for="`step_priority_${index}`" value="Priorità" />
-                        <select
+                        <SearchableSelect
                             :id="`step_priority_${index}`"
                             :value="template.priority"
                             class="app-input mt-1 block min-h-[44px] w-full rounded-xl"
@@ -131,7 +131,7 @@ const offsetSummary = (template) => {
                             <option :value="2">Alta</option>
                             <option :value="3">Media</option>
                             <option :value="4">Bassa</option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="errorFor(index, 'priority')" class="mt-1" />
                     </div>
 

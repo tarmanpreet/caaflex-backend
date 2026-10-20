@@ -152,26 +152,26 @@ const deleteAppointment = () => {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel for="status" value="Stato" />
-                            <select
+                            <SearchableSelect
                                 id="status"
                                 v-model="form.status"
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                             >
                                 <option v-for="status in statuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
-                            </select>
+                            </SearchableSelect>
                             <InputError :message="form.errors.status" class="mt-2" />
                         </div>
 
                         <div>
                             <InputLabel for="assigned_user_id" value="Assegnato a" />
-                            <select
+                            <SearchableSelect
                                 id="assigned_user_id"
                                 v-model="form.assigned_user_id"
                                 class="mt-1 block w-full rounded-xl border-0 bg-surface-container-high text-sm text-on-surface focus:ring-2 focus:ring-primary/25"
                             >
                                 <option :value="null">Nessuno</option>
                                 <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                            </select>
+                            </SearchableSelect>
                             <InputError :message="form.errors.assigned_user_id" class="mt-2" />
                         </div>
 

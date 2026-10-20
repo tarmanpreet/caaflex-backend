@@ -448,7 +448,7 @@ const closeDeleteModal = () => {
                     <!-- Priority -->
                     <div>
                         <InputLabel for="deadline_priority" value="Priorità" />
-                        <select
+                        <SearchableSelect
                             id="deadline_priority"
                             v-model="createForm.priority"
                             class="app-input mt-1 block w-full rounded-lg"
@@ -457,14 +457,14 @@ const closeDeleteModal = () => {
                             <option :value="2">Alta</option>
                             <option :value="3">Media</option>
                             <option :value="4">Bassa</option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="createForm.errors.priority" class="mt-1" />
                     </div>
 
                     <!-- Assigned User -->
                     <div>
                         <InputLabel for="deadline_user" value="Assegnato a" />
-                        <select
+                        <SearchableSelect
                             id="deadline_user"
                             v-model="createForm.user_id"
                             class="app-input mt-1 block w-full rounded-lg"
@@ -473,7 +473,7 @@ const closeDeleteModal = () => {
                             <option v-for="user in users" :key="user.id" :value="user.id">
                                 {{ user.name }}
                             </option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="createForm.errors.user_id" class="mt-1" />
                     </div>
 
@@ -561,7 +561,7 @@ const closeDeleteModal = () => {
                     <!-- Status -->
                     <div>
                         <InputLabel for="edit_deadline_status" value="Stato" />
-                        <select
+                        <SearchableSelect
                             id="edit_deadline_status"
                             v-model="editForm.status"
                             class="app-input mt-1 block w-full rounded-lg"
@@ -569,14 +569,14 @@ const closeDeleteModal = () => {
                             <option v-for="(config, status) in STATUS_CONFIG" :key="status" :value="status">
                                 {{ config.label }}
                             </option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="editForm.errors.status" class="mt-1" />
                     </div>
 
                     <!-- Priority -->
                     <div>
                         <InputLabel for="edit_deadline_priority" value="Priorità" />
-                        <select
+                        <SearchableSelect
                             id="edit_deadline_priority"
                             v-model="editForm.priority"
                             class="app-input mt-1 block w-full rounded-lg"
@@ -585,14 +585,14 @@ const closeDeleteModal = () => {
                             <option :value="2">Alta</option>
                             <option :value="3">Media</option>
                             <option :value="4">Bassa</option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="editForm.errors.priority" class="mt-1" />
                     </div>
 
                     <!-- Assigned User -->
                     <div>
                         <InputLabel for="edit_deadline_user" value="Assegnato a" />
-                        <select
+                        <SearchableSelect
                             id="edit_deadline_user"
                             v-model="editForm.user_id"
                             class="app-input mt-1 block w-full rounded-lg"
@@ -601,7 +601,7 @@ const closeDeleteModal = () => {
                             <option v-for="user in users" :key="user.id" :value="user.id">
                                 {{ user.name }}
                             </option>
-                        </select>
+                        </SearchableSelect>
                         <InputError :message="editForm.errors.user_id" class="mt-1" />
                     </div>
 

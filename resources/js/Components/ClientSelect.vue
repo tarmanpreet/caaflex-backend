@@ -4,6 +4,7 @@ import Multiselect from '@vueform/multiselect';
 import axios from 'axios';
 
 const props = defineProps({
+    source: { type: String, default: 'clients' },
     modelValue: {
         type: [Number, Array, null],
         default: null,
@@ -48,6 +49,9 @@ const page    = ref(1);
 const hasMore = ref(false);
 const loading = ref(false);
 const query   = ref('');
+const loadError = ref('');
+let requestId = 0;
+let controller;
 
 // Sentinel el injected via #afterlist slot for IntersectionObserver
 const sentinel = ref(null);
@@ -83,25 +87,32 @@ function mergeWithInitial(results) {
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 async function fetchPage(reset = false) {
-    if (loading.value) return;
+    if (loading.value && !reset) return;
+    if (reset) controller?.abort();
+    const current = ++requestId;
+    controller = new AbortController();
     loading.value = true;
-
+    loadError.value = '';
     try {
-        const { data } = await axios.get(route('clients.search'), {
-            params: { q: query.value, page: page.value, per_page: props.perPage },
+        const { data } = await axios.get(route(props.source === 'booking' ? 'booking.options' : 'clients.search'), {
+            params: { q: query.value, page: page.value, per_page: props.perPage, ...(props.source === 'booking' && props.modelValue ? {client_profile_id: props.modelValue} : {}) },
+            signal: controller.signal,
         });
-
-        if (reset) {
-            options.value = mergeWithInitial(data.results);
-        } else {
-            // Append page, skip duplicates (initialOptions may already be in list)
-            const existing = new Set(options.value.map(o => o.value));
-            options.value.push(...data.results.filter(r => !existing.has(r.value)));
+        if (current !== requestId) return;
+        const result = props.source === 'booking' ? {
+            results: data.data.clients.data.map(client => ({value: client.id, label: `${client.first_name} ${client.last_name}`})),
+            hasMore: data.data.clients.current_page < data.data.clients.last_page,
+        } : data;
+        if (reset) options.value = mergeWithInitial(result.results);
+        else {
+            const existing = new Set(options.value.map(option => option.value));
+            options.value.push(...result.results.filter(option => !existing.has(option.value)));
         }
-
-        hasMore.value = data.hasMore;
+        hasMore.value = result.hasMore;
+    } catch (error) {
+        if (!axios.isCancel(error) && current === requestId) loadError.value = 'Ricerca non riuscita. Riprova.';
     } finally {
-        loading.value = false;
+        if (current === requestId) loading.value = false;
     }
 }
 
@@ -148,6 +159,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    controller?.abort();
     observer.value?.disconnect();
     clearTimeout(debounceTimer);
 });
@@ -168,7 +180,7 @@ onBeforeUnmount(() => {
         label="label"
         track-by="value"
         :placeholder="placeholder"
-        no-options-text="Nessun cliente trovato"
+        :no-options-text="loadError || 'Nessun cliente trovato'"
         no-results-text="Nessun risultato"
         :disabled="disabled"
         class="mt-1"

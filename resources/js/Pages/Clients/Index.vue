@@ -79,10 +79,10 @@ const onSort = ({ key, dir }) => {
                             class="h-11 w-full rounded-xl border-0 bg-surface-container-high pl-10 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/25"
                         >
                         </div>
-                        <select v-if="branches?.length > 1" v-model="branchFilter" class="h-11 rounded-xl border-0 bg-surface-container-high px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="performSearch">
+                        <SearchableSelect v-if="branches?.length > 1" v-model="branchFilter" class="h-11 rounded-xl border-0 bg-surface-container-high px-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25" @change="performSearch">
                             <option value="">Tutte le filiali visibili</option>
                             <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option>
-                        </select>
+                        </SearchableSelect>
                     </div>
                     <button type="button" class="app-button inline-flex min-h-[44px] items-center justify-center rounded-xl bg-surface-container-high px-4 text-sm font-semibold text-on-surface transition hover:bg-surface-container-highest" @click="performSearch">Cerca</button>
                 </div>

@@ -476,13 +476,13 @@ async function selectMiniDate(day) {
                                 </div>
                                 <div>
                                     <label class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">Stato</label>
-                                    <select 
+                                    <SearchableSelect
                                         v-model="statusFilter" 
                                         class="block w-full rounded-xl border-0 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:ring-2 focus:ring-primary/25 transition-all"
                                     >
                                         <option value="">Tutti gli stati</option>
                                         <option v-for="status in statuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
-                                    </select>
+                                    </SearchableSelect>
                                 </div>
                                 <div class="flex gap-2">
                                     <button 
