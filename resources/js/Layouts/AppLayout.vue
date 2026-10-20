@@ -91,11 +91,11 @@ const navItems = computed(() => {
                 <aside
                     :class="[
                         isCollapsed ? 'w-[92px]' : 'w-[280px]',
-                        'hidden shrink-0 border-r border-outline-variant/40 bg-surface-container-lowest transition-[width] duration-300 motion-reduce:transition-none lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col',
+                        'hidden shrink-0 border-r border-outline-variant/40 bg-surface-container-lowest transition-[width] duration-300 motion-reduce:transition-none lg:sticky lg:top-0 lg:flex lg:h-[100dvh] lg:flex-col lg:overflow-hidden',
                     ]"
                 >
-                    <div class="flex h-full flex-col px-4 py-5">
-                        <div class="mb-8 flex items-center gap-3 px-3">
+                    <div class="flex min-h-0 flex-1 flex-col px-4 py-5">
+                        <div class="mb-8 flex shrink-0 items-center gap-3 px-3">
                             <Link :href="route('dashboard')" class="flex items-center gap-3 overflow-hidden">
                                 <ApplicationLogo v-if="isNexxworth && !isCollapsed" class="h-14 w-[210px] object-contain object-left" />
                                 <ApplicationMark v-else class="h-12 w-12 shrink-0 drop-shadow-md" />
@@ -107,7 +107,7 @@ const navItems = computed(() => {
                             </Link>
                         </div>
 
-                        <nav class="flex-1 space-y-1.5">
+                        <nav aria-label="Navigazione principale" tabindex="0" class="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain">
                             <template v-for="item in navItems" :key="item.name">
                                 <Link
                                     v-if="item.show"
@@ -127,7 +127,7 @@ const navItems = computed(() => {
                             </template>
                         </nav>
 
-                        <div class="mt-6 space-y-3">
+                        <div class="mt-6 shrink-0 space-y-3">
 
                             <div class="flex items-center justify-between rounded-xl border border-outline-variant/35 bg-surface-container-low px-2 py-2">
                                 <button type="button" @click="toggleSidebar" class="flex min-h-[40px] items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container-lowest hover:text-primary" :aria-label="isCollapsed ? 'Espandi navigazione' : 'Compatta navigazione'">
@@ -222,8 +222,8 @@ const navItems = computed(() => {
             <div v-if="isMobileOpen" class="fixed inset-0 z-50 flex lg:hidden">
                 <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="closeMobile" />
 
-                <aside class="relative flex w-[86vw] max-w-sm flex-col bg-surface-container-low px-4 py-5 shadow-2xl">
-                    <div class="mb-8 flex items-center justify-between">
+                <aside class="relative flex h-[100dvh] min-h-0 w-[86vw] max-w-sm flex-col overflow-hidden bg-surface-container-low px-4 py-5 shadow-2xl">
+                    <div class="mb-8 flex shrink-0 items-center justify-between">
                         <div class="flex items-center gap-3">
                             <ApplicationLogo v-if="isNexxworth" class="h-14 w-[210px] object-contain object-left" />
                             <ApplicationMark v-else class="h-11 w-11 drop-shadow-md" />
@@ -238,7 +238,7 @@ const navItems = computed(() => {
                         </button>
                     </div>
 
-                    <nav class="space-y-1.5">
+                    <nav aria-label="Navigazione principale" tabindex="0" class="min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain">
                         <template v-for="item in navItems" :key="item.name">
                             <Link
                                 v-if="item.show"
@@ -257,7 +257,7 @@ const navItems = computed(() => {
                         </template>
                     </nav>
 
-                    <div class="mt-auto space-y-3 pt-6">
+                    <div class="shrink-0 space-y-3 pt-6">
 
                         <button type="button" @click="toggleDark" class="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/35 bg-surface-container-lowest px-4 py-3 text-sm font-semibold text-on-surface-variant">
                             <SunIcon v-if="isDark" class="h-5 w-5" />
