@@ -67,11 +67,12 @@ class AppointmentAvailabilityService
             }
             $intervals = UserAvailability::query()->where('user_id', $worker->id)->where('day_of_week', $day->dayOfWeek)->orderBy('time_from')->get();
             $appointments = Appointment::query()->where('assigned_user_id', $worker->id)->whereIn('status', ['da_confermare', 'confermato'])->when($ignore, fn ($q) => $q->whereKeyNot($ignore->id))->where('scheduled_at', '<', $day->copy()->addDay())->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$day->toDateTimeString()])->get();
+            $absences = \App\Models\EmployeeAbsence::query()->where('user_id', $worker->id)->whereIn('status', ['approved', 'reported'])->where('starts_at', '<', $day->copy()->addDay())->where('ends_at', '>', $day)->get();
             foreach ($intervals as $interval) {
                 $start = $day->copy()->setTimeFromTimeString($interval->time_from);
                 $end = $day->copy()->setTimeFromTimeString($interval->time_to);
                 for ($cursor = $start; $cursor->copy()->addMinutes($duration)->lte($end); $cursor->addMinutes(15)) {
-                    if ($cursor->lte(now()) || $appointments->contains(fn ($a) => $a->scheduled_at->lt($cursor->copy()->addMinutes($duration)) && $a->scheduled_at->copy()->addMinutes($a->duration_minutes)->gt($cursor))) {
+                    if ($cursor->lte(now()) || $absences->contains(fn ($a) => $a->starts_at->lt($cursor->copy()->addMinutes($duration)) && $a->ends_at->gt($cursor)) || $appointments->contains(fn ($a) => $a->scheduled_at->lt($cursor->copy()->addMinutes($duration)) && $a->scheduled_at->copy()->addMinutes($a->duration_minutes)->gt($cursor))) {
                         continue;
                     }
                     $payload = ['actor' => $actor->id, 'client_profile_id' => $client->id, 'practice_type_id' => $type->id, 'assigned_user_id' => $worker->id, 'scheduled_at' => $cursor->toDateTimeString(), 'duration_minutes' => $duration, 'expires' => now()->addMinutes(15)->timestamp, 'appointment_id' => $ignore?->id];
@@ -143,6 +144,9 @@ class AppointmentAvailabilityService
         User::query()->whereKey($data['assigned_user_id'])->lockForUpdate()->firstOrFail();
         $start = Carbon::parse($data['scheduled_at']);
         $end = $start->copy()->addMinutes((int) $data['duration_minutes']);
+        if (\App\Models\EmployeeAbsence::query()->where('user_id', $data['assigned_user_id'])->whereIn('status', ['approved', 'reported'])->where('starts_at', '<', $end)->where('ends_at', '>', $start)->exists()) {
+            throw ValidationException::withMessages(['assigned_user_id' => 'L’operatore è assente in questo intervallo. Scegli un altro operatore.']);
+        }
         $conflict = Appointment::query()->where('assigned_user_id', $data['assigned_user_id'])->whereIn('status', ['da_confermare', 'confermato'])->when($ignore, fn ($q) => $q->whereKeyNot($ignore))->where('scheduled_at', '<', $end)->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$start->toDateTimeString()])->lockForUpdate()->first(['id']) !== null;
         if ($conflict) {
             throw ValidationException::withMessages(['scheduled_at' => 'L’operatore ha già un appuntamento in questo intervallo. Scegli un altro orario.']);

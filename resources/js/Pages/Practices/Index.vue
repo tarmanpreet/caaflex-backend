@@ -1,5 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue';
+import axios from 'axios';
+import ConfirmationModal from '@/Components/ConfirmationModal.vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import IconButton from '@/Components/IconButton.vue';
@@ -16,7 +18,15 @@ const props = defineProps({
     practiceTypes: Array,
 });
 
+const selected=ref([]); const tab=ref('practices'); const operations=ref(null); const showActions=ref(false); const bulkBusy=ref(false); const bulkError=ref(''); const bulkSuccess=ref(''); const bulkAction=ref('status'); const bulkStatus=ref('in_lavorazione'); const bulkOperators=ref([]);
+const states={nuova:'Nuova',in_lavorazione:'In lavorazione',in_attesa_documenti:'In attesa documenti',completata:'Completata',annullata:'Annullata',sospesa:'Sospesa'};
+async function loadOperations(){try{operations.value=(await axios.get(route('operations.data'))).data.data;}catch{bulkError.value='Impossibile caricare le azioni e il carico di lavoro.';}}
+onMounted(loadOperations);
+watch(()=>props.practices.data,()=>selected.value=[]);
+function selectPage(){const ids=props.practices.data.map(p=>p.id);selected.value=ids.every(id=>selected.value.includes(id))?[]:ids.slice(0,100);}
+async function applyBulk(){bulkBusy.value=true;bulkError.value='';try{const response=await axios.post(route('operations.bulk'),{ids:selected.value,action:bulkAction.value,status:bulkStatus.value,user_ids:bulkOperators.value});bulkSuccess.value=`${response.data.data.count} pratiche aggiornate.`;selected.value=[];showActions.value=false;router.reload({only:['practices','summary']});await loadOperations();}catch(e){bulkError.value=Object.values(e.response?.data?.errors??{}).flat().join(' ')||e.response?.data?.message||'Operazione non riuscita.';}finally{bulkBusy.value=false;}}
 const columns = [
+    { key: 'selection', label: 'Seleziona', sortable: false },
     { key: 'id', label: 'ID' },
     { key: 'client.first_name', label: 'Cliente', sortable: false },
     { key: 'type', label: 'Tipo' },
@@ -89,7 +99,7 @@ const statCards = computed(() => [
                 <div>
                     <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Spazio di lavoro / Pratiche</p>
                     <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface">Gestione pratiche</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Elenco riallineato al template editoriale con header, insight rapidi e tabella premium.</p>
+                    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant">Cerca e seleziona le pratiche, applica azioni multiple e consulta il carico degli operatori.</p>
                 </div>
 
                 <Link
@@ -104,6 +114,10 @@ const statCards = computed(() => [
         </template>
 
         <div class="space-y-8">
+            <div class="flex flex-wrap gap-3" role="tablist" aria-label="Viste pratiche"><button role="tab" :aria-selected="tab==='practices'" class="min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='practices'">Pratiche</button><button v-if="operations?.can_assign" role="tab" :aria-selected="tab==='workload'" class="min-h-12 rounded-xl border px-5 dark:text-white" @click="tab='workload'">Carico di lavoro</button></div>
+            <p v-if="bulkSuccess" role="status" class="text-green-700 dark:text-green-300">{{bulkSuccess}}</p><p v-if="bulkError && !showActions" role="alert" class="text-red-700 dark:text-red-300">{{bulkError}}</p>
+            <section v-if="tab==='workload'" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><article v-for="worker in operations?.workload" :key="worker.id" class="rounded-2xl bg-surface-container-lowest p-5 text-on-surface"><h3 class="font-semibold">{{worker.name}}</h3><dl class="mt-4 grid grid-cols-3 gap-3"><div><dt>Aperte</dt><dd class="text-2xl">{{worker.open_count}}</dd></div><div><dt>Scadute</dt><dd class="text-2xl text-red-600">{{worker.overdue_count}}</dd></div><div><dt>Ferme da 7 giorni</dt><dd class="text-2xl">{{worker.stalled_count}}</dd></div></dl></article></section>
+            <div v-show="tab==='practices'" class="space-y-8">
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <div
                     v-for="card in statCards"
@@ -137,6 +151,7 @@ const statCards = computed(() => [
                 </div>
             </section>
 
+            <div v-if="operations?.can_bulk" class="flex flex-wrap items-center gap-3"><button class="min-h-12 rounded-xl border px-4 dark:text-white" @click="selectPage">Seleziona / deseleziona pagina</button><span class="text-sm dark:text-gray-200">{{selected.length}} selezionate · massimo 100</span><button :disabled="!selected.length" class="min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" @click="showActions=true;bulkError=''">Azioni</button></div>
             <UiSectionCard title="Archivio pratiche" eyebrow="Vista operativa" :padded="false">
                 <div class="border-b border-outline-variant/35 bg-surface-container-lowest p-4 sm:p-5">
                     <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -211,6 +226,7 @@ const statCards = computed(() => [
                         empty-message="Nessuna pratica trovata."
                         @sort="onSort"
                     >
+                        <template #cell-selection="{ row }"><input v-if="operations?.can_bulk" v-model="selected" type="checkbox" :value="row.id" :disabled="!selected.includes(row.id) && selected.length>=100" :aria-label="'Seleziona pratica '+row.id" class="h-5 w-5 rounded" /></template>
                         <template #cell-id="{ row }">
                             <Link
                                 :href="route('practices.show', row.id)"
@@ -249,6 +265,8 @@ const statCards = computed(() => [
                         <Pagination :links="practices.links" />
                     </div>
             </UiSectionCard>
+            </div>
         </div>
+        <ConfirmationModal :show="showActions" @close="!bulkBusy && (showActions=false)"><template #title>Azioni su {{selected.length}} pratiche selezionate</template><template #content><div class="space-y-4"><label class="block">Operazione<select v-model="bulkAction" aria-label="Operazione" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option value="status">Cambia stato</option><option v-if="operations?.can_assign" value="assign">Assegna operatori</option></select></label><label v-if="bulkAction==='status'" class="block">Nuovo stato<select v-model="bulkStatus" aria-label="Nuovo stato" class="mt-2 block w-full rounded-xl dark:bg-gray-900"><option v-for="(label,value) in states" :key="value" :value="value">{{label}}</option></select></label><fieldset v-else><legend>Sostituisci gli operatori assegnati</legend><label v-for="worker in operations?.operators" :key="worker.id" class="flex min-h-12 items-center gap-3"><input v-model="bulkOperators" type="checkbox" :value="worker.id" />{{worker.name}}</label></fieldset><p v-if="bulkError" role="alert" class="text-red-600">{{bulkError}}</p></div></template><template #footer><button class="min-h-12 px-4" :disabled="bulkBusy" @click="showActions=false">Annulla</button><button class="min-h-12 rounded-xl bg-blue-700 px-5 text-white disabled:opacity-40" :disabled="bulkBusy || (bulkAction==='assign'&&!bulkOperators.length)" @click="applyBulk">{{bulkBusy?'Applicazione…':'Applica a '+selected.length+' pratiche'}}</button></template></ConfirmationModal>
     </AppLayout>
 </template>

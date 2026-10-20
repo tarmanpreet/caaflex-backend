@@ -199,6 +199,7 @@ const detailModal = ref(false);
 const detailAppointment = ref(null);
 
 function handleEventClick({ event }) {
+    if (event.extendedProps.kind === 'absence') { router.visit(route('employees.index', {user_id:event.extendedProps.assigned_user_id,month:event.startStr.slice(0,7)})); return; }
     detailAppointment.value = {
         id: event.id,
         title: event.title,

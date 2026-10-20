@@ -1,4 +1,6 @@
 <script setup>
+import { usePage } from '@inertiajs/vue3';
+const isStaff=usePage().props.auth.user?.permissions?.includes('clients.view-any');
 import { ref } from 'vue';
 import axios from 'axios';
 import { Link, router } from '@inertiajs/vue3';
@@ -14,7 +16,7 @@ async function run(method,url,body) {busy.value=true;error.value='';try {await a
 function grant(){run('post',route('family.grant',props.profile.client.id),{...form.value,expires_on:form.value.expires_on||null});}
 function page(key,number){router.get(route('family.profile',props.profile.client.id),{[key]:number},{preserveScroll:true});}
 </script>
-<template><AppLayout title="Familiari e deleghe"><template #header><h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Familiari e deleghe</h2></template><div class="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 dark:text-gray-100">
+<template><AppLayout title="Familiari e deleghe"><div v-if="isStaff && !family.profiles.length" class="mb-6 rounded-2xl border bg-white p-5 dark:bg-gray-800 dark:text-gray-100"><h3 class="text-lg font-semibold">Gestisci le deleghe dalla scheda cliente</h3><p class="my-3">Questo spazio mostra i profili personali e le deleghe che hai ricevuto. Per concedere una delega a un familiare, apri il cliente interessato.</p><Link :href="route('clients.index')" class="inline-flex min-h-12 items-center rounded-xl bg-blue-700 px-5 text-white">Apri clienti</Link></div><template #header><h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Familiari e deleghe</h2></template><div class="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 dark:text-gray-100">
 <p class="text-sm text-gray-600 dark:text-gray-300">Ogni delega richiede l’accettazione del destinatario. Puoi scegliere le operazioni consentite, una scadenza e revocarla in qualsiasi momento.</p>
 <p v-if="error" role="alert" class="rounded-xl bg-red-50 p-4 text-red-800">{{error}}</p>
 <section v-if="family.invitations.length" class="space-y-4 rounded-2xl border bg-white p-5 dark:border-gray-700 dark:bg-gray-800"><h3 class="text-lg font-semibold">Inviti ricevuti</h3><article v-for="invite in family.invitations" :key="invite.id" class="space-y-3 border-t pt-4"><strong>{{invite.client.first_name}} {{invite.client.last_name}}</strong><p>{{invite.scopes.map(scope=>scopeLabels[scope]).join(' · ')}}</p><p>Scade il {{new Date(invite.expires_at).toLocaleDateString('it-IT')}}</p><div class="flex flex-wrap gap-3"><PrimaryButton :disabled="busy" @click="run('post',route('family.accept',invite.id))">Accetta delega</PrimaryButton><button :disabled="busy" @click="pending={client:invite.client.id,id:invite.id}" class="min-h-12 rounded-lg border px-4">Rifiuta</button></div></article></section>

@@ -29,6 +29,7 @@ const showSlot = ref(props.show);
 const modalContent = ref(null);
 let previouslyFocusedElement = null;
 let previousBodyOverflow = '';
+let hideTimer = null;
 
 const focusableSelector = [
     'a[href]',
@@ -57,6 +58,7 @@ const restoreFocus = () => {
 };
 
 watch(() => props.show, async (val) => {
+    if (hideTimer !== null) { clearTimeout(hideTimer); hideTimer = null; }
     if (val) {
         previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         previousBodyOverflow = document.body.style.overflow;
@@ -66,7 +68,7 @@ watch(() => props.show, async (val) => {
     } else {
         document.body.style.overflow = previousBodyOverflow;
         restoreFocus();
-        setTimeout(() => { showSlot.value = false; }, 200);
+        hideTimer = setTimeout(() => { if (!props.show) showSlot.value = false; hideTimer = null; }, 200);
     }
 }, { immediate: true });
 
@@ -109,6 +111,7 @@ onMounted(() => {
     document.addEventListener('keydown', trapFocus);
 });
 onUnmounted(() => {
+    if (hideTimer !== null) clearTimeout(hideTimer);
     document.removeEventListener('keydown', closeOnEscape);
     document.removeEventListener('keydown', trapFocus);
     document.body.style.overflow = previousBodyOverflow;
@@ -156,7 +159,7 @@ const maxWidthClass = computed(() => ({
                     :aria-labelledby="labelledBy"
                     :aria-describedby="describedBy"
                     tabindex="-1"
-                    class="relative z-10 w-full overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface shadow-2xl shadow-slate-950/25 transform transition-all motion-reduce:transition-none sm:mx-auto"
+                    class="relative z-10 max-h-[calc(100dvh-2rem)] w-full overflow-y-auto rounded-2xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface shadow-2xl shadow-slate-950/25 transform transition-all motion-reduce:transition-none sm:mx-auto"
                     :class="maxWidthClass"
                 >
                     <slot v-if="showSlot" />

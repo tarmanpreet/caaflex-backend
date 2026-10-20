@@ -64,10 +64,9 @@ const navItems = computed(() => {
 
     return [
         { name: 'Pannello', icon: Squares2X2Icon, route: route('dashboard'), active: route().current('dashboard'), show: true },
-        { name: 'Familiari e deleghe', icon: UserGroupIcon, route: route('family.index'), active: route().current('family.*'), show: true },
+        { name: 'Familiari e deleghe', icon: UserGroupIcon, route: route('family.index'), active: route().current('family.*'), show: isCliente.value },
         { name: 'Prenota un orario', icon: CalendarDaysIcon, route: route('booking.index'), active: route().current('booking.*'), show: true },
         { name: 'Ricerca', icon: FolderOpenIcon, route: route('search.index'), active: route().current('search.index'), show: true },
-        { name: 'Lavorazioni', icon: ClipboardDocumentListIcon, route: route('operations.index'), active: route().current('operations.*'), show: !isCliente.value },
         { name: 'Clienti', icon: UserGroupIcon, route: route('clients.index'), active: route().current('clients.*'), show: !isCliente.value },
         { name: 'Pratiche', icon: FolderOpenIcon, route: route('practices.index'), active: route().current('practices.*'), show: !isCliente.value },
         { name: 'Step', icon: ClockIcon, route: route('deadlines.index'), active: route().current('deadlines.*'), show: canViewDeadlines.value },

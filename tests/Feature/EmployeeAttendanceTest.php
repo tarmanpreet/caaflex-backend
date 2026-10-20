@@ -123,7 +123,7 @@ class EmployeeAttendanceTest extends TestCase
         $this->actingAs($this->admin, 'api')->patchJson('/api/v1/employees/absences/'.$id, ['note' => 'No'])->assertForbidden();
     }
 
-    public function test_managers_review_requests_with_notes_and_cannot_review_their_own(): void
+    public function test_managers_review_requests_with_notes_and_can_always_review_their_own(): void
     {
         $absence = EmployeeAbsence::factory()->create(['user_id' => $this->employee->id]);
         $url = '/api/v1/employees/absences/'.$absence->id.'/review';
@@ -132,7 +132,7 @@ class EmployeeAttendanceTest extends TestCase
         $this->postJson($url, ['status' => 'approved', 'review_note' => 'Confermato'])->assertOk()->assertJsonPath('data.reviewed_by', $this->admin->id);
         $this->postJson($url, ['status' => 'rejected', 'review_note' => 'Duplicata'])->assertUnprocessable();
         $own = EmployeeAbsence::factory()->create(['user_id' => $this->superadmin->id]);
-        $this->actingAs($this->superadmin, 'api')->postJson('/api/v1/employees/absences/'.$own->id.'/review', ['status' => 'approved'])->assertForbidden();
+        $this->actingAs($this->superadmin, 'api')->postJson('/api/v1/employees/absences/'.$own->id.'/review', ['status' => 'approved'])->assertOk();
         $this->getJson('/api/v1/employees')->assertJsonCount(0, 'data.pending');
     }
 
@@ -148,7 +148,7 @@ class EmployeeAttendanceTest extends TestCase
         $this->postJson('/api/v1/employees/absences', $this->payload())->assertCreated();
     }
 
-    public function test_managers_only_see_staff_in_accessible_branches(): void
+    public function test_administrators_always_see_and_review_all_workers(): void
     {
         $branch = Branch::factory()->create();
         $hiddenBranch = Branch::factory()->create();
@@ -157,9 +157,9 @@ class EmployeeAttendanceTest extends TestCase
         $hidden = $this->worker('employee');
         $hidden->branches()->attach($hiddenBranch);
         $absence = EmployeeAbsence::factory()->create(['user_id' => $hidden->id, 'note' => 'Riservato altra sede']);
-        $this->actingAs($this->admin, 'api')->getJson('/api/v1/employees')->assertOk()->assertJsonCount(2, 'data.staff')->assertDontSee('Riservato altra sede');
-        $this->getJson('/api/v1/employees?user_id='.$hidden->id)->assertNotFound();
-        $this->postJson('/api/v1/employees/absences/'.$absence->id.'/review', ['status' => 'approved'])->assertNotFound();
+        $this->actingAs($this->admin, 'api')->getJson('/api/v1/employees')->assertOk()->assertJsonCount(4, 'data.staff');
+        $this->getJson('/api/v1/employees?user_id='.$hidden->id)->assertOk();
+        $this->postJson('/api/v1/employees/absences/'.$absence->id.'/review', ['status' => 'approved'])->assertOk();
         $this->getJson('/api/v1/employees?user_id='.$this->employee->id)->assertOk();
         $this->actingAs($this->superadmin, 'api')->getJson('/api/v1/employees?user_id='.$hidden->id)->assertOk();
     }

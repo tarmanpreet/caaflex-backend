@@ -142,4 +142,13 @@ class AvailableBookingApiTest extends TestCase
         $this->postJson('/api/v1/booking/'.$id.'/reschedule', ['slot' => $token])->assertUnprocessable();
         $this->assertSame($changedType->id, $appointment->fresh()->practice_type_id);
     }
+
+    public function test_absence_hides_slots_and_invalidates_previously_issued_slot_tokens(): void
+    {
+        $initial = $this->slots();
+        \App\Models\EmployeeAbsence::factory()->create(['user_id' => $this->worker->id, 'type' => 'malattia', 'status' => 'reported', 'all_day' => false, 'starts_at' => $this->date.' 09:00:00', 'ends_at' => $this->date.' 10:00:00']);
+        $this->assertCount(3, $this->slots());
+        $this->postJson('/api/v1/booking', ['slot' => $initial[0]['token']])->assertUnprocessable();
+        $this->postJson('/api/v1/booking', ['slot' => $initial[4]['token']])->assertCreated();
+    }
 }

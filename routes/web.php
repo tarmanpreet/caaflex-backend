@@ -88,6 +88,9 @@ Route::middleware([
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::get('/employees/export', [App\Http\Controllers\EmployeeAttendanceController::class, 'export'])->name('employees.export');
+    Route::get('/employees/absences/{absence}/review-context', [App\Http\Controllers\EmployeeAttendanceController::class, 'reviewContext'])->name('employees.reviewContext');
+    Route::put('/employees/users/{user}/approvers', [App\Http\Controllers\EmployeeAttendanceController::class, 'approvers'])->name('employees.approvers');
     Route::get('/employees', [App\Http\Controllers\EmployeeAttendanceController::class, 'index'])->name('employees.index');
     Route::post('/employees/clock-in', [App\Http\Controllers\EmployeeAttendanceController::class, 'clockIn'])->name('employees.clockIn');
     Route::post('/employees/clock-out', [App\Http\Controllers\EmployeeAttendanceController::class, 'clockOut'])->name('employees.clockOut');

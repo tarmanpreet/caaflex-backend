@@ -140,6 +140,16 @@ class User extends Authenticatable
         return $this->belongsToMany(Branch::class, 'branch_user')->withPivot('assigned_at');
     }
 
+    public function absenceApprovers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'employee_approvers', 'employee_id', 'approver_id');
+    }
+
+    public function supervisedEmployees(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'employee_approvers', 'approver_id', 'employee_id');
+    }
+
     public function scopeAssignable(Builder $query): Builder
     {
         return $query->role(['employee', 'admin', 'superadmin']);

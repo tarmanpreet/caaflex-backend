@@ -131,6 +131,7 @@ const statusBadgeClass = (status) => {
                 <Link :href="route('users.index')" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 text-sm">
                     &larr; Utenti
                 </Link>
+                <Link :href="route('employees.index',{user_id:user.id})" class="inline-flex min-h-12 items-center rounded-xl bg-blue-100 px-4 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-100">Presenze, assenze e referenti</Link>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     {{ user?.name }}
                 </h2>

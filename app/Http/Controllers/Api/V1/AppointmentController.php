@@ -196,6 +196,8 @@ class AppointmentController extends Controller
             ],
         ]);
 
+        $events = $events->concat(app(\App\Services\EmployeeAttendanceService::class)->calendar($user, $request->from, $request->to));
+
         return response()->json(['data' => $events]);
     }
 

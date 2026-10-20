@@ -21,6 +21,25 @@ class EmployeeAttendanceController extends Controller
         return response()->json(['data' => $this->attendance->overview($request->user(), $request->validated())]);
     }
 
+    public function reviewContext(AttendanceRequest $request, EmployeeAbsence $absence): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['data' => $this->attendance->reviewContext($request->user(), $absence)]);
+    }
+
+    public function approvers(\App\Http\Requests\UpdateEmployeeApproversRequest $request, \App\Models\User $user): JsonResponse
+    {
+        $this->attendance->setApprovers($request->user(), $user, $request->validated('approver_ids'));
+
+        return response()->json(['message' => 'Referenti aggiornati.']);
+    }
+
+    public function export(AttendanceRequest $request): JsonResponse
+    {
+        $file = $this->attendance->export($request->user(), $request->validated());
+
+        return response()->json(['data' => $file]);
+    }
+
     public function clockIn(AttendanceRequest $request): JsonResponse
     {
         return response()->json(['data' => $this->attendance->clock($request->user(), true, $request->validated('note'))], 201);

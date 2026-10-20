@@ -84,7 +84,7 @@ const formatDate = (value) => value
                             <span class="text-xs text-on-surface-variant">{{ formatDate(notification.created_at) }}</span>
                         </span>
                         <span class="mt-1 block text-sm leading-6 text-on-surface-variant">{{ notification.body }}</span>
-                        <span class="mt-2 inline-flex rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{{ sections[notification.section] ?? notification.section }}</span>
+                        <span class="mt-2 inline-flex rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{{ notification.section === 'employees' ? 'Presenze e assenze' : (sections[notification.section] ?? notification.section) }}</span>
                     </span>
                 </button>
             </section>

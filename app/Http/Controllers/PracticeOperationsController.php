@@ -14,8 +14,8 @@ class PracticeOperationsController extends Controller
         return Inertia::render('Practices/Operations', ['operations' => null]);
     }
 
-    public function __invoke(Request $request, PracticeOperationsService $operations): Response
+    public function __invoke(Request $request, PracticeOperationsService $operations): \Illuminate\Http\RedirectResponse
     {
-        return Inertia::render('Practices/Operations', ['operations' => $operations->board($request->user())]);
+        return redirect()->route('practices.index');
     }
 }

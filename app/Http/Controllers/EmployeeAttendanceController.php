@@ -22,6 +22,25 @@ class EmployeeAttendanceController extends Controller
         return Inertia::render('Employees/Index', ['attendance' => $this->attendance->overview($request->user(), $request->validated())]);
     }
 
+    public function reviewContext(AttendanceRequest $request, EmployeeAbsence $absence): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['data' => $this->attendance->reviewContext($request->user(), $absence)]);
+    }
+
+    public function approvers(\App\Http\Requests\UpdateEmployeeApproversRequest $request, \App\Models\User $user): RedirectResponse
+    {
+        $this->attendance->setApprovers($request->user(), $user, $request->validated('approver_ids'));
+
+        return back()->with('success', 'Referenti aggiornati.');
+    }
+
+    public function export(AttendanceRequest $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $file = $this->attendance->export($request->user(), $request->validated());
+
+        return response($file['content'], 200, ['Content-Type' => 'text/csv; charset=UTF-8', 'Content-Disposition' => 'attachment; filename="'.$file['filename'].'"']);
+    }
+
     public function clockIn(AttendanceRequest $request): RedirectResponse
     {
         $this->attendance->clock($request->user(), true, $request->validated('note'));
