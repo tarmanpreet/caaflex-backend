@@ -43,7 +43,7 @@ class NotificationApiTest extends TestCase
 
         $listResponse->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.title', 'Nuovo appuntamento assegnato');
+            ->assertJsonPath('data.0.title', 'Promemoria step: Nuovo appuntamento assegnato');
 
         $countResponse = $this->actingAs($this->admin, 'api')
             ->getJson('/api/v1/notifications/unread-count');
@@ -111,6 +111,20 @@ class NotificationApiTest extends TestCase
         $this->actingAs($this->admin, 'api')
             ->postJson("/api/v1/notifications/{$notificationId}/open")
             ->assertNotFound();
+    }
+
+    public function test_deleted_step_returns_an_unavailable_mobile_target(): void
+    {
+        $deadline = PracticeDeadline::factory()->create();
+        $this->admin->notify(new DeadlineReminderNotification($deadline));
+        $notificationId = $this->admin->notifications()->firstOrFail()->id;
+        $deadline->delete();
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson("/api/v1/notifications/{$notificationId}/open")
+            ->assertOk()
+            ->assertJsonPath('data.action_unavailable', true)
+            ->assertJsonPath('data.target', ['resource' => 'notifications']);
     }
 
     public function test_user_can_mark_all_notifications_as_read(): void

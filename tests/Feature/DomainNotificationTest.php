@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Jobs\SendExpoPushNotification;
 use App\Models\Appointment;
 use App\Models\ExpoPushToken;
+use App\Models\PracticeDeadline;
 use App\Models\User;
 use App\Models\UserNotificationPreference;
 use App\Notifications\DomainNotification;
@@ -67,6 +68,25 @@ class DomainNotificationTest extends TestCase
         );
 
         Notification::assertNothingSent();
+    }
+
+    public function test_step_updates_identify_the_practice_and_client(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $deadline = PracticeDeadline::factory()->create(['user_id' => $user->id]);
+        $practice = $deadline->practice;
+        $client = $practice->client;
+        Notification::fake();
+
+        app(NotificationManager::class)->send(
+            [$user], 'deadlines.changed', 'deadlines', 'Step modificato',
+            "Sono stati aggiornati i dettagli dello step «{$deadline->title}».",
+            $deadline, route('practices.show', $practice, false).'#steps',
+        );
+
+        Notification::assertSentTo($user, DomainNotification::class, fn (DomainNotification $notification): bool => str_contains($notification->payload['body'], $deadline->title)
+            && str_contains($notification->payload['body'], "Pratica #{$practice->id}")
+            && str_contains($notification->payload['body'], "{$client->first_name} {$client->last_name}"));
     }
 
     public function test_actor_and_inactive_users_are_excluded(): void

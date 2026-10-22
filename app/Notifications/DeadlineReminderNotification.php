@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\PracticeDeadline;
+use App\Services\DeadlineNotificationContent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -35,8 +36,8 @@ class DeadlineReminderNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
+            ...app(DeadlineNotificationContent::class)->reminder($this->deadline),
             'deadline_id' => $this->deadline->id,
-            'title' => $this->deadline->title,
             'practice_id' => $this->deadline->practice_id,
             'deadline_at' => $this->deadline->deadline_at->toIso8601String(),
             'priority' => $this->deadline->priority,

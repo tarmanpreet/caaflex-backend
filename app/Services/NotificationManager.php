@@ -28,6 +28,10 @@ class NotificationManager
         string $severity = 'info',
         ?Carbon $occurredAt = null,
     ): void {
+        if ($subject instanceof \App\Models\PracticeDeadline && $eventKey !== 'deadlines.reminder') {
+            $body .= ' '.app(DeadlineNotificationContent::class)->context($subject);
+        }
+
         Collection::make($recipients)
             ->filter(fn (User $user): bool => $user->is_active && $user->id !== $actorId)
             ->unique('id')

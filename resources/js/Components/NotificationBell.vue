@@ -53,8 +53,8 @@ onMounted(() => initialize(props.user, props.realtime, toast));
                     <span class="flex items-start gap-3">
                         <span :class="notification.read_at ? 'bg-surface-container-high' : 'bg-primary'" class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" />
                         <span class="min-w-0">
-                            <span class="block truncate text-sm font-bold text-on-surface">{{ notification.title }}</span>
-                            <span class="mt-1 block line-clamp-2 text-xs leading-5 text-on-surface-variant">{{ notification.body }}</span>
+                            <span class="block break-words text-sm font-bold text-on-surface">{{ notification.title }}</span>
+                            <span class="mt-1 block break-words text-xs leading-5 text-on-surface-variant">{{ notification.body }}</span>
                         </span>
                     </span>
                 </button>

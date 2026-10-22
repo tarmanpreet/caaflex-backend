@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\PracticeDeadline;
 use App\Models\ScheduledNotificationOccurrence;
 use App\Models\User;
 use App\Notifications\DomainNotification;
@@ -70,5 +71,34 @@ class NotificationReminderTest extends TestCase
         $this->assertDatabaseHas('scheduled_notification_occurrences', [
             'status' => ScheduledNotificationOccurrence::STATUS_CANCELLED,
         ]);
+    }
+
+    public function test_step_reminder_delivery_contains_the_practice_client_and_deadline(): void
+    {
+        Carbon::setTestNow('2026-07-22 10:00:00');
+        $user = User::factory()->create(['is_active' => true]);
+        $deadline = PracticeDeadline::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Preparazione file',
+            'status' => PracticeDeadline::STATUS_PENDING,
+            'deadline_at' => now()->addMinutes(61),
+        ]);
+        $practice = $deadline->practice;
+        $client = $practice->client;
+        Notification::fake();
+        $scheduler = app(ReminderScheduler::class);
+        $scheduler->synchronize();
+        Carbon::setTestNow(now()->addMinute());
+
+        $this->assertSame(1, $scheduler->dispatchDue());
+
+        Notification::assertSentTo($user, DomainNotification::class, function (DomainNotification $notification) use ($practice, $client): bool {
+            return $notification->payload['title'] === 'Promemoria step: Preparazione file'
+                && str_contains($notification->payload['body'], "Pratica #{$practice->id}")
+                && str_contains($notification->payload['body'], $practice->tracking_code)
+                && str_contains($notification->payload['body'], "{$client->first_name} {$client->last_name}")
+                && str_contains($notification->payload['body'], '22/07/2026 13:01')
+                && $notification->payload['action_url'] === route('practices.show', $practice, false).'#steps';
+        });
     }
 }

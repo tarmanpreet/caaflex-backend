@@ -53,7 +53,12 @@ class NotificationController extends Controller
     {
         $record = request()->user()->notifications()->whereKey($notification)->firstOrFail();
         $record->markAsRead();
-        $url = $feed->transform($record)['action_url'];
+        $notificationData = $feed->transform($record);
+        $url = $notificationData['action_url'];
+
+        if ($notificationData['action_unavailable']) {
+            request()->session()->flash('error', 'Lo step o la pratica collegata a questa notifica non è più disponibile.');
+        }
 
         if (! is_string($url) || ! str_starts_with($url, '/') || str_starts_with($url, '//')) {
             $url = route('dashboard', absolute: false);

@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\PracticeDeadline;
 use App\Models\User;
+use App\Notifications\DeadlineReminderNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
@@ -23,7 +25,15 @@ class NotificationFeedService
             $query->whereNotNull('read_at');
         }
 
-        return $query->paginate($perPage)->through(fn (DatabaseNotification $notification): array => $this->transform($notification));
+        $notifications = $query->paginate($perPage);
+        $deadlineIds = $notifications->getCollection()->map(fn (DatabaseNotification $notification): ?int => $this->deadlineId($notification))->filter()->unique();
+        $deadlines = PracticeDeadline::query()->with(['practice.client', 'practice.practiceType', 'assignee'])->whereKey($deadlineIds)->get()->keyBy('id');
+
+        foreach ($notifications as $notification) {
+            $notification->setRelation('notificationDeadline', $deadlines->get($this->deadlineId($notification)));
+        }
+
+        return $notifications->through(fn (DatabaseNotification $notification): array => $this->transform($notification));
     }
 
     /** @return array<string, mixed> */
@@ -32,23 +42,70 @@ class NotificationFeedService
         $data = $notification->data;
         $legacyDeadlineAt = data_get($data, 'deadline_at');
         $legacyTitle = data_get($data, 'title', 'Step');
+        $isDeadline = $this->deadlineId($notification) !== null;
+        $deadline = $isDeadline ? $this->deadline($notification) : null;
+        $unavailable = $isDeadline && (! $deadline || ! $deadline->practice);
+        $isReminder = $notification->type === DeadlineReminderNotification::class
+            || data_get($data, 'event_key', $notification->type) === 'deadlines.reminder';
+        $content = $deadline && $isReminder
+            ? app(DeadlineNotificationContent::class)->reminder($deadline)
+            : [];
 
         return [
             'id' => $notification->id,
             'event_key' => data_get($data, 'event_key', $notification->type),
             'section' => data_get($data, 'section', 'deadlines'),
             'severity' => data_get($data, 'severity', 'info'),
-            'title' => data_get($data, 'title', 'Nuova notifica'),
-            'body' => data_get($data, 'body', $legacyDeadlineAt
+            'title' => $content['title'] ?? data_get($data, 'title', 'Nuova notifica'),
+            'body' => $content['body'] ?? data_get($data, 'body', $legacyDeadlineAt
                 ? sprintf('%s entro il %s', $legacyTitle, Carbon::parse($legacyDeadlineAt)->format('d/m/Y H:i'))
                 : 'Hai ricevuto una nuova notifica.'),
-            'action_url' => data_get($data, 'action_url', data_get($data, 'practice_id')
+            'action_unavailable' => $unavailable,
+            'action_url' => $isDeadline
+                ? ($unavailable ? route('notifications.index', absolute: false) : route('practices.show', $deadline->practice_id, false).'#steps')
+                : data_get($data, 'action_url', data_get($data, 'practice_id')
                 ? route('practices.show', data_get($data, 'practice_id'), false).'#steps'
                 : route('dashboard', absolute: false)),
-            'target' => $this->target($data),
+            'target' => $isDeadline
+                ? ($unavailable ? ['resource' => 'notifications'] : [
+                    'resource' => 'practice',
+                    'id' => $deadline->practice_id,
+                    'section' => 'steps',
+                    'child_resource' => 'practice_deadline',
+                    'child_id' => $deadline->id,
+                ])
+                : $this->target($data),
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at?->toIso8601String(),
         ];
+    }
+
+    private function deadlineId(DatabaseNotification $notification): ?int
+    {
+        $data = $notification->data;
+        $id = data_get($data, 'deadline_id');
+
+        if (! $id && (data_get($data, 'subject_type') === PracticeDeadline::class
+            || str_starts_with((string) data_get($data, 'event_key', $notification->type), 'deadlines.'))) {
+            $id = data_get($data, 'subject_id');
+        }
+
+        if (! $id && data_get($data, 'target.child_resource') === 'practice_deadline') {
+            $id = data_get($data, 'target.child_id');
+        }
+
+        return $id ? (int) $id : null;
+    }
+
+    private function deadline(DatabaseNotification $notification): ?PracticeDeadline
+    {
+        if (! $notification->relationLoaded('notificationDeadline')) {
+            $notification->setRelation('notificationDeadline', PracticeDeadline::query()
+                ->with(['practice.client', 'practice.practiceType', 'assignee'])
+                ->find($this->deadlineId($notification)));
+        }
+
+        return $notification->getRelation('notificationDeadline');
     }
 
     /**

@@ -208,12 +208,13 @@ class ReminderScheduler
         }
 
         if ($subject instanceof PracticeDeadline) {
+            $content = app(DeadlineNotificationContent::class)->reminder($subject);
             $this->notifications->send(
                 [$occurrence->user],
                 'deadlines.reminder',
                 'deadlines',
-                'Promemoria step',
-                "Completa «{$subject->title}» entro {$when}.",
+                $content['title'],
+                $content['body'],
                 $subject,
                 route('practices.show', $subject->practice_id, false).'#steps',
                 severity: 'warning',

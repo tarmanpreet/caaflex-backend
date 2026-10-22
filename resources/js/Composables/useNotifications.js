@@ -49,8 +49,7 @@ export function useNotifications() {
 
     const open = async (notification) => {
         const response = await window.axios.post(route('notifications.open', notification.id));
-        await refresh();
-        router.visit(response.data.data.redirect_url);
+        router.visit(response.data.data.redirect_url, { onFinish: refresh });
     };
 
     const markAllAsRead = async () => {
