@@ -32,7 +32,7 @@ RUN npm run build
 ###############################################################################
 # Stage 3 — Application image (PHP-FPM + Nginx + Supervisor)
 ###############################################################################
-FROM php:8.4-fpm-alpine
+FROM php:8.5.12-fpm-alpine
 
 LABEL maintainer="dev"
 

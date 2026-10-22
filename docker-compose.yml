@@ -2,7 +2,7 @@ name: caf
 
 services:
   # ─────────────────────────────────────────────────────────────
-  # App — PHP 8.4-FPM + Nginx + Supervisor (single container)
+  # App — PHP 8.5-FPM + Nginx + Supervisor (single container)
   # ─────────────────────────────────────────────────────────────
   app:
     build:
